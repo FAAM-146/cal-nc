@@ -59,7 +59,7 @@ group: size_cal {
         bin:long_name = "bin number";
 
     // Define group variables
-        char applies_to(time);    // "String or link" HOW TO LINK?
+        char applies_to(time);
         applies_to:long_name = "Each calibration applies to these measurements";
         applies_to:comments = "String of applicable flight numbers for each calibration date";
 
@@ -67,24 +67,48 @@ group: size_cal {
         traceability:long_name = "Traceability trail for each calibration";
         traceability:comment = "Link to file/s showing traceability of calibration materials and instruments";
 
+        int cal_flag(time);
+        cal_flag:long_name = "Flag denoting quality of calibration";
+        cal_flag:valid_range = 0, 3;
+        cal_flag:flag_values = 0, 1, 2, 3;
+        cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+        cal_flag:_FillValue = 3;
+
         float bin_x-section(time,bin);
         bin_x-section:long_name = "Bin centre scattering cross-sections associated with each bin.";
         bin_x-section:comment = "";
         bin_x-section:units = "m**2";
-        bin_x-section:bounds = ;
+        bin_x-section:bounds = "bin_x-section_bounds";
         bin_x-section:ancillary_variables = "bin_x-section_err";
         bin_x-section:_FillValue = -9999.f;
 
         float bin_x-section_err(time,bin);
-        bin_x-section_err:long_name = "Uncertainty of BIN_X-SECTION";
+        bin_x-section_err:long_name = "Uncertainty of bin_x-section";
         bin_x-section_err:comment = "Comment here about calculation of uncertainties";
         bin_x-section_err:units = "m**2";
         bin_x-section_err:_FillValue = -9999.f;
 
         float bin_x-section_bounds(time,bin,bin_bounds);
-        bin_x-section_bounds:long_name = "Lower and upper scattering cross section limits of each bin.";
-        bin_x-section_bounds:comment = "Depending on the calibration procedure used, bin boundaries may overlap";
+        bin_x-section_bounds:comment = "Lower and upper scattering cross section limits of each bin. Depending on the calibration procedure used, bin boundaries may overlap";
 
+        float bin_dia(time,bin);
+        bin_x-section:long_name = "Bin centre diameters associated with each bin number for given particle material properties";
+        bin_dia:comment = "Comments here about the derivation of diameter";
+        bin_dia:refractive_index = "1.59+0i";
+        bin_dia:shape = "spherical";
+        bin_dia:units = "um";
+        bin_dia:bounds = "bin_dia_bounds";
+        bin_dia:ancillary_variables = "bin_dia_err";
+        bin_dia:_FillValue = -9999.f;
+
+        float bin_dia_err(time,bin);
+        bin_dia_err:long_name = "Uncertainty of bin_dia";
+        bin_dia_err:comment = "Comment here about calculation of uncertainties";
+        bin_dia_err:units = "um";
+        bin_dia_err:_FillValue = -9999.f;
+
+        float bin_dia_bounds(time,bin,bin_bounds);
+        bin_dia_bounds:comment = "Lower and upper diameter limits of each bin. Depending on the calibration procedure used, bin boundaries may overlap";
 
 
     } // End group size_cal

@@ -1,0 +1,91 @@
+netcdf PCASP1_cal_20180117 {
+
+// This cdl file contains the attributes, dimensions, and variables that are
+// applied to all calibration netCDF files for a particular instrument. This
+// file combined with FAAMheader.cdl provides the source data for PCASP1 
+// calibration netCDF files. Some of these fields shall be modified/
+// overwritten by cal_ncgen.py if it is used.
+//
+// author = G. Nott
+// email = graeme.nott@faam.ac.uk
+// creation = Jan 2018
+
+// global attributes:
+    :title = "Calibration data for the PCASP-1";
+    :source = "Laboratory-based calibration";
+    :instr = "PCASP-1";
+    :instr_long_name = "Passive Cavity Spectrometer Probe. SPP200 electronics package";
+    :instr_serialnumber = "17884-0190-04";
+    :references = "http://www.faam.ac.uk/index.php/science-instruments/aerosol/304-pcasp";
+
+// The following global attributes shall be modified by cal_ncgen.py if used
+    :user_name = "graeme.nott@faam.ac.uk, Graeme Nott";
+    :history = "20180111";
+
+// Define global dimensions for generated file.
+// calnc files have a root unlimited dimension of time. The units of time may
+// be one of days ('d'), hours ('hr', 'h'), minutes ('min'), or seconds ('sec',
+// 's') and the most appropriate unit for the frequency of calibration should
+// be used.
+dimensions:
+    time = UNLIMITED ; // (2 currently)
+
+// Define global coordinate variable
+variables:
+    float time(time);
+    time:standard_name = "time";
+    time:long_name = "time of calibration";
+    time:timezone = "UTC";
+    time:units = "days since 2010-01-01 00:00:00";
+    time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z"
+
+
+group: size_cal {
+    // Group containing calibration of size bins of the PCASP
+    //
+    //
+    :title = "Size bin calibration of PCASP";
+    :comment = "Group containing calibration of size bins of the PCASP. Photodetector voltage pulse-heights are calibrated to the calculated scattering cross-section of known PSL and DEHS monodisperse distributions.";
+    :references = "P.D. Rosenberg, A.R. Dean, P.I. Williams, J.R. Dorsey, A. Minikin, M.A. Pickering and A. Petzold, Particle sizing calibration with refractive index correction for light scattering optical particle counters and impacts upon PCASP and CDP data collected during the Fennec campaign, Atmos. Meas. Tech., 5, 1147-1163, doi:10.5194/amt-5-1147-2012, 2012.";
+
+    // Define any group dimensions in addition to the global dimension, time
+    dimensions:
+        bin = 30;
+        bin_bounds = 2;
+
+    // Define group coordinate variable
+    variables:
+        int bin(bin);
+        bin:long_name = "bin number";
+
+    // Define group variables
+        char applies_to(time);    // "String or link" HOW TO LINK?
+        applies_to:long_name = "Each calibration applies to these measurements";
+        applies_to:comments = "String of applicable flight numbers for each calibration date";
+
+        char traceability(time);
+        traceability:long_name = "Traceability trail for each calibration";
+        traceability:comment = "Link to file/s showing traceability of calibration materials and instruments";
+
+        float bin_x-section(time,bin);
+        bin_x-section:long_name = "Bin centre scattering cross-sections associated with each bin.";
+        bin_x-section:comment = "";
+        bin_x-section:units = "m**2";
+        bin_x-section:bounds = ;
+        bin_x-section:ancillary_variables = "bin_x-section_err";
+        bin_x-section:_FillValue = -9999.f;
+
+        float bin_x-section_err(time,bin);
+        bin_x-section_err:long_name = "Uncertainty of BIN_X-SECTION";
+        bin_x-section_err:comment = "Comment here about calculation of uncertainties";
+        bin_x-section_err:units = "m**2";
+        bin_x-section_err:_FillValue = -9999.f;
+
+        float bin_x-section_bounds(time,bin,bin_bounds);
+        bin_x-section_bounds:long_name = "Lower and upper scattering cross section limits of each bin.";
+        bin_x-section_bounds:comment = "Depending on the calibration procedure used, bin boundaries may overlap";
+
+
+
+    } // End group size_cal
+}

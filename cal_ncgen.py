@@ -86,7 +86,17 @@ Instrument cdl *n*
     Subsequent instrument cdl files can be written. These may be used if the
     quantity of data becomes unwieldy for a single file.
 
+
+Script summary:
+---------------
+Multiple cld files are combined into a temporary cdl file. If required the
+date and user for the revision are appended to the global history and
+username attributes. If required a filename for the calibration netCDF is
+automatically generated based on the ... The script calls ncgen to create the
+netCDF from the cdl file [#fnote-direct_ncgen_call].
+
 .. highlights::
+
     name:
         cal_ncgen.py
 
@@ -104,6 +114,12 @@ Instrument cdl *n*
 
     created:
         Jan 2018
+
+.. rubic::
+
+..[#fnote-direct_ncgen_call] This means that a user can completely by-pass
+the use of this script and call ncget directly on a user-generated cdl file.
+This is by design as it allows greater flexibility.
 
 """
 

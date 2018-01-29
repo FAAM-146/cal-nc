@@ -89,6 +89,18 @@ Instrument cdl *n*
 
 Script summary:
 ---------------
+
+Mandatory script argument is either cdl or nc file.
+- If cdl a new nc file will be created using the cdl as a template
+- If nc then new data is appended into the file
+
+If more than one cdl file is given then they shall be concatenated,
+there is little error checking besides removing the start and end braces. It
+is up to the user to ensure no conflicts etc.
+
+If the input is cdl then ncgen is run to create a nc file.
+
+
 Multiple cld files are combined into a temporary cdl file. If required the
 date and user for the revision are appended to the global history and
 username attributes. If required a filename for the calibration netCDF is
@@ -126,11 +138,46 @@ This is by design as it allows greater flexibility.
 import sys
 import datetime, pytz
 import netCDF4
+import pdb
+
+import cal_class
+import cal_cdl
 
 # Version of this script
 cal_ncgen_ver = 0.1
 
-default_org_cdl = "FAAM_cal.cdl"
+#default_org_cdl = "FAAM_cal.cdl"
+
+
+# class generic():
+#     """
+#     Empty class for instrument-specific processing and parsing of
+#     calibration data suitable for writing to the calibration netCDF
+
+#     """
+
+#     def __init__(self,ds):
+#         """
+#         Generic class which merely passes netCDF4 dataset straight through
+
+#         :param ds: dataset from ingested cal_nc file
+#         :type ds:  netCDF4.dataset
+#         :returns ds:
+#         """
+#         return ds
+
+
+def call(infile,args):
+    """
+    If multiple cdl then concat
+    If cdl then ncgen to nc
+
+    open nc -a
+    determine instrument
+    Instantiate instrument class
+        populate or append to data
+    write nc
+    """
 
 
 
@@ -160,21 +207,37 @@ if __name__=='__main__':
     # Mandatory argument
     parser.add_argument('files',
                         nargs='+',
-                        help=('White-space delineated path/filename '
-                        'of input cdl file/s. Glob or list of globs '
-                        'may be used.'))
+                        help=('Input cdl or nc file. If cdl then a new '
+                              'calibration netCDF file shall be created '
+                              'using the cdl as a template. More than one '
+                              'cdl can be given and basic concatenation '
+                              'shall be done to create the template. If an '
+                              'existing nc file is given then new '
+                              'calibration data shall be appended to the '
+                              'variables in that file.'))
 
     # Optional arguments
-    parser.add_argument('-b', '--base', action='store',
-                        dest='base_cdl', default=default_org_cdl,
-                        help=("Organisation's base cdl file for this cal nc. "
-                        "If --base='' then none is used. If not given then "
-                        "default is '{}'.".format(default_org_cdl)))
+    parser.add_argument('-d', '--data', action='store',
+                        nargs = '+',
+                        dest='datafiles', default=None,
+                        help=('Space-delineated list of data file path/'
+                              'filenames as required by the specific '
+                              'instrument class.'))
+    parser.add_argument('-i', '--instr', action='store',
+                        dest='instr', default=None,
+                        help=('Instrument class is selected based on the '
+                              "'instr' global attribute in the input file. "
+                              'If this is none-standard or uses a different '
+                              'instrument class then instr can be explicitly '
+                              'given with this option.'))
     parser.add_argument('-o', '--output', action='store',
                         dest='outfile', default=None,
                         help=('Explicitly give output path/filename of '
                         'cal nc file. If not given then filename is '
-                        'generated based on the input file/s.'))
+                        'generated based on the input cdl file. If the '
+                        'input is a nc file and the filename is different '
+                        'from the input, then a new nc file shall be '
+                        'created.'))
 
     parser.add_argument('--hist', action='store',
                         dest='hist', nargs='?',
@@ -205,6 +268,7 @@ if __name__=='__main__':
 
     # Process arguments and convert to dictionary ----------------------------
     args_dict = vars(parser.parse_args())
+    opts_dict = {k:v for k,v in args_dict.items() if k not in ['files']}
     print()
 
     # Welcome splash
@@ -212,7 +276,8 @@ if __name__=='__main__':
     print('\t  Calibration netCDF generation script')
     print('-----------------------------------------------------\n')
 
-    call(**args_dict)
+    pdb.set_trace()
+    call(args_dict['files'],opts_dict)
 
     print('\nDone.\n')
     # EOF

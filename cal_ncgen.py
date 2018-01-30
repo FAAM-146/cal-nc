@@ -98,14 +98,18 @@ If more than one cdl file is given then they shall be concatenated,
 there is little error checking besides removing the start and end braces. It
 is up to the user to ensure no conflicts etc.
 
-If the input is cdl then ncgen is run to create a nc file.
+If the input is cdl then ncgen is run to create an nc file
+[#fnote-direct_ncgen_call].
 
+This nc file is then read in with the netCDF4 module. The instrument
+nickname is extracted from the resulting datasets global 'instr' attribute
+amd this is used to instantiate the appropriate class for that instrument.
+The simplest class is 'generic' which has methods for appending history
+and username information and that is all. All other classes inherit from
+generic and may include other methods to parse from ancillary files and
+and write this data into the nc file. This parsing will be highly specific
+to an instrument, thus the individual classes.
 
-Multiple cld files are combined into a temporary cdl file. If required the
-date and user for the revision are appended to the global history and
-username attributes. If required a filename for the calibration netCDF is
-automatically generated based on the ... The script calls ncgen to create the
-netCDF from the cdl file [#fnote-direct_ncgen_call].
 
 .. highlights::
 
@@ -130,41 +134,22 @@ netCDF from the cdl file [#fnote-direct_ncgen_call].
 .. rubic::
 
 ..[#fnote-direct_ncgen_call] This means that a user can completely by-pass
-the use of this script and call ncget directly on a user-generated cdl file.
+the use of this script and call ncgen directly on a user-generated cdl file.
 This is by design as it allows greater flexibility.
 
 """
 
-import sys
 import datetime, pytz
 import netCDF4
 import pdb
 
 import cal_class
-import cal_cdl
 
 # Version of this script
 cal_ncgen_ver = 0.1
 
-#default_org_cdl = "FAAM_cal.cdl"
-
-
-# class generic():
-#     """
-#     Empty class for instrument-specific processing and parsing of
-#     calibration data suitable for writing to the calibration netCDF
-
-#     """
-
-#     def __init__(self,ds):
-#         """
-#         Generic class which merely passes netCDF4 dataset straight through
-
-#         :param ds: dataset from ingested cal_nc file
-#         :type ds:  netCDF4.dataset
-#         :returns ds:
-#         """
-#         return ds
+# Default directories where cdl file/s may be stored
+default_cdl_dir = ['.','cal_cdl']
 
 
 def call(infile,args):
@@ -178,9 +163,73 @@ def call(infile,args):
         populate or append to data
     write nc
     """
+    import subprocess
+    import os.path
 
+    # Create absolute paths for infile/s
+    # Note that this may create multiple copies of the same file with
+    # different paths.
+    ### TODO: Create set to look for multiple copies of same file
+    abs_infile = [os.path.abspath(os.path.join(d,f)) \
+                  for d in default_cdl_dir for f in infile \
+                  if os.path.isfile(os.path.join(d,f))]
 
+    if len(abs_infile) == 0:
+        # Are no valid input files
+        print('\nNo valid input files have been given')
+        return None
 
+    with open(abs_infile[0], 'r+') as outfile:
+        for fname in (f_ for f_ in abs_infile[1:]):
+
+            print('\nConcatenation of multiple cdl files is not implemented.')
+            break
+            with open(fname) as infile_:
+                instring = infile_.read()
+
+                # TODO: Remove EOF closing braces and put at end of
+                # concatenated files
+                outfile.write()
+
+    if os.path.splitext(abs_infile[0])[-1].lower() == '.cdl':
+        # Convert cdl to nc
+        if args['outfile'] != None and type(args['outfile']) is str:
+            outarg = args['outfile']
+        else:
+            outarg = os.path.splitext(abs_infile[0])[0] + '.nc'
+
+        # Run ncgen to produce netCDF-4 format file
+        try:
+            subprocess.check_call('ncgen -b -k 2 -o {} {}'.format(outarg,
+                                                            abs_infile[0]),
+                                  shell=True)
+        except Exception as err:
+            print('\nSomething when horribly wrong with the ncgen call')
+            print('\n',err)
+            pdb.set_trace()
+
+    # Open nc file for reading/writing
+    with netCDF4.Dataset(outarg, mode='r+', format="NETCDF4") as root:
+
+        instr = getattr(root,'instr')
+
+        # Check that instr is a valid cal_class class
+        instr_class = [ic for ic in cal_class.__all__ \
+                       if ic.lower() == instr.lower()]
+
+        try:
+            nc_class = getattr(cal_class,instr_class[0])
+        except:
+            pdb.set_trace()
+
+        nc = nc_class(root)
+
+        # Update the history and username attributes
+        nc.update_hist(args['hist'])
+        nc.update_user(args['user'])
+
+    # root closed
+    pdb.set_trace()
 
 
 
@@ -208,34 +257,34 @@ if __name__=='__main__':
     parser.add_argument('files',
                         nargs='+',
                         help=('Input cdl or nc file. If cdl then a new '
-                              'calibration netCDF file shall be created '
-                              'using the cdl as a template. More than one '
-                              'cdl can be given and basic concatenation '
-                              'shall be done to create the template. If an '
-                              'existing nc file is given then new '
-                              'calibration data shall be appended to the '
-                              'variables in that file.'))
+                        'calibration netCDF file shall be created '
+                        'using the cdl as a template. More than one '
+                        'cdl can be given and basic concatenation '
+                        'shall be done to create the template. If an '
+                        'existing nc file is given then new '
+                        'calibration data shall be appended to the '
+                        'variables in that file.'))
 
     # Optional arguments
     parser.add_argument('-d', '--data', action='store',
                         nargs = '+',
                         dest='datafiles', default=None,
                         help=('Space-delineated list of data file path/'
-                              'filenames as required by the specific '
-                              'instrument class.'))
+                        'filenames as required by the specific '
+                        'instrument class.'))
     parser.add_argument('-i', '--instr', action='store',
-                        dest='instr', default=None,
+                        dest='instr', default='generic',
                         help=('Instrument class is selected based on the '
-                              "'instr' global attribute in the input file. "
-                              'If this is none-standard or uses a different '
-                              'instrument class then instr can be explicitly '
-                              'given with this option.'))
+                        "'instr' global attribute in the input file. "
+                        'If this is none-standard or uses a different '
+                        'instrument class then instr can be explicitly '
+                        'given with this option.'))
     parser.add_argument('-o', '--output', action='store',
                         dest='outfile', default=None,
                         help=('Explicitly give output path/filename of '
                         'cal nc file. If not given then filename is '
                         'generated based on the input cdl file. If the '
-                        'input is a nc file and the filename is different '
+                        'input is an nc file and the filename is different '
                         'from the input, then a new nc file shall be '
                         'created.'))
 
@@ -250,10 +299,10 @@ if __name__=='__main__':
                         'then assume history updates have been handled in '
                         'the cdl file/s. This option should be used with '
                         'care.'))
-    parser.add_argument('--user', action='store',
+    parser.add_argument('-u', '--user', action='store',
                         dest='user', nargs='?',
-                        default=None,
-                        const='NA',
+                        default='NA',
+                        const=None,
                         help=('Do not auto-generate the updated username '
                         'attribute of the resultant cal nc file. If a string '
                         'is given then this string is appended to the '

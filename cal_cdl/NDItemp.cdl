@@ -1,0 +1,185 @@
+netcdf NDItemp_cal_20180117 {
+
+// This cdl file contains the attributes, dimensions, and variables that are
+// applied to all calibration netCDF files for a particular instrument. This
+// file may be used as a template which is the read by cal_ncgen.py (which
+// adds the calibration data) or, if it includes all data, run with ncgen to
+// create a netCDF file directly.
+//
+// author = G. Nott
+// email = graeme.nott@faam.ac.uk
+// creation = Jan 2018
+
+// global attributes:
+    
+    // Universal global file attributes. Do not modify.
+    :Conventions = "CF-1.6";
+    :NCO = "4.1.3";
+    :_Format = "netCDF-4";
+    :institution = "FAAM. Facility for Airborne Atmospheric Measurements";
+    :address = "Building 146, Cranfield University, Cranfield MK43 0AL UK";
+
+    // Instrument global file attributes. 
+    :title = "FAAM calibration data for the non-deiced rosemount temperature probe";
+    :source = "Laboratory-based calibration";
+    :instr = "NDIT";
+    :instr_long_name = "Non-deiced temperature probe";
+    :references = "";
+
+// The following global attributes shall be modified by cal_ncgen.py if used
+    :username = "Graeme Nott <graeme.nott@faam.ac.uk>";
+    :history = "20180111";
+
+// Define global dimensions for generated file.
+// If all groups have the same time stamp then the time coordinate can be 
+// defined in the root. If the groups have differing time stamps then each
+// group should have it's own time coordinate. The units of time may
+// be one of days ('d'), hours ('hr', 'h'), minutes ('min'), or seconds ('sec',
+// 's') and the most appropriate unit for the frequency of calibration should
+// be used.
+dimensions:
+    time = UNLIMITED; //
+
+// Define global coordinate variable
+variables:
+    float time(time);
+    time:standard_name = "time";
+    time:long_name = "time of calibration";
+    time:timezone = "UTC";
+    time:units = "days since 2010-01-01 00:00:00";
+    time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+
+    string sn(time);
+    sn:long_name = "Serial number of the temperature sensor";
+
+    string type(time);
+    type:long_name = "Sensor type";
+    type:comment = "Different sensor types which may be one of plate, loom, or thermistor.";
+    type:references = "";
+
+// Global data
+data:
+    time = 2798.5, 2808.5;
+    sn = "19207E","15480E";
+    type = "loom","plate";
+
+
+group: recovery_factor {
+
+    :title = "Recovery factors of the non-deiced temperature probe";
+    :comment = "";
+    :references = "";
+
+    // Define group variables
+    variables:
+        string applies_to(time);
+            applies_to:long_name = "Each calibration applies to these measurements";
+            applies_to:comments = "String of applicable flight numbers for each calibration date";
+            applies_to:_FillValue = "";
+
+        string traceability(time);
+            traceability:long_name = "Traceability trail for each calibration";
+            traceability:comment = "Link to file/s showing traceability of calibration materials and instruments";
+            traceability:_FillValue = "";
+
+        int cal_flag(time);
+            cal_flag:long_name = "Flag denoting quality of calibration";
+            cal_flag:valid_range = 0, 3;
+            cal_flag:flag_values = 0, 1, 2, 3;
+            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+            cal_flag:_FillValue = 3;
+
+        float recovery(time);
+            recovery:long_name = "Recovery factor applied to sensor";
+            recovery:comment = "Comment about derivation of recovery factor";
+            recovery:ancillary_variables = "recovery_err";
+            recovery:_FillValue = NaN;
+
+        float recovery_err(time);
+            recovery_err:long_name = "Uncertainty of recovery factor";
+            recovery_err:comment = "Comment here about calculation of uncertainties";
+            recovery_err:_FillValue = NaN;
+
+
+    data:
+        // Data is comma-delineated with no additional deliniation between 
+        // dimensions. Thus the data is presented flattened with the overall 
+        // length being d1*d2*..dn. As specified in the variable definition,
+        // the dimensions are cycled over in reverse order so for multi-
+        // dimensional arrays, the last dimension varies fastest. Thus, 
+        // row-order rather than column order is used for matrices.. If 
+        // var = np.array([[11,12,13],[21,22,23]]) then var.flatten() or 
+        // np.ravel(var) will write the array in the correct way.
+        // Missing data can be written as '_'
+
+        applies_to = "C046-C055","C056-C076";
+        traceability = _,_;
+        cal_flag = 0, 0;
+
+        recovery = 9.9900E-1, 9.9900E-1;
+
+
+
+    } // End group size_cal
+
+
+group: coefficients {
+    //
+    :title = "Calibration coefficients for the non-deiced temperature probe";
+    :comment = "";
+    :references = "";
+
+    // Define any group dimensions in addition to the global dimension, time.
+    dimensions:
+        poly_terms = 3; // Is a second order polynomial
+
+    // Define group variables
+    variables:
+        string applies_to(time);
+            applies_to:long_name = "Each calibration applies to these measurements";
+            applies_to:comments = "String of applicable flight numbers for each calibration date";
+
+        string traceability(time);
+            traceability:long_name = "Traceability trail for each calibration";
+            traceability:comment = "Link to file/s showing traceability of calibration materials and instruments";
+
+        int cal_flag(time);
+            cal_flag:long_name = "Flag denoting quality of calibration";
+            cal_flag:valid_range = 0, 3;
+            cal_flag:flag_values = 0, 1, 2, 3;
+            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+            cal_flag:_FillValue = 3;
+
+        float coefficients(time,poly_terms);
+            coefficients:long_name = "Array of polynomial coefficients for calibration";
+            coefficients:comment = "Polynomial coefficients from the lowest power to the highest.";
+            coefficients:ancillary_variables = "coefficients_err";
+            coefficients:_FillValue = NaN;
+    
+        float coefficients_err(time,poly_terms);
+            coefficients_err:long_name = "Uncertainty of polynomial coefficients";
+            coefficients_err:comment = "Comment here about calculation of uncertainties";
+            coefficients_err:_FillValue = NaN;
+   
+
+    data:
+        // Data is comma-delineated with no additional deliniation between 
+        // dimensions. Thus the data is presented flattened with the overall 
+        // length being d1*d2*..dn. As specified in the variable definition,
+        // the dimensions are cycled over in reverse order so for multi-
+        // dimensional arrays, the last dimension varies fastest. Thus, 
+        // row-order rather than column order is used for matrices.. If 
+        // var = np.array([[11,12,13],[21,22,23]]) then var.flatten() or 
+        // np.ravel(var) will write the array in the correct way.
+        
+        applies_to = "C046","C056";
+//        traceability = "";
+        cal_flag = 0, 0;
+        coefficients = -2.440609E+02, 3.787841E-05, 2.999138E-13,
+                       -2.437523E+02, 9.975186E-04, 1.895209E-10;
+
+    } // End group flow_cal
+
+    
+
+} // EOF

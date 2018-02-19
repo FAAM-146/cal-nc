@@ -10,16 +10,23 @@ To present calibration data in a consistant manner, to facilitate archiving of t
 A full specification can be found in FAAM technical document FAAM000003, "Calibration netCDF Structure".
 
 The proposed structure has been set with several central tenets in mind;
+
 #. There is a single calibration file for each instrument,
+
 #. A single instrument may require several different calibrations in order to
-produce calibrated data. These different aspects of the calibration are
-contained within separate groups within the same netCDF file,
+    produce calibrated data. These different aspects of the calibration are
+    contained within separate groups within the same netCDF file,
+
 #. A single file holds a time series of comparable calibrations,
+
 #. The calibration and measurement data files each are contain references to
-the other. The data file should contain a boolean variable indicating whether
-the calibration has already been applied,
+    the other. The data file should contain a boolean variable indicating
+    whether the calibration has already been applied,
+
 #. Calibrations are traceable by the inclusion of calibration metadata,
+
 #. Future expansion and instruments can be accommodated.
+
 
 File Structure:
 ---------------
@@ -55,44 +62,55 @@ Further dimensions - vector
     line fit.
 
 
-Script Description
-==================
+netCDF Construction
+===================
 
 Templates for calibration netCDF files are done by hand in cdl. This is a
-text equivalent of the binary netCDF. Given the small amount of data in the
-variables this should be reasonably convenient although it may be useful to
-include functionality in this or other scripts to ingest larger datasets
-and write them into variables of the calibration netCDF that is created with
-the cdl template.
+text equivalent of the binary netCDF. For some instruments, the amount
+of calibration data may be so small that it can all be included in the
+cdl. For other instruments the data can be included in other files. These
+other files may be cdl with the correct variables as defined in the primary
+cdl or they may be any other file. These ancillary files are read in seperately and the data written into variables of the calibration netCDF
+that is created with the cdl template.
 
 CDL templates:
 --------------
 There are at least two cdl files required. These and any others are combined
 to produce the final calibration netCDF.
 
-Institution cdl
-    The top level cdl contains information on the institution only. This is
-    used for all calibration netCDFs from that institution to provide
-    universal information and consistency. Only global attributes are
-    included in this cdl.
-
 Instrument cdl 1
-    The instrument cdl has instrument information. Global attributes and
-    coordinates may be included. The primary global coordinate is *time*.
-    Groups for each type of calibration for the instrument are included
-    along with the group attributes, dimensions, and variables.
+    The top level instrument cdl has convention, institution, and
+    instrument metadata that are written as netCDF global attributes.
+    Convention and institution metadata are fixed. Instrument metadata
+    applies to the entire file and includes instrument name/s, serial
+    number, references, etc. Groups may be included in this file if there
+    are multiple types of calibration for the same instrument. The primary
+    coordinate is *time*, this may be a global attribute if it applies
+    to all groups or may be a group coordinate if more appropriate.
 
 Instrument cdl *n*
-    Subsequent instrument cdl files can be written. These may be used if the
-    quantity of data becomes unwieldy for a single file.
+    Auxillary instrument cdl file/s can be written. These may be used if
+    the quantity of data becomes unwieldy for a single file. These should
+    not replicate attributes and dimensions of the primary cdl file but
+    include data variables.
 
+Ancillary files:
+----------------
+It may be that the quantity or dimensionality of calibration data makes it
+unwieldy to write into the cdl file by hand. In these situations it is
+easier to write the calibration data into another type of file and use a
+customized parser to ingest this data, massage it into the appropriate
+form, and write it into the netCDF. If this is the case the parser and
+processor of the ancillary data is included in the instrument processing
+class.
 
 Script summary:
 ---------------
 
 Mandatory script argument is either cdl or nc file.
-- If cdl a new nc file will be created using the cdl as a template
-- If nc then new data is appended into the file
+
+* If cdl a new nc file will be created using the cdl as a template
+* If nc then new data is appended into the file
 
 If more than one cdl file is given then they shall be concatenated,
 there is little error checking besides removing the start and end braces. It
@@ -143,7 +161,7 @@ import datetime, pytz
 import netCDF4
 import pdb
 
-import cal_class
+import cal_proc
 
 # Version of this script
 cal_ncgen_ver = 0.1
@@ -211,22 +229,41 @@ def call(infile,args):
     # Open nc file for reading/writing
     with netCDF4.Dataset(outarg, mode='r+', format="NETCDF4") as root:
 
-        instr = getattr(root,'instr')
+        ########
+        pdb.set_trace()
 
-        # Check that instr is a valid cal_class class
-        instr_class = [ic for ic in cal_class.__all__ \
-                       if ic.lower() == instr.lower()]
+        # Obtain intrument from nc or options
+        if args['instr'] is None:
+            instr = getattr(root,'instr')
+        else:
+            instr = args['instr']
+
+        # Obtain appropriate instrument processing class
+        instr_class = cal_proc.proc_map(instr)
 
         try:
-            nc_class = getattr(cal_class,instr_class[0])
+            # Initialise the nc object
+            nc = instr_class(root)
         except:
+            print('Instrument processing class not found: {}'.format(instr))
             pdb.set_trace()
 
-        nc = nc_class(root)
+        ########
+        pdb.set_trace()
+
+        # Run any additional scripts if necessary
+        if 'help' in [l[0].lower() for l in args['update_arg']]:
+            # Print more detailed help from class method
+            print(nc)
+            return
+
+        nc.update_options(args['update_arg'])
 
         # Update the history and username attributes
         nc.update_hist(args['hist'])
         nc.update_user(args['user'])
+
+
 
     # root closed
     pdb.set_trace()
@@ -266,14 +303,16 @@ if __name__=='__main__':
                         'variables in that file.'))
 
     # Optional arguments
-    parser.add_argument('-d', '--data', action='store',
-                        nargs = '+',
-                        dest='datafiles', default=None,
-                        help=('Space-delineated list of data file path/'
-                        'filenames as required by the specific '
-                        'instrument class.'))
+    parser.add_argument('-u', '--update', action='append',
+                        nargs = '*',
+                        dest='update_arg', default=None,
+                        help=('Space-delineated list of data parameters '
+                        'as required by the specific instrument class. '
+                        "'--update' can be given multiple times, each time "
+                        'used to update and different parameter '
+                        "Use '-d help' for instrument specific help."))
     parser.add_argument('-i', '--instr', action='store',
-                        dest='instr', default='generic',
+                        dest='instr', default=None,
                         help=('Instrument class is selected based on the '
                         "'instr' global attribute in the input file. "
                         'If this is none-standard or uses a different '
@@ -295,18 +334,20 @@ if __name__=='__main__':
                         help=('Do not auto-generate the updated history '
                         'attribute of the resultant cal nc file. If a string '
                         'is given then this string is appended to the '
-                        'history attribute instead. If no string is given '
+                        'history attribute instead (should be space-seperated '
+                        'date and comment). If no string is given '
                         'then assume history updates have been handled in '
                         'the cdl file/s. This option should be used with '
                         'care.'))
-    parser.add_argument('-u', '--user', action='store',
+    parser.add_argument('--user', action='store',
                         dest='user', nargs='?',
-                        default='NA',
-                        const=None,
+                        default=None,
+                        const='NA',
                         help=('Do not auto-generate the updated username '
                         'attribute of the resultant cal nc file. If a string '
                         'is given then this string is appended to the '
-                        'username attribute instead. If no string is given '
+                        'username attribute instead (should be space-seperated '
+                        'user and <email>). If no string is given '
                         'then assume username updates have been handled in '
                         'the cdl file/s. This option should be used with '
                         'care.'))

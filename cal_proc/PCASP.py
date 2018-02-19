@@ -3,6 +3,25 @@ File containing all PCASP instrument processor classes.
 """
 
 from .generic import generic
+import os.path
+import numpy as np
+import pdb
+
+
+# Map cal file variable names to nc variables
+var_map = {'bin_cal/ADC_thres': lambda d: np.vstack((d['Lower Boundaries'].base,
+                                                     d['Lower Boundaries'].base)),
+
+           'bin_cal/x-section': lambda d: np.vstack((d['Lower Cross Section Boundaries'].base,
+                                                     d['Upper Cross Section Boundaries'].base)),
+           'bin_cal/bin_cal/x-section_err': lambda d: np.vstack((d['Lower Cross Section Boundary Errors'].base,
+                                                                 d['Upper Cross Section Boundary Errors'].base)),
+           'bin_cal/x-section_width': lambda d: d['Width of Cross Section Boundaries'],
+           'bin_cal/x-section_width_err': lambda d: d['Width of Cross Section Boundary Errors'],
+           'bin_cal/dia_centre': lambda d: d['Channel Centre'],
+           'bin_cal/dia_centre_err': lambda d: d['Channel Centre Errors'],
+           'bin_cal/dia_width': lambda d: d['Channel Widths'],
+           'bin_cal/dia_width_err': lambda d: d['Channel Width Errors']}
 
 
 # -----------------------------------------------------------------------------
@@ -35,13 +54,8 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
 
     import csv, os.path
     import numpy
-    import pdb
 
-    # Test input file
-    if not os.path.isfile(cal_file):
-        # File does not exist as given
-        print('\nfile does not exist: {}\n'.format(cal_file))
-        return None
+
 
     # List of known types for help
     valid_types = {'pcasp_d':   'output of CDtoDConverter.exe [default]',
@@ -154,7 +168,7 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
         d['data']['raw data'] = {}
         d['data']['Straight line fits'] = {}
 
-        f = open(cal_file, 'rb')
+        f = open(cal_file, 'r') # originally 'rb' for some reason
 
         # Read metadata at top of file
         # Read any empty/extra lines at top of file
@@ -397,6 +411,7 @@ class PCASP(generic):
     Passive Cavity Aerosol Spectrometer Probe
     """
 
+
     def __init__(self,ds):
         """
 
@@ -405,5 +420,128 @@ class PCASP(generic):
         """
         generic.__init__(self,ds)
 
+        # datafiles is included in kargs and is not none and is relevant to
+        # bin calibration
+
+    def __str__(self):
+        """
+        Help, specifically with regards to structure of update_options() call.
+        """
+
+        h1 = '\nHelp for command-line update of nc values:'
+        h2 = 'Any nc attribute or variable can be updated with the program ' +\
+        'option --update=x, where x is a space-delineated list of ' +\
+        'options.'
 
 
+        help_str = '\n'.join([h1,h2]) + '\n' + self.update.__doc__ + '\n'
+
+        print(help_str)
+
+
+
+    def update(self,largs):
+        """
+        Method to make any change to the nc object
+
+        largs list is from cal_ncgen argparse --update option and may be one
+        of the following types;
+
+        * A list [of lists] of cdl files of data to be written into the nc
+          object. This option is chosen based on extension .cdl. If more than
+          one cdl file is offered then it must be given as a single entry. eg;
+
+          -u PCASP_20170725.cdl PCASP_20171114.cdl
+
+        * A list [of lists] of PCASP diameter calibration files output from
+          cstodconverter. This option is chosen based on filename ending
+          with d.csv. If more than one calibration file is offered then it
+          must be given as a single entry. eg;
+
+          -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
+
+        * A list nc attribute/value or variable/value pairs. For attributes
+          that are strings, the value is concatenated to the existing string
+          with a delimiting comma (non-char attributes will probably throw
+          an error). Variables will be appended to the end of the existing
+          variable numpy array. Note that variable attributes cannot be
+          appended to. The attribute/variable names must be given exactly as
+          in the existing nc file. Any containing group/s is given with
+          forward slashes, eg
+
+          -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071
+
+        Note that any spaces in filenames must be enclosed in quotes. All
+        files are assumed to the same type as the first filename in the list.
+
+        :param vars: List of lists of arbitrary arguments to apply to nc
+        """
+
+        # Loop over outer list and determine action based on first element
+        for larg in largs:
+
+            if os.path.splitext(larg[0])[1] == 'cdl':
+                # Auxillary cdl file/s
+                #######
+                # Do something with cdl files
+                pass
+
+            elif os.path.splitext(larg[0])[0].endswith('d') and \
+                 os.path.splitext(larg[0])[1] == 'csv':
+                # PCASP calibration file/s
+                update_bincal(larg)
+
+            elif larg[0] in self.dataset:
+                # Attribute/variable contained within nc object
+
+                #####
+                # Do something here to get attrib or var then append
+                pass
+
+
+
+    def update_bincal(self,datafiles):
+        """
+        Append bin calibration data in datafile/s to that already in nc
+
+        :param datafiles: list of strings of path/filename
+        """
+
+
+
+        if datafiles == None:
+            # Nothing to do
+            return
+
+        for dfile in datafiles:
+            pdb.set_trace()
+            if os.path.isfile(dfile):
+                if os.path.splitext(datafiles[0])[0].endswith('cs'):
+                    data = read_cal_file(dfile,f_type='pcasp_cs')
+                elif os.path.splitext(datafiles[0])[0].endswith('d'):
+                    data = read_cal_file(dfile,f_type='pcasp_d')
+                else:
+                    # Ignore unrelated file
+                    pass
+
+                # Append data to ds
+                pdb.set_trace()
+                #self.dataset.
+
+
+# class PCASP-1(PCASP):
+#     """
+#     Class for parsing and processing of calibration data files for
+#     instruments;
+
+#     PCASP
+#     Passive Cavity Aerosol Spectrometer Probe
+#     """
+
+#     def __init__(self,ds):
+#         """
+
+#         :param ds: dataset from ingested cal_nc file
+#         :type ds:  netCDF4.dataset
+#         """
+#         PCASP.__init__(self,ds)

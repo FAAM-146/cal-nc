@@ -28,7 +28,7 @@ netcdf NDItemp_cal_20180117 {
 
 // The following global attributes may be modified by cal_ncgen.py if used
     :username = "Graeme Nott <graeme.nott@faam.ac.uk>";
-    :history = "20180111";
+    :history = "20180111 Initial creation";
 
 // Define global dimensions for generated file.
 // If all groups have the same time stamp then the time coordinate can be 

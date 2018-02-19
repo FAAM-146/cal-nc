@@ -1,4 +1,4 @@
-netcdf PCASP1_cal_20180117 {
+netcdf PCASP1_cal_template {
 
 // This cdl file contains the attributes, dimensions, and variables that are
 // applied to all calibration netCDF files for a particular instrument. This
@@ -28,28 +28,9 @@ netcdf PCASP1_cal_20180117 {
     :references = "http://www.faam.ac.uk/index.php/science-instruments/aerosol/304-pcasp";
 
 // The following global attributes shall be modified by cal_ncgen.py if used
-    :username = "graeme.nott@faam.ac.uk, Graeme Nott";
-    :history = "20180111";
+    :username = " Graeme Nott <graeme.nott@faam.ac.uk>";
+    :history = "20180214 Initial creation";
 
-// Define global dimensions for generated file.
-// calnc files have a root unlimited dimension of time. The units of time may
-// be one of days ('d'), hours ('hr', 'h'), minutes ('min'), or seconds ('sec',
-// 's') and the most appropriate unit for the frequency of calibration should
-// be used.
-dimensions:
-    time = UNLIMITED ; // (2 currently)
-
-// Define global coordinate variable
-variables:
-    float time(time);
-    time:standard_name = "time";
-    time:long_name = "time of calibration";
-    time:timezone = "UTC";
-    time:units = "days since 2010-01-01 00:00:00";
-    time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
-
-data:
-    time = 2818.5, 2864.5;
 
 group: bin_cal {
     // Group containing calibration of size bins of the PCASP
@@ -58,13 +39,25 @@ group: bin_cal {
     :comment = "Group containing calibration of size bins of the PCASP. Photodetector voltage pulse-heights are calibrated to the calculated scattering cross-section of known PSL and DEHS monodisperse distributions.";
     :references = "P.D. Rosenberg, A.R. Dean, P.I. Williams, J.R. Dorsey, A. Minikin, M.A. Pickering and A. Petzold, Particle sizing calibration with refractive index correction for light scattering optical particle counters and impacts upon PCASP and CDP data collected during the Fennec campaign, Atmos. Meas. Tech., 5, 1147-1163, doi:10.5194/amt-5-1147-2012, 2012.";
 
-    // Define any group dimensions in addition to the global dimension, time
+
+    // Define dimensions for group.
+    // The units of time may be one of days ('d'), hours ('hr', 'h'),
+    // minutes ('min'), or seconds ('sec', 's') and the most appropriate unit
+    // for the frequency of calibration should be used.
     dimensions:
+        time = UNLIMITED ;
         bin = 30;
         bin_bounds = 2;
 
     // Define group coordinate variable
     variables:
+        float time(time);
+        time:standard_name = "time";
+        time:long_name = "time of calibration";
+        time:timezone = "UTC";
+        time:units = "days since 2010-01-01 00:00:00";
+        time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+
         int bin(bin);
             bin:long_name = "bin number";
 
@@ -86,7 +79,7 @@ group: bin_cal {
 
         int ADC_thres(time,bin,bin_bounds);
             ADC_thres:long_name = "Lower and upper ADC thresholds for each bin";
-            ADC_thres:comment = "Coverage of each bin in terms of the digitized peak photovoltage. This variable has been included primarily for error checking as the same vaules should be in the standard data files.";
+            ADC_thres:comment = "Coverage of each bin in terms of the digitized peak photovoltage. This variable has been included primarily for error checking as the same values should be in the standard data files.";
             ADC_thres:valid_range = 0, 1288;
             ADC_thres:_FillValue = NaN;
 
@@ -162,39 +155,39 @@ group: bin_cal {
         traceability = "","";
         cal_flag = 0, 0;
 
-        ADC_thres = _, 692,692, 1146,1146, 1814,1814, 2769,2769, 4096,4096, 4192,4192, 4231,4231, 4282,4282, 4348,4348, 4537,4537, 4825,4825, 5251,5251, 5859,5859, 6703,6703, 8192,8192, 8335,8335, 8435,8435, 8520,8520, 8767,8767, 8981,8981, 9194,9194, 9412,9412, 9572,9572, 9825,9825, 10080,10080, 10460,10460, 10872,10872, 11322,11322, 11759,11759, 12288,
-                            _, 692,692, 1146,1146, 1814,1814, 2769,2769, 4096,4096, 4192,4192, 4231,4231, 4282,4282, 4348,4348, 4537,4537, 4825,4825, 5251,5251, 5859,5859, 6703,6703, 8192,8192, 8335,8335, 8435,8435, 8520,8520, 8767,8767, 8981,8981, 9194,9194, 9412,9412, 9572,9572, 9825,9825, 10080,10080, 10460,10460, 10872,10872, 11322,11322, 11759,11759, 12288 ;
+//        ADC_thres = _, 692,692, 1146,1146, 1814,1814, 2769,2769, 4096,4096, 4192,4192, 4231,4231, 4282,4282, 4348,4348, 4537,4537, 4825,4825, 5251,5251, 5859,5859, 6703,6703, 8192,8192, 8335,8335, 8435,8435, 8520,8520, 8767,8767, 8981,8981, 9194,9194, 9412,9412, 9572,9572, 9825,9825, 10080,10080, 10460,10460, 10872,10872, 11322,11322, 11759,11759, 12288,
+//                            _, 692,692, 1146,1146, 1814,1814, 2769,2769, 4096,4096, 4192,4192, 4231,4231, 4282,4282, 4348,4348, 4537,4537, 4825,4825, 5251,5251, 5859,5859, 6703,6703, 8192,8192, 8335,8335, 8435,8435, 8520,8520, 8767,8767, 8981,8981, 9194,9194, 9412,9412, 9572,9572, 9825,9825, 10080,10080, 10460,10460, 10872,10872, 11322,11322, 11759,11759, 12288 ;
 
-        x-section = _, 0.000484975,
-                    0.000484975,0.000582489,
-                    0.000582489, 0.000725968,
-                    0.000725968, 0.00093101,
-                    0.0009311, 0.00121611,
-                    0.00121611, 0.00156032,
-                    0.00156032, 0.0021721,
-                    0.0021721, 0.00297209,
-                    0.00297209, 0.00400738,
-                    0.00400738, 0.00697209,
-                    0.00697209, 0.0114897,
-                    0.0114897, 0.0181721,
-                    0.0181721, 0.0277093,
-                    0.0277093, 0.0409486,
-                    0.0409486, 0.0643054,
-                    0.0643054, 0.0755462,
-                    0.0755462, 0.221729,
-                    0.221729, 0.345984,
-                    0.345984, 0.707055,
-                    0.707055, 1.01989,
-                    1.01989, 1.33125,
-                    1.33125, 1.64993,
-                    1.64993, 1.88383,
-                    1.88383, 2.25367,
-                    2.25367, 2.62643,
-                    2.62643, 3.18193,
-                    3.18193, 3.7842,
-                    3.7842, 4.44202,
-                    4.44202, 5.08084,
-                    5.08084, 5.85414;
+//        x-section = _, 0.000484975,
+//                    0.000484975,0.000582489,
+//                    0.000582489, 0.000725968,
+//                    0.000725968, 0.00093101,
+//                    0.0009311, 0.00121611,
+//                    0.00121611, 0.00156032,
+//                    0.00156032, 0.0021721,
+//                    0.0021721, 0.00297209,
+//                    0.00297209, 0.00400738,
+//                    0.00400738, 0.00697209,
+//                    0.00697209, 0.0114897,
+//                    0.0114897, 0.0181721,
+//                    0.0181721, 0.0277093,
+//                    0.0277093, 0.0409486,
+//                    0.0409486, 0.0643054,
+//                    0.0643054, 0.0755462,
+//                    0.0755462, 0.221729,
+//                    0.221729, 0.345984,
+//                    0.345984, 0.707055,
+//                    0.707055, 1.01989,
+//                    1.01989, 1.33125,
+//                    1.33125, 1.64993,
+//                    1.64993, 1.88383,
+//                    1.88383, 2.25367,
+//                    2.25367, 2.62643,
+//                    2.62643, 3.18193,
+//                    3.18193, 3.7842,
+//                    3.7842, 4.44202,
+//                    4.44202, 5.08084,
+//                    5.08084, 5.85414;
 
 
 
@@ -207,13 +200,24 @@ group: flow_cal {
     :title = "Flow calibration of PCASP";
     :comment = "Group containing sample flow calibration information. Sample flow output and/or input is measured by a calibrated meter";
     :references = "http://www.faam.ac.uk/index.php/science-instruments/aerosol/304-pcasp";
-
-    // Define any group dimensions in addition to the global dimension, time.
+    
+    // The units of time may be one of days ('d'), hours ('hr', 'h'),
+    // minutes ('min'), or seconds ('sec', 's') and the most appropriate unit
+    // for the frequency of calibration should be used.
     dimensions:
+        time = UNLIMITED ;
         max_flows = 1024;    // Maximum number of different flows in a calibration
 
-    // Define group variables
+    // Define group coordinate variable
     variables:
+        float time(time);
+        time:standard_name = "time";
+        time:long_name = "time of calibration";
+        time:timezone = "UTC";
+        time:units = "days since 2010-01-01 00:00:00";
+        time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+
+    // Define group variables
         string applies_to(time);
             applies_to:long_name = "Each calibration applies to these measurements";
             applies_to:comments = "String of applicable flight numbers for each calibration date";

@@ -26,7 +26,7 @@ netcdf NDItemp_cal_20180117 {
     :instr_long_name = "Non-deiced temperature probe";
     :references = "";
 
-// The following global attributes shall be modified by cal_ncgen.py if used
+// The following global attributes may be modified by cal_ncgen.py if used
     :username = "Graeme Nott <graeme.nott@faam.ac.uk>";
     :history = "20180111";
 
@@ -38,7 +38,7 @@ netcdf NDItemp_cal_20180117 {
 // 's') and the most appropriate unit for the frequency of calibration should
 // be used.
 dimensions:
-    time = UNLIMITED; //
+    time = UNLIMITED;
 
 // Define global coordinate variable
 variables:
@@ -55,7 +55,7 @@ variables:
     string type(time);
     type:long_name = "Sensor type";
     type:comment = "Different sensor types which may be one of plate, loom, or thermistor.";
-    type:references = "";
+    type:references = "FAAM013001A";
 
 // Global data
 data:
@@ -107,7 +107,7 @@ group: recovery_factor {
         // length being d1*d2*..dn. As specified in the variable definition,
         // the dimensions are cycled over in reverse order so for multi-
         // dimensional arrays, the last dimension varies fastest. Thus, 
-        // row-order rather than column order is used for matrices.. If 
+        // row-order rather than column order is used for matrices. If 
         // var = np.array([[11,12,13],[21,22,23]]) then var.flatten() or 
         // np.ravel(var) will write the array in the correct way.
         // Missing data can be written as '_'
@@ -119,8 +119,8 @@ group: recovery_factor {
         recovery = 9.9900E-1, 9.9900E-1;
 
 
+    } // End group recovery_factor
 
-    } // End group size_cal
 
 
 group: coefficients {
@@ -142,6 +142,7 @@ group: coefficients {
         string traceability(time);
             traceability:long_name = "Traceability trail for each calibration";
             traceability:comment = "Link to file/s showing traceability of calibration materials and instruments";
+            traceability:_FillValue = "";
 
         int cal_flag(time);
             cal_flag:long_name = "Flag denoting quality of calibration";
@@ -168,17 +169,17 @@ group: coefficients {
         // length being d1*d2*..dn. As specified in the variable definition,
         // the dimensions are cycled over in reverse order so for multi-
         // dimensional arrays, the last dimension varies fastest. Thus, 
-        // row-order rather than column order is used for matrices.. If 
+        // row-order rather than column order is used for matrices. If 
         // var = np.array([[11,12,13],[21,22,23]]) then var.flatten() or 
         // np.ravel(var) will write the array in the correct way.
         
         applies_to = "C046","C056";
-//        traceability = "";
+//        traceability = _,_;
         cal_flag = 0, 0;
         coefficients = -2.440609E+02, 3.787841E-05, 2.999138E-13,
                        -2.437523E+02, 9.975186E-04, 1.895209E-10;
 
-    } // End group flow_cal
+    } // End group coefficients
 
     
 

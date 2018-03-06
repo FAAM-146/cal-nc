@@ -117,7 +117,7 @@ group: recovery_factor {
         cal_flag = 0, 0;
 
         recovery = 9.9900E-1, 9.9900E-1;
-
+        recovery_err = _,_;
 
     } // End group recovery_factor
 
@@ -141,7 +141,7 @@ group: coefficients {
 
         string traceability(time);
             traceability:long_name = "Traceability trail for each calibration";
-            traceability:comment = "Link to file/s showing traceability of calibration materials and instruments";
+            traceability:comment = "NPL calibration document reference number";
             traceability:_FillValue = "";
 
         int cal_flag(time);
@@ -173,8 +173,8 @@ group: coefficients {
         // var = np.array([[11,12,13],[21,22,23]]) then var.flatten() or 
         // np.ravel(var) will write the array in the correct way.
         
-        applies_to = "C046","C056";
-//        traceability = _,_;
+        applies_to = "C046-C055","C056-C076";
+        traceability = "2015110037-2","2015110037-1";
         cal_flag = 0, 0;
         coefficients = -2.440609E+02, 3.787841E-05, 2.999138E-13,
                        -2.437523E+02, 9.975186E-04, 1.895209E-10;

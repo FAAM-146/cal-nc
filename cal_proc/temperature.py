@@ -23,13 +23,16 @@ class NDIT(generic):
         generic.__init__(self,ds)
 
 
-    def update_options(self,**kargs):
+    def update(self,largs):
         """
         Method to determine any other additional changes to the nc obj
 
         :param kargs: dictionary of optional arguments
         :type kargs: dictionary
         """
+        if largs is None:
+            return
+
         pass
 
 class DIT(generic):
@@ -49,11 +52,14 @@ class DIT(generic):
         """
         generic.__init__(self,ds)
 
-    def update_options(self,**kargs):
+    def update(self,largs):
         """
         Method to determine any other additional changes to the nc obj
 
         :param kargs: dictionary of optional arguments
         :type kargs: dictionary
         """
+        if largs is None:
+            return
+
         pass

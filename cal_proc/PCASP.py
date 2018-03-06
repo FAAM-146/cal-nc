@@ -470,12 +470,16 @@ class PCASP(generic):
           forward slashes, eg
 
           -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071
+    2818.5, 2864.5
 
         Note that any spaces in filenames must be enclosed in quotes. All
         files are assumed to the same type as the first filename in the list.
 
         :param vars: List of lists of arbitrary arguments to apply to nc
         """
+
+        if largs is None:
+            return
 
         # Loop over outer list and determine action based on first element
         for larg in largs:

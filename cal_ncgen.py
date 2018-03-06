@@ -252,12 +252,15 @@ def call(infile,args):
         pdb.set_trace()
 
         # Run any additional scripts if necessary
-        if 'help' in [l[0].lower() for l in args['update_arg']]:
-            # Print more detailed help from class method
-            print(nc)
-            return
+        try:
+            if 'help' in [l[0].lower() for l in args['update_arg']]:
+                print(nc)
+                return
+        except TypeError:
+            # If args['update_arg'] is None
+            pass
 
-        nc.update_options(args['update_arg'])
+        nc.update(args['update_arg'])
 
         # Update the history and username attributes
         nc.update_hist(args['hist'])
@@ -284,7 +287,7 @@ if __name__=='__main__':
                    'netCDF files.\n {0}'.format(version))
     epilog = 'Usage examples.\n' +\
              'Write something here'
-####
+
     parser = argparse.ArgumentParser(usage=usage,
                 formatter_class=argparse.RawDescriptionHelpFormatter,
                 description=description,

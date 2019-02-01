@@ -1,2 +1,3 @@
-
-# __init__ for cal_cdl
+"""
+Directory of template cdl files for different instruments
+"""

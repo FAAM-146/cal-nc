@@ -1,4 +1,6 @@
-# Import all cal parser functions
+"""
+Import all cal parser functions
+"""
 
 from .generic import *
 from .temperature import *
@@ -18,7 +20,7 @@ def proc_map(instr):
 
     Function to map instrument nickname string to the appropriate
     instrument processing class. This string may be given as a global
-    nc attribute or with the --instr=instr option of cal_ncgen.__main__().
+    nc attribute or with the ``--instr=instr`` option of cal_ncgen.
 
     :param instr: Unique instrument identifying string, case-sensitive
     :type instr: string

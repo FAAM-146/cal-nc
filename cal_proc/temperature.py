@@ -8,10 +8,9 @@ from .generic import generic
 class NDIT(generic):
     """
     Class for parsing and processing of calibration data files for
-    instruments;
+    instruments::
 
-    NDIT
-    Non-deiced temperature probe
+        NDIT: Non-deiced temperature probe
     """
 
     def __init__(self,ds):
@@ -38,10 +37,9 @@ class NDIT(generic):
 class DIT(generic):
     """
     Class for parsing and processing of calibration data files for
-    instruments;
+    instruments::
 
-    DIT
-    Deiced temperature probe
+        DIT: Deiced temperature probe
     """
 
     def __init__(self,ds):

@@ -32,8 +32,9 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
     The output format is defined for different types of files.
     Data is returned in a dictionary.
 
-    NOTE:   This has been ripped straight from datafile_utils.py. Probably
-            can do this better.
+    .. NOTE::
+        This has been ripped straight from datafile_utils.py. Probably
+        can do this better.
 
     :param cal_file: path and filename of calibration csv file to be read
     :type cal_file: string
@@ -405,10 +406,9 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
 class PCASP(generic):
     """
     Class for parsing and processing of calibration data files for
-    instruments;
+    instruments::
 
-    PCASP
-    Passive Cavity Aerosol Spectrometer Probe
+        PCASP: Passive Cavity Aerosol Spectrometer Probe
     """
 
 
@@ -444,21 +444,32 @@ class PCASP(generic):
         """
         Method to make any change to the nc object
 
-        largs list is from cal_ncgen argparse --update option and may be one
-        of the following types;
+        :param largs: List of lists of arbitrary arguments to apply to nc
+
+        The *largs* list is from
+
+        :Example:
+
+        >>> cal_ncgen.py --update *option*
+
+        and may be one of the following types;
 
         * A list [of lists] of cdl files of data to be written into the nc
-          object. This option is chosen based on extension .cdl. If more than
+          object. This option is chosen based on extension ``.cdl``. If more than
           one cdl file is offered then it must be given as a single entry. eg;
 
-          -u PCASP_20170725.cdl PCASP_20171114.cdl
+          :Example:
+
+          >>> cal_ncgen.py -u PCASP_20170725.cdl PCASP_20171114.cdl
 
         * A list [of lists] of PCASP diameter calibration files output from
-          cstodconverter. This option is chosen based on filename ending
-          with d.csv. If more than one calibration file is offered then it
+          ``cstodconverter``. This option is chosen based on filename ending
+          with ``d.csv``. If more than one calibration file is offered then it
           must be given as a single entry. eg;
 
-          -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
+          :Example:
+
+          >>> cal_ncgen.py -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
 
         * A list nc attribute/value or variable/value pairs. For attributes
           that are strings, the value is concatenated to the existing string
@@ -469,13 +480,13 @@ class PCASP(generic):
           in the existing nc file. Any containing group/s is given with
           forward slashes, eg
 
-          -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071
-    2818.5, 2864.5
+          :Example:
+
+          >>> cal_ncgen.py -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071 2818.5, 2864.5
 
         Note that any spaces in filenames must be enclosed in quotes. All
         files are assumed to the same type as the first filename in the list.
 
-        :param vars: List of lists of arbitrary arguments to apply to nc
         """
 
         if largs is None:

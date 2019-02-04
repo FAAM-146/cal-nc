@@ -18,34 +18,26 @@ src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
 if src_dir not in sys.path:
     sys.path.insert(0,src_dir)
 
+# This imports the cal_nc __init__.py file.
+# ::TODO: There has to be a better way to do this.
+import cal_proc
+
+import pdb
+
+
 # -- Project information -----------------------------------------------------
 
-project = 'FAAM Calibration netCDF'
-copyright = '2019, Graeme Nott'
-author = 'Graeme Nott'
+title = cal_proc.__title__
+project = cal_proc.__description__
+institution = cal_proc.__institution__
+copyright = cal_proc.__copyright__
+author = cal_proc.__author__
+email = cal_proc.__author_email__
 
 # The short X.Y version
-version = ''#can_ncgen.cal_ncgen_ver
+version = cal_proc.__version__
 # The full version, including alpha/beta/rc tags
-release = ''#can_ncgen.cal_ncgen_ver
-
-import re
-import subprocess
-# The full version, including alpha/beta/rc tags.
-# Copied from https://protips.readthedocs.io/git-tag-version.html
-# where it is described. Has been modified to use subprocess.
-# Will only work if git annotated tags have been used and the version
-# number is given at the beginning of the tag. Ie v1.0, V1.0, version1.0, etc
-release = subprocess.run(['git','describe'],
-                         check=True,universal_newlines=True,
-                         stdout=subprocess.PIPE).stdout.strip()
-if release.lower().startswith('v'):
-    version = release
-elif release.lower().startswith('fatal'):
-    # No tags have been attributed to the code
-    version = ''
-
-release = version
+release = cal_proc.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -109,6 +101,27 @@ add_function_parentheses = True
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
 add_module_names = True
+
+
+# rst substitutions for each file. Used for easy access to project
+# fundamentals.
+rst_epilog = """
+.. |ProjectTitle| replace:: {ProjTitle}
+.. |ProjectDescription| replace:: {ProjDescr}
+.. |ProjectInst| replace:: {ProjInst}
+.. |ProjectVersion| replace:: {ProjVer}
+.. |PythonVersion| replace:: {PythonVer}
+.. |ProjectAuth| replace:: {ProjAuth}
+.. |ProjectEmail| replace:: {ProjEmail}
+.. |ProjectCopyright| replace:: {ProjCopyright}
+""".format(ProjTitle = title,
+           ProjDescr = project,
+           ProjInst = institution,
+           ProjVer = version,
+           PythonVer = str(sys.version_info.major)+'.'+str(sys.version_info.minor),
+           ProjAuth = author,
+           ProjEmail = email,
+           ProjCopyright = copyright)
 
 
 # -- Options for HTML output -------------------------------------------------

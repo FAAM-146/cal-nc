@@ -11,8 +11,6 @@ import pdb
 
 import cal_proc
 
-# Version of this script
-cal_ncgen_ver = 0.1
 
 # Default directories where cdl file/s may be stored
 default_cdl_dir = ['.','cal_cdl']
@@ -139,7 +137,7 @@ if __name__=='__main__':
 
     # Define commandline options
     usage = '%(prog)s filename [options]'
-    version = 'version: {v}'.format(v=cal_ncgen_ver)
+    version = 'version: {v}'.format(v=cal_proc.__version__)
     description = ('Script to assist in the creation of calibration ' +\
                    'netCDF files.\n {0}'.format(version))
     epilog = 'Usage examples.\n' +\

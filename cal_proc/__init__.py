@@ -6,6 +6,17 @@ from .generic import *
 from .temperature import *
 from .PCASP import *
 
+
+# Project information
+__title__ = 'cal_ncgen'
+__description__ = 'FAAM Calibration netCDF'
+__institution__ = 'FAAM - Facility for Airborne Atmospheric Measurements'
+__version__ = '0.2'
+__author__ = 'Graeme Nott'
+__author_email__ = 'graeme.nott@faam.ac.uk'
+__copyright__ = '2019, FAAM'
+
+
 # List of data reader modules in reader/
 __all__ = ['generic',
         # Primary instruments

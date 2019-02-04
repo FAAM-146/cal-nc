@@ -8,8 +8,8 @@ from .PCASP import *
 
 
 # Project information
-__title__ = 'cal_ncgen'
-__description__ = 'FAAM Calibration netCDF'
+__title__ = 'FAAM Calibration netCDF'
+__description__ = 'Creation/updates of nc files for FAAM calibration data'
 __institution__ = 'FAAM - Facility for Airborne Atmospheric Measurements'
 __version__ = '0.2'
 __author__ = 'Graeme Nott'

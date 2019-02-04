@@ -1,11 +1,18 @@
 Calibration netCDF
 ==================
 
+
+Calibration Data Background:
+----------------------------
+
+Instrument calibration is an integral part of scientific operations at FAAM as part of the mission to provide the highest level of quality assurance with measurements. The calibration procedures, traceability, and data itself must be provided to the end user in a manner that is clear, robust, and linked with the measurement data to which it applies. Instrument calibration parameters to date have been dealt with in a somewhat piecemeal manner and as such clarity in particular has been reduced for the user.
+
+Core primary instrument calibrations are generally held in a text file called the flight constants file. There is a unique file for each flight and the file contains all of the parameters that are applied to the raw data to convert them to physical units as contained within the FAAM core netCDF. Some instrument data, such as those contained within the core cloud physics netCDF, does not have calibrations applied. The relevant calibration data is supplied separately for the user to apply. These calibration text files are stored on the FAAM website and emailed out to users.
+
+
 Introduction:
 -------------
 To present calibration data in a consistant manner, to facilitate archiving of the data, and include traceability information and references, data is stored in a netCDF file of a specified structure. netCDF has been chosen as, although it is perhaps unnecessarily complicated for this application, it is commonly used for instrument data and is self-describing. The structure is flexible enough to hold many different types of instrument calibration information. The quantity of calibration information stored within the files will almost certainly be quite small so size and read/write speed are not a priority. Additionally, it is possible to insert these files into a netCDF4 data file as a sub-group and thus keep data and calibration together.
-
-A full specification can be found in FAAM technical document FAAM000003, "Calibration netCDF Structure".
 
 The proposed structure has been set with several central tenets in mind;
 
@@ -20,6 +27,40 @@ The proposed structure has been set with several central tenets in mind;
 #. Calibrations are traceable by the inclusion of calibration metadata,
 
 #. Future expansion and instruments can be accommodated.
+
+
+Calibration files
+^^^^^^^^^^^^^^^^^
+The idea is that each instrument has its own calibration file [#fnote-multi_instr_nc]_, the filename shall follow current FAAM conventions with a structure such as::
+
+    instr_faam_YYYYDDMM_v001_r000_cal.nc
+
+where ``instr`` is a unique string identifier for each instrument, ``v001`` refers to the version of the software that produced the netCDF, and ``r000`` gives the revision of the file.
+
+
+Calibration groups
+^^^^^^^^^^^^^^^^^^
+Some instruments may require different calibrations that are then both applied to the raw data within the processing software. An example of this is the PCASP; currently a calibration is applied to the flow meters readings plus a calibration is applied to the particle size bin boundaries. These two calibrations may be done at different times and they may be applied to the data at different times. Different calibrations are given in different groups within the same file. 
+
+Time series data
+^^^^^^^^^^^^^^^^
+Each file contains a time series of calibrations as long as these calibrations are comparable [#fnote-noncomparable_cals]_.  Calibrations are held in an array with an unlimited dimension that is time/date of calibration.
+
+This way it is straight forward to detect changes in comparable calibrations over time and also not to compare calibrations that are not comparable. For example if the instrument undergoes a sensor upgrade, comparing calibrations from before and after this hardware change is not meaningful.
+
+Data and calibration referencing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+It is important that calibration information is easily linked to those datasets to which it applies and that the end user of the dataset understands whether the calibrations have already been applied or not. These are possibly quite difficult to satisfy depending on the instrument.
+
+In each calibration group there is a variable called ``APPLIES_TO`` which has an entry for each calibration time in the series that points to the applicable measurement data to which this calibration data has been or should be applied to. 
+
+Traceability
+^^^^^^^^^^^^
+Traceability of calibrations, calibration materials, and procedures is vital for user confidence in the data that FAAM provides. The calibration netCDF has to hold this information within the file. This may include certificates provided by manufacturers or third party calibration facilities, descriptions of procedures or links to these that detail the methods used, and/or references to papers or textbooks that serve as the basis of the procedures.
+
+The structure provides several layers of references. In the root of the calibration netCDF file are global attributes ``references`` and ``readme``, these apply to all calibration information within the entire file and so are necessarily general. Within the root of each calibration group there is a ``references`` attribute that provides direct textual information or a link to an external reference detailing the calibration procedure relevant to that calibration group.
+
+Most specifically, there is a ``TRACEABILITY`` variable within each calibration group that provides, for each calibration time, any information specific to that individual calibration. These may include images of calibration certificates for materials or equipment used, links to parent calibration netCDF files, name of the person carrying out the calibration, etc.
 
 
 File Structure:
@@ -75,26 +116,9 @@ If more than one cdl file is given then they shall be concatenated, there is lit
 
 If the input is cdl then ncgen is run to create an nc file [#fnote-direct_ncgen_call]_.
 
-This nc file is then read in with the netCDF4 module. The instrument nickname is extracted from the resulting datasets global 'instr' attribute amd this is used to instantiate the appropriate class for that instrument. The simplest class is 'generic' which has methods for appending history and username information and that is all. All other classes inherit from generic and may include other methods to parse from ancillary files and and write this data into the nc file. This parsing will be highly specific to an instrument, thus the individual classes.
+This nc file is then read in with the netCDF4 module. The instrument nickname is extracted from the resulting datasets global ``instr`` attribute amd this is used to instantiate the appropriate class for that instrument. The simplest class is ``generic`` which has methods for appending history and username information and that is all. All other classes inherit from generic and may include other methods to parse from ancillary files and and write this data into the nc file. This parsing will be highly specific to an instrument, thus the individual classes.
 
-.. highlights::
 
-    name:
-        cal_ncgen.py
-
-    description:
-        Script to assist in the creation of calibration netCDF files.
-
-    version:
-        0.1
-
-    python version:
-        3.4
-
-    author:
-        Graeme Nott <graeme.nott@faam.ac.uk>
-
-    created:
-        Jan 2018
-
+.. [#fnote-multi_instr_nc] Having only a single instrument will mean a lot of almost empty files for many of the primary instruments. It may be possible to combine many such calibrations in a single calibration file through the use of links.
+.. [#fnote-noncomparable_cals] An exception to this may be when instrument calibrations are never comparable.
 .. [#fnote-direct_ncgen_call] This means that a user can completely by-pass the use of this script and call ncgen directly on a user-generated cdl file. This is by design as it allows greater flexibility.

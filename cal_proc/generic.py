@@ -3,7 +3,7 @@
 import datetime, pytz
 
 
-class generic():
+class Generic():
     """
     Minimal parent class for instrument-specific parsing and processing
     of calibration data suitable for writing to the calibration netCDF.

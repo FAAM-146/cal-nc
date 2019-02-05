@@ -4,6 +4,7 @@ Import all cal parser functions
 
 from .generic import *
 from .temperature import *
+from .wcm2000 import *
 from .PCASP import *
 
 
@@ -19,9 +20,9 @@ __copyright__ = '2019, FAAM'
 
 # List of data reader modules in reader/
 __all__ = ['generic',
-        # Primary instruments
-           'NDIT', 'DIT',
-        # Core cloud physics
+           # Primary instruments
+           'NDIT', 'DIT', 'WCM2000',
+           # Core cloud physics
            'PCASP']
 
 # ----------------------------------------------------------------------
@@ -33,23 +34,29 @@ def proc_map(instr):
     instrument processing class. This string may be given as a global
     nc attribute or with the ``--instr=instr`` option of cal_ncgen.
 
-    :param instr: Unique instrument identifying string, case-sensitive
+    :param instr: Unique instrument identifying string, case-insensitive
     :type instr: string
     :returns k: Class object relating to instrument or None if no match
     """
 
     # Map of instrument names to processing classes
     # Each list of strings can have many instr strings. However, each
-    # of these strings must be unique within rmap.
-    proc_map = {PCASP:      ['PCASP','PCASP-1','PCASP-2','PCASP-X',
-                             'PCASP1','PCASP2','PCASPX'],
-                NDIT:       ['NDIT'],
-                DIT:        ['DIT']}
+    # of these strings must be unique within proc_map.
+    proc_map = {}
+
+    # Primary instruments
+    proc_map[DIT] = ['DIT']       # Deiced temperature
+    proc_map[NDIT] = ['NDIT']     # Non-deiced temperature
+    proc_map[WCM2000] = ['WCM-2000','WCM2000','SEA']
+
+    # Core cloud physics
+    proc_map[PCASP] = ['PCASP','PCASP-1','PCASP-2','PCASP-X',
+                       'PCASP1','PCASP2','PCASPX']
 
     # Search proc_map dictionary for exact match to instr string.
     # Will only return the first instance.
     for k,v in proc_map.items():
-        if instr in v:
+        if instr.lower() in [v_.lower() for v_ in v]:
             return k
 
     return None

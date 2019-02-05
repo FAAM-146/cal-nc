@@ -2,7 +2,7 @@
 File containing all PCASP instrument processor classes.
 """
 
-from .generic import generic
+from .generic import Generic
 import os.path
 import numpy as np
 import pdb
@@ -403,10 +403,10 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
 
 
 
-class PCASP(generic):
+class PCASP(Generic):
     """
     Class for parsing and processing of calibration data files for
-    instruments::
+    instrument::
 
         PCASP: Passive Cavity Aerosol Spectrometer Probe
     """
@@ -422,22 +422,6 @@ class PCASP(generic):
 
         # datafiles is included in kargs and is not none and is relevant to
         # bin calibration
-
-    def __str__(self):
-        """
-        Help, specifically with regards to structure of update_options() call.
-        """
-
-        h1 = '\nHelp for command-line update of nc values:'
-        h2 = 'Any nc attribute or variable can be updated with the program ' +\
-        'option --update=x, where x is a space-delineated list of ' +\
-        'options.'
-
-
-        help_str = '\n'.join([h1,h2]) + '\n' + self.update.__doc__ + '\n'
-
-        print(help_str)
-
 
 
     def update(self,largs):

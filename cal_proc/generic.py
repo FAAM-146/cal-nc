@@ -2,14 +2,12 @@
 
 import datetime, pytz
 
+
 class generic():
     """
     Minimal parent class for instrument-specific parsing and processing
     of calibration data suitable for writing to the calibration netCDF.
-
     """
-
-
 
     def __init__(self,ds):
         """
@@ -23,6 +21,33 @@ class generic():
         :returns ds:
         """
         self.dataset = ds
+
+
+    def __str__(self):
+        """
+        Help, specifically with regards to structure of update() method if
+        it exists. If update() does not exist then use docstr of processor
+        class __init__()
+        """
+
+        # To print name of instance use: type(self).__name__
+        import pdb
+
+        h1 = self.__doc__
+
+        try:
+            h2 = h1 + '\n' + self.update.__doc__
+        except AttributeError:
+            pdb.set_trace()
+            h2 = h1
+
+        try:
+            h3 = h2  + '\n' + self._add__str__()
+        except AttributeError:
+            pdb.set_trace()
+            h3 = h2
+
+        return h3
 
 
     def update_hist(self,update=None):

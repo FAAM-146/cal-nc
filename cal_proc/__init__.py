@@ -19,7 +19,7 @@ __copyright__ = '2019, FAAM'
 
 
 # List of data reader modules in reader/
-__all__ = ['generic',
+__all__ = ['Generic',
            # Primary instruments
            'NDIT', 'DIT', 'WCM2000',
            # Core cloud physics

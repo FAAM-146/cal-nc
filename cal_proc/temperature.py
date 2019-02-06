@@ -3,9 +3,9 @@ File containing all primary instrument temperature instrument processor
 classes.
 """
 
-from .generic import generic
+from .generic import Generic
 
-class NDIT(generic):
+class NDIT(Generic):
     """
     Class for parsing and processing of calibration data files for
     instruments::
@@ -19,7 +19,7 @@ class NDIT(generic):
         :param ds: dataset from ingested cal_nc file
         :type ds:  netCDF4.dataset
         """
-        generic.__init__(self,ds)
+        Generic.__init__(self,ds)
 
 
     def update(self,largs):
@@ -34,7 +34,7 @@ class NDIT(generic):
 
         pass
 
-class DIT(generic):
+class DIT(Generic):
     """
     Class for parsing and processing of calibration data files for
     instruments::
@@ -48,7 +48,7 @@ class DIT(generic):
         :param ds: dataset from ingested cal_nc file
         :type ds:  netCDF4.dataset
         """
-        generic.__init__(self,ds)
+        Generic.__init__(self,ds)
 
     def update(self,largs):
         """

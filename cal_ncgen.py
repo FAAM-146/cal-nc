@@ -2,7 +2,28 @@
 r"""
 Script for creating FAAM calibration netCDFs
 
-For information see README
+.. code-block:: console
+
+    $ python3 cal_ncgen.py SEA-WCM2000.cdl
+
+creates a netCDF4 file, ``SEA-WCM2000.nc`` from the cdl source file. To
+update variables in the netCDF directly from the command line:
+
+.. code-block:: console
+
+    $ python3 cal_ncgen.py SEA-WCM2000.nc -u time 700 800
+      -u applies_to C150- C180- -u TWC/r100 31.4473 31.5585
+      -u TWC/dtdr 33.9276 34.0387 --user 'Graeme Nott <graeme.nott@faam.ac.uk>'
+      --hist \<now\>\ Artificial\ update\ 1 '<today> Artificial update 2'
+
+where the nc file is read in and four parameters are updated. Two entries
+are appended to the global variables ``time`` and ``applies_to``, and to the
+TWC group variables ``TWC/r100`` and ``TWC/dtdr``. The same username is
+appended to the ``username`` global attribute for both entries. Different
+history strings are appended to the global ``history`` attribute however (note
+the two different ways to escape history strings) with ``<now>`` and ``<today>``
+being converted to the current date.
+
 """
 
 import datetime, pytz
@@ -13,6 +34,7 @@ import cal_proc
 
 
 # Default directories where cdl file/s may be stored
+# Searched in order
 default_cdl_dir = ['.','cal_cdl']
 
 
@@ -25,23 +47,62 @@ def call(infile,args):
     :type infile: list
     :param args: Arguments for adding to cdl file
     :type args: Dictionary
-
     :returns: None
 
-    :How this works?:
+    :How this function works::
 
         * .. TODO::
              concatenate multiple cdl input files
         * If infile is cdl then create nc by calling ``ncgen``.
-          If no other arguments for nc then return
-        * open nc file
+          If no other arguments for nc then finish
+        * open nc file as ``root``
         * determine instrument to operate on from nc or arg['instr']
         * Instantiate instrument class
-        * populate or append to data
+        * Write or append data to variables
         * write nc
     """
     import subprocess
     import os.path
+
+
+    def run_ncgen(fin,fout,nc_fmt=3):
+        """
+        Create netCDF file, fout, from input cdl, fin
+
+        :param fin: Filename of cdl file
+        :type fin: string
+        :param fout: Filename of output netCDF file
+        :type fin: string
+        :param nc_fmt: Integer specifying the format of the netCDF created,
+            default is 3 for netCDF-4. Options are;
+
+            1 netcdf classic file format, netcdf-3 type model
+            2 netcdf 64 bit classic file format, netcdf-3 type model
+            3 netcdf-4 file format, netcdf-4 type model
+            4 netcdf-4 file format, netcdf-3 type model
+
+        :type nc_fmt: integer, 1-4
+        :returns: None
+        """
+
+        try:
+            subprocess.check_call(['ncgen','-b','-k{:d}'.format(nc_fmt),'-o',
+                                   fout,fin])
+        except subprocess.CalledProcessError as err:
+            #print('\n',vars(err))
+            if err.returncode == 127:
+                print('\nCommand not found. Check that ncgen is installed.\n')
+            elif err.returncode == 1:
+                # Generally error in cdl
+                print('\nGeneration of netCDF from cdl file failed.')
+                print('Check input cdl syntax.\n')
+            raise SystemExit
+        except Exception as err:
+            print('\nSomething went horribly wrong with the ncgen call\n')
+            print('\n',err)
+            pdb.set_trace()
+
+        return
 
     # Create absolute paths for infile/s
     # Note that this may create multiple copies of the same file with
@@ -75,23 +136,11 @@ def call(infile,args):
         else:
             outarg = os.path.splitext(abs_infile[0])[0] + '.nc'
 
-        # Run ncgen to produce netCDF-4 format file
-        try:
-            subprocess.check_call(['ncgen','-b','-k3','-o',
-                                   outarg,abs_infile[0]])
-        except subprocess.CalledProcessError as err:
-            #print('\n',vars(err))
-            if err.returncode == 127:
-                print('\nCommand not found. Check that ncgen is installed.\n')
-            elif err.returncode == 1:
-                # Generally error in cdl
-                print('\nGeneration of netCDF from cdl file failed.')
-                print('Check input cdl syntax.\n')
-            raise SystemExit
-        except Exception as err:
-            print('\nSomething went horribly wrong with the ncgen call\n')
-            print('\n',err)
-            pdb.set_trace()
+    ### ::TODO: Use ncrcat or MFDataset to concatenate multiple nc files
+    ### Note: What happens to the attributes or if file variables are not the same.
+
+    # Run ncgen to produce netCDF-4 format file
+    run_ncgen(abs_infile[0],outarg)
 
     if os.path.splitext(abs_infile[0])[-1].lower() == '.nc' and \
        os.path.exists(abs_infile[0]):
@@ -116,7 +165,7 @@ def call(infile,args):
         try:
             # Initialise the nc object
             nc = instr_class(root)
-        except:
+        except Exception as err:
             print('Instrument processing class not found: {}\n'.format(instr))
             pdb.set_trace()
 
@@ -174,19 +223,14 @@ def call(infile,args):
                 print(' ','\n  '.join(discard_hist))
                 print()
 
-        pdb.set_trace()
+        # Update the variables/attributes
         nc.update(updates)
 
         # Update the history and username attributes
         nc.update_hist(history)
         nc.update_user(user)
 
-        # Save nc back into netCDF4 file
-
     # root closed
-    pdb.set_trace()
-
-
 
 
 # ----------------------------------------------------------------------
@@ -200,8 +244,7 @@ if __name__=='__main__':
     version = 'version: {v}'.format(v=cal_proc.__version__)
     description = ('Script to assist in the creation of calibration ' +\
                    'netCDF files.\n {0}'.format(version))
-    epilog = 'Usage examples.\n' +\
-             'Write something here'
+    epilog = __doc__
 
     parser = argparse.ArgumentParser(usage=usage,
                 formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -276,7 +319,7 @@ if __name__=='__main__':
 
     # Welcome splash
     print('\n-----------------------------------------------------')
-    print('\t  Calibration netCDF generation script')
+    print('\tCalibration netCDF generation script')
     print('-----------------------------------------------------\n')
 
     call(args_dict['files'],opts_dict)

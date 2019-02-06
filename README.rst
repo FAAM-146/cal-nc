@@ -65,15 +65,15 @@ Most specifically, there is a ``TRACEABILITY`` variable within each calibration 
 
 File Structure:
 ---------------
-The file is divided into groups, the top level being the root and containing attributes that apply to contents of the entire file. This metadata contains information about the institution as well as the instrument covered by the file.
+The file is divided into groups, as is possible with netCDF4, with the structure being as follows;
 
 Global attributes
-    Attributes that apply to the entire file contents, these are defined by the conventions. Contains information about where the data was produced, references, instrument information, dates of calibrations, and a history of file versions.
+    Attributes that apply to the contents of the entire file. This metadata contains information about the netCDF conventions, institution, where the data was produced, references, and any universally applicable instrument information such as name, serial number, etc. Additionally there is information about the history of the file. Many of these global attributes are defined in relevant conventions.
 
 Calibration groups
-    Separate calibration information are placed in different groups.
+    Separate calibration information is placed in different calibration groups.
 
-Array dimensions for calibration data are organised so that with each new calibration that is added to the file, the datetime dimension increases by one. Second and tertiary dimensions are set by the requirements of the instrument calibration parameters.
+Array dimensions for calibration data are organised so that with each new calibration that is added, the datetime dimension increases by one. Second and tertiary dimensions are set by the requirements of the instrument calibration parameters.
 
 First dimension - time
     This is the unlimited dimension. This dimension is expanded each time a calibration is added to the file, which may be once a year or numerous times a flight.
@@ -92,6 +92,12 @@ Templates for calibration netCDF files are done by hand in cdl. This is a text e
 
 CDL templates:
 --------------
+
+  .. warning::
+
+     This is not the case. Only a single cdl is now used. Need to update.
+
+
 There are at least two cdl files required. These and any others are combined to produce the final calibration netCDF.
 
 Instrument cdl 1

@@ -418,7 +418,7 @@ class PCASP(Generic):
         :param ds: dataset from ingested cal_nc file
         :type ds:  netCDF4.dataset
         """
-        generic.__init__(self,ds)
+        Generic.__init__(self,ds)
 
         # datafiles is included in kargs and is not none and is relevant to
         # bin calibration

@@ -1,0 +1,198 @@
+netcdf SEA-WCM2000 {
+
+// This cdl file contains the attributes, dimensions, and variables that are
+// applied to all calibration netCDF files for a particular instrument. This
+// file may be used as a template which is read by cal_ncgen.py (the options of
+// which adds the calibration data) or, if it includes all data, run with ncgen to
+// create a netCDF file directly.
+//
+// author = G. Nott
+// email = graeme.nott@faam.ac.uk
+// creation = Feb 2019
+
+// global attributes:
+    
+    // Universal global file attributes. Do not modify.
+    :Conventions = "CF-1.6";
+    :NCO = "4.1.3";
+    :_Format = "netCDF-4";
+    :institution = "FAAM. Facility for Airborne Atmospheric Measurements";
+    :address = "Building 146, Cranfield University, Cranfield MK43 0AL UK";
+
+    // Instrument global file attributes. 
+    :title = "FAAM calibration data for the SEA WCM-2000 total water probe";
+    :source = "Science Engineering Associates. Manufacturer-supplied calibration";
+    :instr = "WCM-2000";
+    :instr_long_name = "Multi-element Water Content System";
+    :instr_serialnumber = "2066";
+    :references = "http://www.scieng.com/products/multi.htm";
+    :comment = "The calibration procedure establishes a baseline unique to each sense head. The sense head is suspended in a constant temperature bath. The bath is heated from 85 C to 145 C. The resistance for each element is measured at multiple temperatures during the heating. The resistances are plotted verses the temperature and the required calibration constants are computed. There is no calibration to be performed by the user for the WCM-2000 system (from instrument manual). Note that the calibration constants are included in the raw data files in the cprb data sentence.";
+
+// The following global attributes shall be modified by cal_ncgen.py if used
+    :username = " Graeme Nott <graeme.nott@faam.ac.uk>";
+    :history = "20190204 Initial creation";
+
+// Define global dimensions for file.
+dimensions:
+    time = UNLIMITED ;
+
+// Define coordinate variable
+variables:
+    float time(time);
+        time:standard_name = "time";
+        time:long_name = "time of calibration";
+        time:timezone = "UTC";
+        time:units = "days since 2017-01-01 00:00:00";
+        time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+        time:comment = "All elements are calibrated at the same time and so have the same time stamp.";
+
+// Define global variables
+    string applies_to(time);
+        applies_to:long_name = "Each calibration applies to these measurements";
+        applies_to:comments = "String of applicable flight numbers for each calibration date. May be given as flight number hyphen to indicate all flights since the given flight.";
+        applies_to:_FillValue = '_';
+
+    string traceability(time);
+        traceability:long_name = "Traceability trail for each calibration";
+        traceability:comment = "Manufacturers' calibration document reference number and date.";
+        traceability:_FillValue = '_';
+
+// Global data
+data:
+    time = 669.;
+    applies_to = "C122-";
+    traceability = "2018-1212";
+
+
+group: TWC {
+    // Group attributes
+    :title = "Total Water Content (TWC) element calibration";
+    :comment = "Group containing calibration information for TWC element. ";
+
+    // Define group variables
+    variables:
+        int cal_flag(time);
+            cal_flag:long_name = "Flag denoting quality of calibration";
+            cal_flag:valid_range = 0, 3;
+            cal_flag:flag_values = 0, 1, 2, 3;
+            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+            cal_flag:_FillValue = 3;
+
+        float r100(time);
+            r100:long_name = "TWC element resistance at 100deg C";
+            r100:units = "milliohm";
+            r100:_FillValue = NaN;
+
+        float dtdr(time);
+            dtdr:long_name = "Change in 083 element resistance with temperature";
+            dtdr:comment = "Valid over range 80-160deg C";
+            dtdr:units = "deg C / milliohm";
+            dtdr:_FillValue = NaN;
+
+    data:
+        // Missing data can be written as '_'
+        cal_flag = 0;
+        r100 = 31.3362;
+        dtdr = 33.8165;
+
+    } // End group TWC
+
+group: el083 {
+    // Group attributes
+    :title = "Liquid Water Content, 083 element calibration";
+    :comment = "Group containing calibration information for 083 element. This element has the approximate dimensions of the King probe element.";
+
+    // Define group variables
+    variables:
+        int cal_flag(time);
+            cal_flag:long_name = "Flag denoting quality of calibration";
+            cal_flag:valid_range = 0, 3;
+            cal_flag:flag_values = 0, 1, 2, 3;
+            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+            cal_flag:_FillValue = 3;
+
+        float r100(time);
+            r100:long_name = "083 element resistance at 100deg C";
+            r100:units = "milliohm";
+            r100:_FillValue = NaN;
+
+        float dtdr(time);
+            dtdr:long_name = "Change in 083 element resistance with temperature";
+            dtdr:comment = "Valid over range 80-160deg C";
+            dtdr:units = "deg C / milliohm";
+            dtdr:_FillValue = NaN;
+
+    data:
+        // Missing data can be written as '_'
+        cal_flag = 0;
+        r100 = 29.6913;
+        dtdr = 34.1811;
+
+    } // End group el083
+
+group: el021 {
+    // Group attributes
+    :title = "Liquid Water Content, 021 element calibration";
+    :comment = "Group containing calibration information for 021 element. This element has the approximate dimensions of the Johnson-Williams probe element.";
+
+    // Define group variables
+    variables:
+        int cal_flag(time);
+            cal_flag:long_name = "Flag denoting quality of calibration";
+            cal_flag:valid_range = 0, 3;
+            cal_flag:flag_values = 0, 1, 2, 3;
+            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+            cal_flag:_FillValue = 3;
+
+        float r100(time);
+            r100:long_name = "021 element resistance at 100deg C";
+            r100:units = "milliohm";
+            r100:_FillValue = NaN;
+
+        float dtdr(time);
+            dtdr:long_name = "Change in 021 element resistance with temperature";
+            dtdr:comment = "Valid over range 80-160deg C";
+            dtdr:units = "deg C / milliohm";
+            dtdr:_FillValue = NaN;
+
+    data:
+        // Missing data can be written as '_'
+        cal_flag = 0;
+        r100 = 30.6205;
+        dtdr = 9.0081;
+
+    } // End group el021
+
+group: CMP {
+    // Group attributes
+    :title = "Dry-air compensation, CMP element calibration";
+    :comment = "Group containing calibration information for compensation element.";
+
+    // Define group variables
+    variables:
+        int cal_flag(time);
+            cal_flag:long_name = "Flag denoting quality of calibration";
+            cal_flag:valid_range = 0, 3;
+            cal_flag:flag_values = 0, 1, 2, 3;
+            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+            cal_flag:_FillValue = 3;
+
+        float r100(time);
+            r100:long_name = "CMP element resistance at 100deg C";
+            r100:units = "milliohm";
+            r100:_FillValue = NaN;
+
+        float dtdr(time);
+            dtdr:long_name = "Change in CMP element resistance with temperature";
+            dtdr:comment = "Valid over range 80-160deg C";
+            dtdr:units = "deg C / milliohm";
+            dtdr:_FillValue = NaN;
+
+    data:
+        // Missing data can be written as '_'
+        cal_flag = 0;
+        r100 = 84.2527;
+        dtdr = 3.3535;
+
+    } // End group CMP
+} // EOF

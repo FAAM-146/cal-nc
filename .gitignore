@@ -1,0 +1,12 @@
+##
+## git ignore file for cpps repository
+##
+
+# System backups
+*~
+
+# Python executables
+*.pyc
+
+# Sphinx documentation
+docsource/build/

@@ -56,7 +56,7 @@ In each calibration group there is a variable called ``APPLIES_TO`` which has an
 
 Traceability
 ^^^^^^^^^^^^
-Traceability of calibrations, calibration materials, and procedures is vital for user confidence in the data. The calibration netCDF has to hold this information within the file. This may include certificates provided by manufacturers or third party calibration facilities, descriptions of procedures or links to these that detail the methods used, and/or references to papers or textbooks that serve as the basis of the procedures[#fnote-graphics_inclusion]_.
+Traceability of calibrations, calibration materials, and procedures is vital for user confidence in the data. The calibration netCDF has to hold this information within the file. This may include certificates provided by manufacturers or third party calibration facilities, descriptions of procedures or links to these that detail the methods used, and/or references to papers or textbooks that serve as the basis of the procedures [#fnote-graphics_inclusion]_.
 
 The structure provides several layers of references. In the root of the calibration netCDF file are global attributes ``references`` and ``readme``, these apply to all calibration information within the entire file and so are necessarily general. Within the root of each calibration group there is a ``references`` attribute that provides direct textual information or a link to an external reference detailing the calibration procedure relevant to that calibration group.
 
@@ -93,9 +93,9 @@ Templates for calibration netCDF files are done by hand in `cdl <https://www.uni
 CDL templates:
 --------------
 
-  .. warning::
+    .. warning::
 
-     This is not the case. Only a single cdl is now used. Need to update.
+    This is not the case. Only a single cdl is now used. Need to update.
 
 
 There are at least two cdl files required. These and any others are combined to produce the final calibration netCDF.
@@ -128,24 +128,27 @@ This nc file is then read in with the netCDF4 module. The instrument nickname is
 Installation
 ============
 
-.. note::
+    .. note::
 
     These instructions assume that you are in a shell, either a terminal on a linux box or a `git bash` terminal on a Windows machine. You can also use various GUIs such as `GitHub Desktop <https://desktop.github.com>`_ but in this case you're on your own.
 
 * In a terminal clone the cal-nc repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)
    
 .. code-block:: bash
+
     user@pc:~\git$ git clone git@github.com:FAAM-146/cal-nc.git
 
 
 or if you prefer `https`,
 
 .. code-block:: bash
+
     user@pc:~\git$ git clone https://github.com/FAAM-146/cal-nc.git
 
 * Create a `conda` environment (after installing `conda <https://conda.io/en/latest/>`_ if necessary) using the environment file included in the repository;
 
 .. code-block:: bash
+
     user@pc:~\git$ cd cal-nc
     user@pc:~\git\cal-nc$ conda env create -f calnc-environment.yml
 
@@ -154,11 +157,13 @@ This shall create an environment called `cal-nc`.
 * Activate the environment
 
 .. code-block:: bash
+
     user@pc:~\git\cal-nc$ conda activate cal-nc
 
 * Classes, methods, and functions are written in `cal_proc` while template instrument-specific `cdl` templates are in `cal_cdl`. The helper script `cal-ncgen.py` has been written to make the creation and maintenance of calibration netCDF files easier, full help exists so for examples of how to run it type
 
 .. code-block:: bash
+
     (cal-nc) user@pc:~\git\cal-nc$ python cal-ncgen.py --help
 
 

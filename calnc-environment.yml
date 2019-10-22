@@ -1,4 +1,4 @@
-name: cpps
+name: cal-nc
 channels:
   - anaconda
   - defaults

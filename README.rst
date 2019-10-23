@@ -113,7 +113,12 @@ It may be that the quantity or dimensionality of calibration data makes it unwie
 ``cal_ncgen.py`` script summary:
 --------------------------------
 
-The mandatory script argument is either cdl or nc file.
+    .. warning::
+
+    Check this...
+
+
+A helper script, ``cal_ncgen.py`` has been written to assist in creating and modifying the calibration netCDF files. The mandatory script argument is either a cdl or nc file.
 
 * If cdl, a new nc file will be created using the cdl as a template
 * If nc then new data is appended into this nc file
@@ -131,6 +136,10 @@ Installation
     .. note::
 
     These instructions assume that you are in a shell, either a terminal on a linux box or a `git bash` terminal on a Windows machine. You can also use various GUIs such as `GitHub Desktop <https://desktop.github.com>`_ but in this case you're on your own.
+
+    .. note::
+
+    This application uses ``ncgen`` which is part of the `netCDF <https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html>`_ package. It must be in the OS path so that it can be found by the script.
 
 * In a terminal clone the cal-nc repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)
    
@@ -170,4 +179,4 @@ This shall create an environment called `cal-nc`.
 .. [#fnote-multi_instr_nc] Having only a single instrument will mean a lot of almost empty files for many of the primary instruments. It may be possible to combine many such calibrations in a single calibration file through the use of links.
 .. [#fnote-noncomparable_cals] An exception to this may be when instrument calibrations are never comparable.
 .. [#fnote-graphics_inclusion] At this stage the feasibility of inclusion of graphics file/s of calibration certificates etc within the netCDF is unknown. Inclusion of raster data is done so should be possible to do. However no work on how practical in terms of writing, reading, and file sizes has been done so at this stage only links have been used. This means that a repository or database of these materials shall need to be kept separate to the calibration netCDF file.
-.. [#fnote-direct_ncgen_call] This means that a user can completely by-pass the use of this script and call ncgen directly on a user-generated cdl file. This is by design as it allows greater flexibility.
+.. [#fnote-direct_ncgen_call] This means that a user can completely by-pass the use of this script and call `ncgen <https://www.unidata.ucar.edu/software/netcdf/netcdf/ncgen.html>`_ directly on a user-generated cdl file. This is by design as it allows greater flexibility.

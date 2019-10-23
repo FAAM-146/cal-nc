@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 r"""
-Script for creating FAAM calibration netCDFs
+Script for creating FAAM calibration netCDF files.
 
 .. code-block:: console
 
@@ -56,7 +56,7 @@ def call(infile,args):
         * If infile is cdl then create nc by calling ``ncgen``.
           If no other arguments for nc then finish
         * open nc file as ``root``
-        * determine instrument to operate on from nc or arg['instr']
+        * determine instrument to operate on from nc or args['instr']
         * Instantiate instrument class
         * Write or append data to variables
         * write nc
@@ -81,6 +81,7 @@ def call(infile,args):
             3 netcdf-4 file format, netcdf-4 type model
             4 netcdf-4 file format, netcdf-3 type model
 
+            Note that using a netcdf-3 format will break group features.
         :type nc_fmt: integer, 1-4
         :returns: None
         """
@@ -105,50 +106,67 @@ def call(infile,args):
         return
 
     # Create absolute paths for infile/s
-    # Note that this may create multiple copies of the same file with
-    # different paths.
-    ### TODO: Create set to look for multiple copies of same file
-    abs_infile = [os.path.abspath(os.path.join(d,f)) \
-                  for d in default_cdl_dir for f in infile \
-                  if os.path.isfile(os.path.join(d,f))]
+    abs_infile_ = (os.path.abspath(os.path.join(d,f)) \
+                   for d in default_cdl_dir for f in infile \
+                   if os.path.isfile(os.path.join(d,f)))
+
+    # Remove any duplicate files
+    abs_infile = []
+    for f_ in abs_infile_:
+        if not any([os.path.samefile(a_,f_) for a_ in abs_infile]):
+            abs_infile.append(f_)
 
     if len(abs_infile) == 0:
         # Are no valid input files
         print('\nNo valid input files have been given')
         return None
 
-    with open(abs_infile[0], 'r+') as outfile:
-        for fname in (f_ for f_ in abs_infile[1:]):
+    # Split input files into nc and cdl lists
+    nc_infile = [f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.nc']
+    cdl_infile =[f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.cdl']
 
-            print('\nConcatenation of multiple cdl files is not implemented.')
-            break
-            with open(fname) as infile_:
-                instring = infile_.read()
+    # Find 'master' input file on which to build
+    # Note that this shall always be the first netCDF file if one is provided.
+    try:
+        master_infile = nc_infile[0]
+    except IndexError:
+        # No nc files provided
+        master_infile = cdl_infile[0] 
 
-                # .. TODO: Remove EOF closing braces and put at end of
-                # concatenated files
-                outfile.write()
+    # Determine filename of output file
+    if args['outfile'] != None and type(args['outfile']) is str:
+        outfile = args['outfile']
+    else:
+        outfile = os.path.splitext(master_infile)[0] + '.nc'
 
-    if os.path.splitext(abs_infile[0])[-1].lower() == '.cdl':
-        # Convert cdl to nc
-        if args['outfile'] != None and type(args['outfile']) is str:
-            outarg = args['outfile']
+    # Read in all cdl files and convert to netCDF with temporary filenames
+    tmp_outfile = []
+    for i, cdl_f in enumerate(cdl_infile):
+        tmp_outfile.append('{}_tmp{:003d}.nc'.format(os.path.splitext(outfile)[0],
+                                                     i+1))
+
+        # Run ncgen to produce netCDF-4 format file
+        run_ncgen(cdl_f,tmp_outfile[-1])
+
+    pdb.set_trace()
+    if all([v_==None for k_,v_ in args.items() if k_ != 'outfile']) \
+       and (len(abs_infile) == 1):
+        # No arguments for single file so can return as outfile
+        try:
+            os.replace(tmp_outfile[0],outfile)
+        except IndexError:
+            # Only input file was a nc, no cdls
+            pass
+
+        if len(outfile) < 1.1 * len(os.path.relpath(outfile)):
+            print('Written: {}'.format(outfile))
         else:
-            outarg = os.path.splitext(abs_infile[0])[0] + '.nc'
-
-    ### ::TODO: Use ncrcat or MFDataset to concatenate multiple nc files
-    ### Note: What happens to the attributes or if file variables are not the same.
-
-    # Run ncgen to produce netCDF-4 format file
-    run_ncgen(abs_infile[0],outarg)
-
-    if os.path.splitext(abs_infile[0])[-1].lower() == '.nc' and \
-       os.path.exists(abs_infile[0]):
-        outarg = abs_infile[0]
-
-    if all([v_==None for k_,v_ in args.items() if k_ != 'outfile']):
-        # No arguments given so can return
+            print('Written: {}'.format(os.path.relpath(outfile)))
         return
+
+
+
+    pdb.set_trace()
 
     # Open nc file for reading/writing
     with netCDF4.Dataset(outarg, mode='r+', format="NETCDF4") as root:
@@ -254,14 +272,15 @@ if __name__=='__main__':
     # Mandatory argument
     parser.add_argument('files',
                         nargs='+',
-                        help=('Input cdl or nc file. If cdl then a new '
-                        'calibration netCDF file shall be created '
-                        'using the cdl as a template. More than one '
-                        'cdl can be given and basic concatenation '
-                        'shall be done to create the template. If an '
-                        'existing nc file is given then new '
-                        'calibration data shall be appended to the '
-                        'variables in that file.'))
+                        help=('Input cdl or nc file/s. If one or more cdl files '
+                        'then a new calibration netCDF file shall be created '
+                        'using the (concatenated if possible) cdl as a template. '
+                        'If an existing nc file is given then new calibration '
+                        'data shall be appended to the variables in that file. '
+                        'This data is provided in additional cdf/nc files or '
+                        'as --update argumenmts. The first nc file, and if none '
+                        'the first cdl file, is treated as the master and used '
+                        'for output filename generation, root attributes, etc.'))
 
     # Optional arguments
     parser.add_argument('-u', '--update', action='append',
@@ -270,7 +289,7 @@ if __name__=='__main__':
                         help=('Space-delineated list of data parameters '
                         'as required by the specific instrument class. '
                         "'--update' can be given multiple times, each time "
-                        'used to update a different parameter.'
+                        'being used to update a different parameter.'
                         "Use '-u help' for instrument specific help."))
     parser.add_argument('-i', '--instr', action='store',
                         dest='instr', default=None,
@@ -282,17 +301,16 @@ if __name__=='__main__':
     parser.add_argument('-o', '--output', action='store',
                         dest='outfile', default=None,
                         help=('Explicitly give output path/filename of '
-                        'cal nc file. If not given then filename is '
+                        'cal-nc file. If not given then the filename is '
                         'generated based on the input cdl file. If the '
                         'input is an nc file and the filename is different '
-                        'from the input, then a new nc file shall be '
-                        'created.'))
+                        'from the input a new nc file shall be created.'))
 
     parser.add_argument('--hist', action='store',
                         dest='hist', nargs='*',
                         default=None,
                         help=('Do not auto-generate the updated history '
-                        'attribute of the resultant cal nc file. Instead the '
+                        'attribute of the resultant cal-nc file. Instead the '
                         'given string is appended to the global history '
                         'attribute instead. These should be a space-delineated '
                         'series of dates and comments, spaces in each entry '
@@ -303,7 +321,7 @@ if __name__=='__main__':
                         dest='user', nargs='*',
                         default=None,
                         help=('Do not auto-generate the updated username '
-                        'attribute of the resultant cal nc file. Instead the '
+                        'attribute of the resultant cal-nc file. Instead the '
                         'given string is appended to the global username '
                         'attribute instead (should be space-seperated '
                         'user and <email>).'))

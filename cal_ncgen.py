@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
 r"""
 Script for creating FAAM calibration netCDF files.
 
@@ -24,18 +25,75 @@ history strings are appended to the global ``history`` attribute however (note
 the two different ways to escape history strings) with ``<now>`` and ``<today>``
 being converted to the current date.
 
+It is possible to update variables using one or more external files. This
+requires a custom parser to be part of the instrument processor class so that
+these files can be read and injested. A single external file may be added to an
+existing calibration netCDF file with;
+
+.. code-block:: console
+
+    $ python3 cal_ncgen.py PCASP_faam_20170701_v001_r000_cal.nc -u time 20170919
+      -u applies_to C027-C055 -u parsefile testing/data/20170919_P1_cal_results_cs.csv
+
+Additional metadata associated with the text file
+`testing/data/20170919_P1_cal_results_cs.csv` is given with `-u` arguments. The
+special --update key `parsefile` indicates that the following value needs to be
+parsed with the instrument-specific parser method.
+
+It is also possible to add multiple external calibration files at the same time
+as the associated metadata with an external configuration file. This file uses
+the standard ascii format that is parsed with the `configparser 
+<https://docs.python.org/3.7/library/configparser.html>`_ package. So if for 
+example the config file `PCASP1_CLARIFY_cals.cfg` contained;
+
+.. code-block::
+
+    [pre-CLARIFY]
+    time = 20170701
+    applied_to = C027-
+    user = Graeme Nott
+    traceability = List of PSL lot number information
+    comments = After realignment of inlet jet
+    cal_flag = 0
+
+    parsefile = testing/data/20170801_P1_cal_results_cs.csv
+
+    [post-CLARIFY]
+    time = 20170919
+    applied_to = C027-C055
+    user = Graeme Nott
+    traceability = List of PSL lot number information
+    cal_flag = 0
+
+    parsefile = testing/data/20170919_P1_cal_results_cs.csv
+
+this could be inserted into an existing netCDF file that has been created from
+the PCASP1 template cdl file as follows;
+
+.. code-block:: console
+
+    $ python3 cal_ncgen.py PCASP1_cal.cdl -u parsefile PCASP1_CLARIFY_cals.cfg
+      -o PCASP_faam_20170701_v001_r000_cal.nc
+
+Note that such a config file must have a recognisable format and the `.cfg.` or
+`.config` extension to ensure that the instrument parser is not invoked on the
+config file directly.
+
 """
 
 import datetime, pytz
 import netCDF4
+import xarray as xr
 import pdb
 
 import cal_proc
-
+from cal_proc import *
+from cal_nc import *
 
 # Default directories where cdl file/s may be stored
 # Searched in order
 default_cdl_dir = ['.','cal_cdl']
+
 
 
 def call(infile,args):
@@ -63,47 +121,6 @@ def call(infile,args):
     """
     import subprocess
     import os.path
-
-
-    def run_ncgen(fin,fout,nc_fmt=3):
-        """
-        Create netCDF file, fout, from input cdl, fin
-
-        :param fin: Filename of cdl file
-        :type fin: string
-        :param fout: Filename of output netCDF file
-        :type fin: string
-        :param nc_fmt: Integer specifying the format of the netCDF created,
-            default is 3 for netCDF-4. Options are;
-
-            1 netcdf classic file format, netcdf-3 type model
-            2 netcdf 64 bit classic file format, netcdf-3 type model
-            3 netcdf-4 file format, netcdf-4 type model
-            4 netcdf-4 file format, netcdf-3 type model
-
-            Note that using a netcdf-3 format will break group features.
-        :type nc_fmt: integer, 1-4
-        :returns: None
-        """
-
-        try:
-            subprocess.check_call(['ncgen','-b','-k{:d}'.format(nc_fmt),'-o',
-                                   fout,fin])
-        except subprocess.CalledProcessError as err:
-            #print('\n',vars(err))
-            if err.returncode == 127:
-                print('\nCommand not found. Check that ncgen is installed.\n')
-            elif err.returncode == 1:
-                # Generally error in cdl
-                print('\nGeneration of netCDF from cdl file failed.')
-                print('Check input cdl syntax.\n')
-            raise SystemExit
-        except Exception as err:
-            print('\nSomething went horribly wrong with the ncgen call\n')
-            print('\n',err)
-            pdb.set_trace()
-
-        return
 
     # Create absolute paths for infile/s
     abs_infile_ = (os.path.abspath(os.path.join(d,f)) \
@@ -144,19 +161,23 @@ def call(infile,args):
     for i, cdl_f in enumerate(cdl_infile):
         tmp_outfile.append('{}_tmp{:003d}.nc'.format(os.path.splitext(outfile)[0],
                                                      i+1))
-
-        # Run ncgen to produce netCDF-4 format file
+        # Run cal_nc.nc_func.ncgen to produce netCDF-4 format file
         run_ncgen(cdl_f,tmp_outfile[-1])
 
-    pdb.set_trace()
+    # Make sure master is pointing to a nc file
+    if os.path.splitext(master_infile)[-1] != '.nc':
+        # If master_infile is a cdl then make master the corresponding nc file
+        master_infile = os.path.splitext(master_infile)[0] + '.nc'
+        os.replace(tmp_outfile[0],master_infile)
+
+        _ = tmp_outfile.pop(0)
+
     if all([v_==None for k_,v_ in args.items() if k_ != 'outfile']) \
        and (len(abs_infile) == 1):
         # No arguments for single file so can return as outfile
-        try:
-            os.replace(tmp_outfile[0],outfile)
-        except IndexError:
-            # Only input file was a nc, no cdls
-            pass
+
+        if master_infile != outfile:
+            os.replace(master_infile,outfile)
 
         if len(outfile) < 1.1 * len(os.path.relpath(outfile)):
             print('Written: {}'.format(outfile))
@@ -166,7 +187,19 @@ def call(infile,args):
 
 
 
+#    fred=pcasp.read_cal_file('testing/data/20170919_P1_cal_results_cs.csv',
+#                                f_type='pcasp_cs')
+
+
     pdb.set_trace()
+
+    # Take all but first nc_infile as first has been moved to master_infile
+    # If empty nc_infile then nothing is done
+    master_ds, aux_ds = read_nc(master_infile,nc_infile[1:] + tmp_outfile)
+
+    pdb.set_trace()
+    
+
 
     # Open nc file for reading/writing
     with netCDF4.Dataset(outarg, mode='r+', format="NETCDF4") as root:

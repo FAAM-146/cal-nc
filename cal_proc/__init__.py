@@ -2,10 +2,10 @@
 Import all cal parser functions
 """
 
-from .generic import *
-from .temperature import *
-from .wcm2000 import *
-from .PCASP import *
+from . import generic
+from . import temperature
+from . import wcm2000
+from . import pcasp
 
 
 # Project information
@@ -19,11 +19,11 @@ __copyright__ = '2019, FAAM'
 
 
 # List of data reader modules in reader/
-__all__ = ['Generic',
+__all__ = ['generic',
            # Primary instruments
-           'NDIT', 'DIT', 'WCM2000',
+           'temperature', 'wcm2000',
            # Core cloud physics
-           'PCASP']
+           'pcasp']
 
 # ----------------------------------------------------------------------
 def proc_map(instr):

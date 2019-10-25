@@ -45,13 +45,13 @@ def proc_map(instr):
     proc_map = {}
 
     # Primary instruments
-    proc_map[DIT] = ['DIT']       # Deiced temperature
-    proc_map[NDIT] = ['NDIT']     # Non-deiced temperature
-    proc_map[WCM2000] = ['WCM-2000','WCM2000','SEA']
+    proc_map[temperature.DIT] = ['DIT']       # Deiced temperature
+    proc_map[temperature.NDIT] = ['NDIT']     # Non-deiced temperature
+    proc_map[wcm2000.WCM2000] = ['WCM-2000','WCM2000','SEA']
 
     # Core cloud physics
-    proc_map[PCASP] = ['PCASP','PCASP-1','PCASP-2','PCASP-X',
-                       'PCASP1','PCASP2','PCASPX']
+    proc_map[pcasp.PCASP] = ['PCASP','PCASP-1','PCASP-2','PCASP-X',
+                             'PCASP1','PCASP2','PCASPX']
 
     # Search proc_map dictionary for exact match to instr string.
     # Will only return the first instance.

@@ -490,7 +490,7 @@ class PCASP(Generic):
                 # PCASP calibration file/s
                 update_bincal(larg)
 
-            elif larg[0] in self.dataset:
+            elif larg[0] in self.ds:
                 # Attribute/variable contained within nc object
 
                 #####
@@ -525,5 +525,5 @@ class PCASP(Generic):
 
                 # Append data to ds
                 pdb.set_trace()
-                #self.dataset.
+                #self.ds.
 

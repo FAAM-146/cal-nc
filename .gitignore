@@ -10,3 +10,6 @@
 
 # Sphinx documentation
 docsource/build/
+
+# Built netCDF files
+*.nc

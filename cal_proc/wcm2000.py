@@ -131,29 +131,29 @@ class WCM2000(Generic):
 
             # Determine current dimension length and expand variable along
             # that dimension by length of var being appended
-            dim_name = self.dataset[var_name].dimensions[0]
-            dim_size = self.dataset.dimensions[dim_name].size
+            dim_name = self.ds[var_name].dims[0]
+            dim_size = self.ds.dims[dim_name].size
 
             # Find dimension of variable data that corresponds to unlimited one
-            dim_index = int(np.argwhere(np.atleast_1d(self.dataset[var_name].shape) == dim_size))
+            dim_index = int(np.argwhere(np.atleast_1d(self.ds[var_name].shape) == dim_size))
 
             if verbose == True:
-                curr_val = self.dataset[var_name][:]
+                curr_val = self.ds[var_name][:]
                 print(var_name)
                 print(curr_val)
 
             try:
-                self.dataset[var_name][dim_index+1::] = np.atleast_1d(np.asarray(var_data,
-                                                             dtype=self.dataset[var_name].dtype))
+                self.ds[var_name][dim_index+1::] = np.atleast_1d(np.asarray(var_data,
+                                                             dtype=self.ds[var_name].dtype))
             except IndexError:
                 # Attribute/variable does not exist
                 continue
             except ValueError:
                 # Cannot coerce the updated variables into the same type
                 print('Update of {} cannot be coerced to type {}'.format(\
-                         var_name, self.dataset[var_name].dtype))
+                         var_name, self.ds[var_name].dtype))
                 continue
 
             if verbose == True:
-                print(self.dataset[var_name][:])
+                print(self.ds[var_name][:])
                 print()

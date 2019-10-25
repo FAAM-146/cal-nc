@@ -7,6 +7,7 @@ Generic instrument class.
 
 import datetime, pytz
 import numpy as np
+import xarray as xr
 
 import pdb
 
@@ -27,7 +28,7 @@ class Generic():
         :type ds:  netCDF4.dataset
         :returns ds:
         """
-        self.dataset = ds
+        self.ds = ds
 
 
     def __str__(self):
@@ -89,9 +90,9 @@ class Generic():
         # Change any shortcuts to today's date
         update = update.replace('<today>',t_).replace('<now>',t_)
 
-        hist_ = self.dataset.history
-        del(self.dataset.history)
-        self.dataset.history = '{}, {}'.format(hist_,update)
+        hist_ = self.ds.history
+        del(self.ds.history)
+        self.ds.history = '{}, {}'.format(hist_,update)
 
 
     def update_user(self,update=None):
@@ -121,9 +122,9 @@ class Generic():
             update = ', '.join(update[:])
 
         else:
-            user_ = self.dataset.username
-            del(self.dataset.username)
-            self.dataset.username = '{}, {}'.format(user_,update)
+            user_ = self.ds.username
+            del(self.ds.username)
+            self.ds.username = '{}, {}'.format(user_,update)
 
 
     def change_val(self,var,old_val,new_val):

@@ -1,10 +1,11 @@
 netcdf PCASP1_cal_template {
 
 // This cdl file contains the attributes, dimensions, and variables that are
-// applied to all calibration netCDF files for a particular instrument. This
-// file combined with FAAMheader.cdl provides the source data for PCASP1 
-// calibration netCDF files. Some of these fields shall be modified/
-// overwritten by cal_ncgen.py if it is used.
+// applied to all calibration netCDF files for a particular instrument.
+//
+// Instrument: PCASP-1
+//
+// Some of these fields may be modified/overwritten by cal_ncgen.py.
 //
 // author = G. Nott
 // email = graeme.nott@faam.ac.uk

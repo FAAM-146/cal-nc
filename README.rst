@@ -58,7 +58,7 @@ Traceability
 ^^^^^^^^^^^^
 Traceability of calibrations, calibration materials, and procedures is vital for user confidence in the data. The calibration netCDF has to hold this information within the file. This may include certificates provided by manufacturers or third party calibration facilities, descriptions of procedures or links to these that detail the methods used, and/or references to papers or textbooks that serve as the basis of the procedures [#fnote-graphics_inclusion]_.
 
-The structure provides several layers of references. In the root of the calibration netCDF file are global attributes ``references`` and ``readme``, these apply to all calibration information within the entire file and so are necessarily general. Within the root of each calibration group there is a ``references`` attribute that provides direct textual information or a link to an external reference detailing the calibration procedure relevant to that calibration group.
+The structure provides several layers of references. In the root of the calibration netCDF file are global attributes ``references`` and ``comment``, these apply to all calibration information within the entire file and so are necessarily general. Within the root of each calibration group there is a ``references`` attribute that provides direct textual information or a link to an external reference detailing the calibration procedure relevant to that calibration group.
 
 Most specific is a ``TRACEABILITY`` variable within each calibration group that provides, for each calibration time, any information specific to that individual calibration. These may include calibration certificate information for materials and/or equipment used, links to parent calibration netCDF files, name of the person carrying out the calibration, etc.
 
@@ -139,7 +139,7 @@ Installation
 
     .. note::
 
-    This application uses ``ncgen`` which is part of the `netCDF <https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html>`_ package. It must be in the OS path so that it can be found by the script.
+    This application uses ``ncgen`` which is part of the `netCDF <https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html>`_ package. It must be in the OS path so that it can be found by the script. It will usually be installed as part of the ``netcdf4-python`` package.
 
 * In a terminal clone the cal-nc repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)
    

@@ -138,6 +138,8 @@ def call(infile,args):
         print('\nNo valid input files have been given')
         return None
 
+    pdb.set_trace()
+
     # Split input files into nc and cdl lists
     nc_infile = [f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.nc']
     cdl_infile =[f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.cdl']
@@ -198,7 +200,7 @@ def call(infile,args):
     # Obtain intrument from master or if provided from user arguments
     if args['instr'] is None:
         
-        all_instr = [ds_.attrs['instr'] for ds_ in [master_ds]+aux_ds if 'instr' in ds_.attrs]
+        all_instr = [ds_.getncattr('instr') for ds_ in [master_ds]+aux_ds if 'instr' in ds_.ncattrs()]
         instrs = set([i_.lower() for i_ in all_instr])
 
         if len(all_instr) == 0:

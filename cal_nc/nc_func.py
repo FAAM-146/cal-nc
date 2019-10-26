@@ -47,15 +47,15 @@ def read_nc(master,aux=[]):
     """
 
     # Open master nc file for reading/writing
-    #master_ds = netCDF4.Dataset(master, mode='r+', format='NETCDF4')
-    master_ds = xr.open_dataset(master,
-                                decode_times=True)
+    master_ds = netCDF4.Dataset(master, mode='r+', format='NETCDF4')
+    # master_ds = xr.open_dataset(master,
+    #                             decode_times=True)
 
 
     # Open any auxillary files as read only
-    #aux_ds = [netCDF4.Dataset(f_, mode='r', format='NETCDF4') for f_ in aux]
-    aux_ds = [xr.open_dataset(master,
-                              decode_times=True) for f_ in aux]
+    aux_ds = [netCDF4.Dataset(f_, mode='r', format='NETCDF4') for f_ in aux]
+    # aux_ds = [xr.open_dataset(master,
+    #                           decode_times=True) for f_ in aux]
     
     return master_ds, aux_ds
 

@@ -7,8 +7,8 @@ Script for creating FAAM calibration netCDF files.
 
     $ python3 cal_ncgen.py SEA-WCM2000.cdl
 
-creates a netCDF4 file, ``SEA-WCM2000.nc`` from the cdl source file. To
-update variables in the netCDF directly from the command line:
+creates a netCDF4 file, ``SEA-WCM2000.nc`` from the cdl source file.To
+update variables in the netCDF directly from the command line;
 
 .. code-block:: console
 
@@ -24,6 +24,21 @@ appended to the ``username`` global attribute for both entries. Different
 history strings are appended to the global ``history`` attribute however (note
 the two different ways to escape history strings) with ``<now>`` and ``<today>``
 being converted to the current date.
+
+An existing calibration netCDF may have values appended to to it from a cdl or
+nc file with;
+
+.. code-block:: console
+
+    $ python3 cal_ncgen.py SEA-WCM2000_cal_20180810.nc SEA-WCM2000_20190805.cdl
+
+Explicitly giving a different output filename with the --output argument will
+leave WCM2000_cal_20180810.nc unaltered and create a new calibration netCDF;
+
+.. code-block:: console
+
+    $ python3 cal_ncgen.py SEA-WCM2000_cal_20180810.nc SEA-WCM2000_20190805.cdl
+      --output WCM2000_cal_2018-19.nc
 
 It is possible to update variables using one or more external files. This
 requires a custom parser to be part of the instrument processor class so that
@@ -42,8 +57,8 @@ parsed with the instrument-specific parser method.
 
 It is also possible to add multiple external calibration files at the same time
 as the associated metadata with an external configuration file. This file uses
-the standard ascii format that is parsed with the `configparser 
-<https://docs.python.org/3.7/library/configparser.html>`_ package. So if for 
+the standard ascii format that is parsed with the `configparser
+<https://docs.python.org/3.7/library/configparser.html>`_ package. So if for
 example the config file `PCASP1_CLARIFY_cals.cfg` contained;
 
 .. code-block::
@@ -83,7 +98,7 @@ config file directly.
 
 import datetime, pytz
 import netCDF4
-import xarray as xr
+
 import pdb
 
 import cal_proc
@@ -94,6 +109,8 @@ from cal_nc import *
 # Searched in order
 default_cdl_dir = ['.','cal_cdl']
 
+# Directory where temporary files are stored
+default_tmp_dir = './tmp'
 
 
 def call(infile,args):
@@ -123,9 +140,22 @@ def call(infile,args):
     import os.path
 
     # Create absolute paths for infile/s
-    abs_infile_ = (os.path.abspath(os.path.join(d,f)) \
-                   for d in default_cdl_dir for f in infile \
-                   if os.path.isfile(os.path.join(d,f)))
+    abs_infile_ = [os.path.abspath(os.path.join(d,f)) \
+                   for f in infile for d in default_cdl_dir\
+                   if os.path.isfile(os.path.join(d,f))]
+
+    # abs_infile_ = []
+    # for f_ in infile:
+    #     for d_ in default_cdl_dir:
+    #         if os.path.isfile(os.path.join(d_,f_)):
+    #             abs_infile_.append(os.path.abspath(os.path.join(d_,f_)))
+
+    if len(abs_infile_) != len(infile):
+        print('Given input file not found:')
+        for f_ in infile:
+            if os.path.basename(f_) not in (os.path.basename(f__) for f__ in abs_infile_):
+                print(' {}'.format(os.path.basename(f_)))
+        print()
 
     # Remove any duplicate files
     abs_infile = []
@@ -138,8 +168,6 @@ def call(infile,args):
         print('\nNo valid input files have been given')
         return None
 
-    pdb.set_trace()
-
     # Split input files into nc and cdl lists
     nc_infile = [f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.nc']
     cdl_infile =[f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.cdl']
@@ -147,30 +175,34 @@ def call(infile,args):
     # Find 'master' input file on which to build
     # Note that this shall always be the first netCDF file if one is provided.
     try:
-        master_infile = nc_infile[0]
+        master_infile = nc_infile.pop(0)
     except IndexError:
         # No nc files provided
-        master_infile = cdl_infile[0] 
+        master_infile = os.path.splitext(cdl_infile[0])[0] + '.nc'
+        run_ncgen(cdl_infile[0],
+                  master_infile)
+        _ = cdl_infile.pop(0)
 
     # Determine filename of output file
     if args['outfile'] != None and type(args['outfile']) is str:
         outfile = args['outfile']
     else:
-        outfile = os.path.splitext(master_infile)[0] + '.nc'
+        outfile = master_infile
 
     # Read in all cdl files and convert to netCDF with temporary filenames
-    tmp_outfile = []
-    for i, cdl_f in enumerate(cdl_infile):
-        tmp_outfile.append('{}_tmp{:003d}.nc'.format(os.path.splitext(outfile)[0],
-                                                     i+1))
+    tmpfile = []
+    for i, f_ in enumerate(cdl_infile):
+        #tmpfile.append(tempfile.TemporaryFile(dir=os.path.dirname(f_)))
+        tmpfile.append('{}_tmp.nc'.format(os.path.join(default_tmp_dir,os.path.splitext(f_)[0]),
+                                                 i+1))
         # Run cal_nc.nc_func.ncgen to produce netCDF-4 format file
-        run_ncgen(cdl_f,tmp_outfile[-1])
+        run_ncgen(f_,tmpfile[-1])
 
     # Make sure master is pointing to a nc file
     if os.path.splitext(master_infile)[-1] != '.nc':
         # If master_infile is a cdl then make master the corresponding nc file
         master_infile = os.path.splitext(master_infile)[0] + '.nc'
-        os.replace(tmp_outfile[0],master_infile)
+        os.replace(tmpfile[0],master_infile)
 
         _ = tmp_outfile.pop(0)
 
@@ -188,39 +220,64 @@ def call(infile,args):
         return
 
 
+    ### What is the following for?
+    ### Why do all of the updates need to be the same length?
 
-#    fred=pcasp.read_cal_file('testing/data/20170919_P1_cal_results_cs.csv',
-#                                f_type='pcasp_cs')
+    # Basic check on update argument, make sure that they are all the
+    # same length. If there are equal number of different lengths, the
+    # first one shall be selected and the other discarded.
+    update_lens = [len(v_) for v_ in args['update_arg']]
+    modal_len = max(set(update_lens),key=update_lens.count) - 1
+
+    # Restructure update args into list of dictionaries.
+    # Note that this does not cope with flattened dictionaries
+    updates = {l_[0]:l_[1:] for l_ in args['update_arg'] if
+               len(l_) == modal_len + 1}
+
+    # Include some user feedback if any items discarded
+    for u_arg in args['update_arg']:
+        if u_arg[0] not in updates:
+            print('\nUpdate argument discarded as incorrect length')
+            print('  ',u_arg)
+            print()
+
+    pdb.set_trace()
+    ### Process ########################################################
+    proc_rtn, proc_err = process_nc(master_infile,
+                                    nc_infile + tmpfile,
+                                    out_nc = outfile,
+                                    instr=args['instr'],
+                                    updates=updates)
 
 
-    # Take all but first nc_infile as first has been moved to master_infile
-    # If empty nc_infile then nothing is done
-    master_ds, aux_ds = read_nc(master_infile,nc_infile[1:] + tmp_outfile)
 
-    # Obtain intrument from master or if provided from user arguments
+
+    if proc_rtn != 0:
+        # Error occured in process_nc
+        print(proc_err)
+        return
+
+
+    pdb.set_trace()
+
+    # Create a instrument processor from the master nc file. This file remains
+    # open until explicitly closed.
+    master_ds, _ = read_nc(master_infile)
+
+    # Create list of all additional nc files
+    aux_nc = nc_infile[1:] + tmp_outfile
+
+    # Obtain intrument from master or, if provided, from user arguments
     if args['instr'] is None:
-        
-        all_instr = [ds_.getncattr('instr') for ds_ in [master_ds]+aux_ds if 'instr' in ds_.ncattrs()]
-        instrs = set([i_.lower() for i_ in all_instr])
-
-        if len(all_instr) == 0:
-            print('No instrument name given in input file/s.')
+        try:
+            instr = master_ds.getncattr('instr')
+        except AttributeError:
+            print('No instrument name given in master file.')
             print('Use --update instr instrument argument.')
             return
-        
-        elif len(instrs) == 1:
-            # Only a single input file specifies the instr so go with it
-            instr = instrs.pop()
-        
-        else:
-            print('Different instrument names given in input files.')
-            print('Use --update instr instrument argument to override.')
-            return
-
     else:
         # User-given arguement overrides instrument name in input files
         instr = args['instr']
-
 
     # Obtain appropriate instrument processing class
     instr_class = cal_proc.proc_map(instr)
@@ -243,24 +300,8 @@ def call(infile,args):
 
 
     pdb.set_trace()
+    combine_datasets(master.ds,aux_ds[0],master.ds)
 
-    # Basic check on update argument, make sure that they are all the
-    # same length. If there are equal number of different lengths, the
-    # first one shall be selected and the other discarded.
-    update_lens = [len(v_) for v_ in args['update_arg']]
-    modal_len = max(set(update_lens),key=update_lens.count) - 1
-
-    # Restructure update args into list of dictionaries.
-    # Note that this does not cope with flattened dictionaries
-    updates = {l_[0]:l_[1:] for l_ in args['update_arg'] if
-               len(l_) == modal_len + 1}
-
-    # Include some user feedback if any items discarded
-    for u_arg in args['update_arg']:
-        if u_arg[0] not in updates:
-            print('\nUpdate argument discarded as incorrect length')
-            print('  ',u_arg)
-            print()
 
     # Want to apply history and user attributes for each update so make
     # sure are correct length.

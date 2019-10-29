@@ -7,7 +7,7 @@ Generic instrument class.
 
 import datetime, pytz
 import numpy as np
-import xarray as xr
+import netCDF4
 
 import pdb
 
@@ -138,3 +138,233 @@ class Generic():
         """
 
         pass
+
+
+
+
+
+    def append_datasets(self,ds,
+                        force_append=['username','history'],
+                        exclude=[]):
+        """
+        Add groups, attributes, dimensions, and variables from ds.
+
+        Attributes of *self* shall take priority over those of the same name
+        in ds, such attribute values of ds shall be ignored. The exception is
+        if the attribute key is included in ``force_append``. In this case the
+        resultant attribute shall be a comma-delineated combination of the
+        individual attributes with that from ds being appended to that of
+        *self*.
+
+        Variables from ds are appended to the same variable in *self*. The
+        variables are sorted by the unlimited dimension. Variables only in
+        ds shall be added to *self*.
+
+        If any groups, attributes, or variables in ds that are not to be
+        added or appended can be specified as a list with ``exclude``.
+
+        :param ds: netCDF dataset.
+        :type ds: dataset
+        :param force_append: Any attribute strings that should always be
+            appended to, even if they are identical. Default is
+            ['username','history'].
+        :type force_append: List of root or group attributes strings.
+        :param exclude: List of attribute or variable names (but not variable
+            attributes) that are not to be added or appended.
+        :type exclude: List of identifying strings.
+
+        """
+
+
+        def walktree(ds_):
+            values = ds_.groups.values()
+            yield values
+            for value in ds_.groups.values():
+                for children in walktree(value):
+                    yield children
+
+
+
+        def append_dsgroup(mgrp,ngrp):
+            """
+            Update master ds group with values from new ds group
+
+            Either input may be a dataset, in which case the root group is
+            operated on, or a group/subgroup within the dataset. This function
+            does not walk down through any subsequent groups.
+
+            param mgrp: Master dataset object which may be root or a group
+            param ngrp: Dataset object the contents of which shall be added or
+                appended to those in the master dataset object.
+            """
+
+            # Add any new attributes, ignore any conflicts, string append any others
+            new_attrs = {k_:v_ for (k_,v_) in ngrp.__dict__.items() \
+                         if k_ not in mgrp.ncattrs()}
+            app_attrs = {k_:v_ for (k_,v_) in ngrp.__dict__.items() \
+                         if (k_ in mgrp.ncattrs() and v_ != mgrp.getncattr(k_) and k_ in force_append)}
+
+            mgrp.setncatts(new_attrs)
+
+            for k_,v_ in app_attrs.items():
+                if mgrp.getncattr(k_) == '':
+                    app_attr = ngrp.getncattr(k_)
+                else:
+                    app_attr =  ', '.join([mgrp.getncattr(k_)[::],
+                                           ngrp.getncattr(k_)])
+                mgrp.setncattr_string(k_,app_attr)
+
+            # Add any new dimensions
+            new_dim = {d_:v_ for (d_,v_) in ngrp.dimensions.items() if d_ not in mgrp.dimensions}
+            mgrp.dimensions.update(new_dim)
+
+            # Add any new variables
+            new_var = {n_:v_ for (n_,v_) in ngrp.variables.items() \
+                       if n_ not in mgrp.variables}
+            mgrp.variables.update(new_var)
+
+            # Concatenate any variables along the unlimited dimension
+            # that exist in master already. Do this in two steps as operating
+            # directly on the dataset coordinate/s affects the dependent
+            # variables immediately.
+            # Note that new/changed variable attributes are not added.
+            app_var = {n_:v_ for (n_,v_) in ngrp.variables.items() \
+                       if all([n_ in mgrp.variables,
+                               not np.array_equal(ngrp.variables[n_][:],
+                                                  mgrp.variables[n_][:])])}
+
+            mod_var = {}
+            for n_,v_ in app_var.items():
+
+                # Find unlimited dimension
+                for i,d_ in enumerate(mgrp.variables[n_].dimensions):
+                    if mgrp.dimensions[d_].isunlimited():
+                        break
+
+                # Convert datetime stamps to datetime then back again ensuring
+                # units are those of the master group.
+                # Determine if timestamp with variable name and units that
+                # include 'since'. A bit flakey but hopefully ok.
+                if all(['time' in n_.lower(),
+                        'units' in mgrp.variables[n_].ncattrs()]) \
+                   and 'since' in mgrp.variables[n_].units.lower():
+
+                    try:
+                        mcalendar = mgrp.variables[n_].calendar
+                    except AttributeError:
+                        mcalendar = 'standard'
+
+                    try:
+                        ncalendar = ngrp.variables[n_].calendar
+                    except AttributeError:
+                        ncalendar = 'standard'
+
+                    mtime = netCDF4.num2date(mgrp.variables[n_][:],
+                                             mgrp.variables[n_].units,
+                                             mcalendar)
+                    ntime = netCDF4.num2date(ngrp.variables[n_][:],
+                                             ngrp.variables[n_].units,
+                                             ncalendar)
+
+                    atime = np.ma.concatenate((mtime,ntime),axis=i)
+
+                    mod_var[n_] = netCDF4.date2num(atime,
+                                                   mgrp.variables[n_].units,
+                                                   mcalendar)
+
+                else:
+
+        ### TODO: Use pint to make sure any units in variables are comparable and
+        ###       convert new variables to those used in master
+
+                    mod_var[n_] = np.ma.concatenate((mgrp.variables[n_][:],
+                                                     ngrp.variables[n_][:]),
+                                                    axis=i)
+
+
+            # Write modified variables back into master
+            for n_,v_ in mod_var.items():
+                mgrp.variables[n_][:] = v_
+
+
+
+
+
+        # Operate on root first the go through subsequent groups
+
+        append_dsgroup(self.ds,ds)
+
+
+        pdb.set_trace()
+
+        for ds_grp in ds.groups:
+            # Go
+            pass
+        root_attr = {k_:v_ for (k_,v_) in set(self.ds.__dict__.items()).intersection(ds.__dict__.items()) if k_ not in exclude}
+
+        for k_,v_ in set(ds1.__dict__.items()).symmetric_difference(ds2.__dict__.items()):
+            # Add attributes that are unique to one dataset or differ between datasets
+            if k_ in root_attr:
+                root_attr[k_] = ', '.join([ds1.getncattr(k_),ds2.getncattr(k_)])
+            else:
+                try:
+                    root_attr[k_] = ds1.getncattr(k_)
+                except AttributeError:
+                    root_attr[k_] = ds2.getncattr(k_)
+
+        for k_ in force_append:
+            # Add attributes that are required
+            try:
+                root_attr[k_] = ', '.join([ds1.getncattr(k_),ds2.getncattr(k_)])
+            except AttributeError:
+                # This will only happen if the attribute k_ is not in either dataset
+                pass
+
+        ds3.setncatts(root_attr)
+
+        # Find unlimited dimension. Assumes that all datasets have the same unlimited
+        # dimension. If not then the files are not comparable and cannot be concatenated
+        dim_ul = [dim_ for dim_ in ds1.dimensions.keys() \
+                  if ds1.dimensions[dim_].isunlimited()][0]
+
+        # Create dimensions from both datasets
+        for dim_,val_ in set(ds1.dimensions.items()).union(ds2.dimensions.items()):
+            if dim_ not in ds3.dimensions:
+                ds3.createDimension(dim_, len(val_) if not val_.isunlimited() else None)
+
+        # Create variables
+        for var_,val_ in set(ds1.variables.items()).union(ds2.variables.items()):
+
+            if var_ not in ds3.variables and var_ not in exclude:
+
+                try:
+                    fill_ = val_._FillValue
+                except AttributeError:
+                    # _FillValue has not been set so use default
+                    fill_ = None
+
+                ds3.createVariable(var_,
+                                   datatype=val_.datatype,
+                                   dimensions=val_.dimensions)
+
+                try:
+                    var1 = ds1.variables[var_][:]
+                except:
+                    var1 = [ds2.variables[var_]._FillValue]
+                try:
+                    var2 = ds2.variables[var_][:]
+                except:
+                    var2 = [ds1.variables[var_]._FillValue]
+
+                ds3.variables[var_][:] = np.ma.concatenate((var1,var2))
+
+                pdb.set_trace()
+                # Set variable attributes
+                var_attr1 = {k_:v_ for (k_,v_) in ds1.variables[var_].__dict__.items()}
+                var_attr2 = {k_:v_ for (k_,v_) in ds2.variables[var_].__dict__.items()}
+
+                #  Merge attribute dictionaries with ds1 variable attributes
+                # taking precedence over ds2 attributes of the same name.
+                var_attr = {**var_attr2, **var_attr1}
+
+                ds3[var_].setncatts(var_attr)

@@ -26,10 +26,35 @@ netcdf PCASP1_CLARIFY_flowcal {
 //    :instr_long_name = "Passive Cavity Spectrometer Probe. SPP200 electronics package";
 //    :instr_serialnumber = "17884-0190-04";
 //    :references = "http://www.faam.ac.uk/index.php/science-instruments/aerosol/304-pcasp";
-
+    :comment = "This is a cdl test comment";
 // The following global attributes shall be modified by cal_ncgen.py if used
     :username = "Graeme Nott";
     :history = "CLARIFY flow cal, 20180307";
+
+
+    dimensions:
+        time = UNLIMITED ;
+        fred = 2;
+
+    variables:
+        float time(time);
+            time:standard_name = "time";
+            time:long_name = "time of fred";
+            time:timezone = "UTC";
+            time:units = "days since 2019-10-28 00:00:00";
+            time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+
+        float bob(time,fred);
+            bob:long_name = "bob number";
+            bob:comment2 = "New comment!";
+
+        int alice(time,fred);
+            alice:long_name = "Alice number";
+
+    data:
+        time = 4;
+        bob = 4.1,4.2;
+        alice = 42,52;
 
 
 group: flow_cal {

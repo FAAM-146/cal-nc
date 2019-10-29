@@ -7,10 +7,14 @@ Functions for reading, writing, and manipulating netCDF files.
 
 import datetime, pytz
 import netCDF4
-import xarray as xr
+import os.path
+import shutil
+
 import pdb
 
-#from .. import cal_proc
+import cal_proc
+from cal_proc import *
+
 
 
 # Project information
@@ -24,7 +28,11 @@ __author_email__ = 'graeme.nott@faam.ac.uk'
 __copyright__ = '2019, FAAM'
 
 
-__all__ = ['read_nc','run_ncgen']
+__all__ = ['read_nc','process_nc','run_ncgen']
+
+
+# Directory where temporary files are stored
+default_tmp_dir = './tmp'
 
 
 def read_nc(master,aux=[]):
@@ -34,7 +42,7 @@ def read_nc(master,aux=[]):
     .. Note::
 
         All nc files are left open so that the Datasets associated with each
-        file can be operated on/with in the rest of the program. This is 
+        file can be operated on/with in the rest of the program. This is
         required whether or not the file was opened as read-only. Thus all
         Datasets should be explicitly closed when they are finished with.
 
@@ -56,9 +64,97 @@ def read_nc(master,aux=[]):
     aux_ds = [netCDF4.Dataset(f_, mode='r', format='NETCDF4') for f_ in aux]
     # aux_ds = [xr.open_dataset(master,
     #                           decode_times=True) for f_ in aux]
-    
+
     return master_ds, aux_ds
 
+
+def process_nc(master_nc,aux_nc=[],anc_files=[],
+               out_nc=None,instr=None,updates=None):
+    """
+    Open all netCDF files for processing.
+
+    The master netCDF is copied to a temporary file which is opened for read/
+    write while any auxilary files are opened as read-only datasets. Modifications,
+    concatenations, etc are done on the temporary dataset and once complete
+    it is closed and moved to the output file which may be either the master
+    file or out_nc.
+
+    Updates are applied to the master dataset *after* any concatenation etc.
+
+    param master_nc: 'master' netCDF file.
+    type: master: Filename string of pathlib path object.
+    param aux_nc: Any additional netCDF files that are to be added/concatenated
+        with master nc file. Default is [], ie no auxillary files.
+    type aux_nc: list of filename string/s of pathlib path object/s.
+    param anc_files: List of ancillary files that are not netCDF and so need
+        to be parsed before being injested into the dataset. Default is [],
+        ie no ancillary files.
+    type anc_files: list of filename string/s of pathlib path object/s.
+    out_nc: filename of netCDF to be written. If None (default) or the same as
+        master_nc, master_nc is overwritten.
+    out_nc: Filename string of pathlib path object or None.
+    param updates: All updates to be applied to the final dataset.
+    type updates: Dictionary of updates with the keys being existing or new
+        groups, variables, or attributes of the dataset.
+
+    returns: Dataset from master netCDF and list of any auxillary Datasets.
+
+    """
+
+
+
+   # Create a temporary copy of the master
+    # Note that all 'master' operations are done on this temporary copy
+    tmp_nc = '{}_tmp.nc'.format(os.path.splitext(master_nc)[0])
+    shutil.copy2(master_nc,tmp_nc)
+
+    # Create a instrument processor from the master nc file. This file remains
+    # open until explicitly closed.
+    master_ds = netCDF4.Dataset(tmp_nc, mode='r+', format='NETCDF4')
+
+    # If instrument name has not explicitly been given then obtain intrument
+    # from master dataset
+    if instr is None:
+        try:
+            instr = master_ds.getncattr('instr')
+        except AttributeError:
+            print('No instrument name given in master file.')
+            return 1, 'Use --update instr instrument argument.'
+
+    # Obtain appropriate instrument processing class
+    instr_class = cal_proc.proc_map(instr)
+
+
+    try:
+        # Initialise the nc object
+        master = instr_class(master_ds)
+    except Exception as err:
+        print('Instrument processing class not found: {}\n'.format(instr))
+        return 1, ''
+
+    # Print out instrument processor help if required
+    try:
+        if ['help'] in updates.values():
+            print(master)
+            return 1, ''
+    except TypeError:
+        # eg if args['update_arg'] is None
+        pass
+
+
+    # Extract any ancillary files from updates with key 'parsefile'
+    try:
+        anc_files.extend(updates.pop('parsefile'))
+    except KeyError:
+        pass
+
+    # Read in all additional nc files
+    aux_ds = [netCDF4.Dataset(f_, mode='r', format='NETCDF4') for f_ in aux_nc]
+
+    pdb.set_trace()
+    master.append_datasets(aux_ds[0])
+
+    pdb.set_trace()
 
 
 def run_ncgen(fin,fout,nc_fmt=3):

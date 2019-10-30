@@ -80,8 +80,8 @@ group: bin_cal {
             time:standard_name = "time";
             time:long_name = "time of calibration";
             time:timezone = "UTC";
-            time:units = "days since 1970-01-01 00:00:00";
-            time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+            time:units = "seconds since 1970-01-01 00:00:00";
+            time:strftime_format = "seconds since %Y-%m-%d %H:%M:%S%Z";
 
         int bin(bin);
             bin:long_name = "bin number";
@@ -204,8 +204,8 @@ group: flow_cal {
         time:standard_name = "time";
         time:long_name = "time of calibration";
         time:timezone = "UTC";
-        time:units = "days since 1970-01-01 00:00:00";
-        time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+        time:units = "seconds since 1970-01-01 00:00:00";
+        time:strftime_format = "seconds since %Y-%m-%d %H:%M:%S%Z";
 
     // Define group variables
         string applies_to(time);

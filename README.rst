@@ -173,7 +173,7 @@ This shall create an environment called `cal-nc`.
 
 .. code-block:: bash
 
-    (cal-nc) user@pc:~\git\cal-nc$ python cal-ncgen.py --help
+    (cal-nc) user@pc:~\git\cal-nc$ python cal_ncgen.py --help
 
 
 .. [#fnote-multi_instr_nc] Having only a single instrument will mean a lot of almost empty files for many of the primary instruments. It may be possible to combine many such calibrations in a single calibration file through the use of links.

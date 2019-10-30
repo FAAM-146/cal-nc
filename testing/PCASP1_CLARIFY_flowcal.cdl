@@ -56,6 +56,42 @@ netcdf PCASP1_CLARIFY_flowcal {
         bob = 4.1,4.2;
         alice = 42,52;
 
+group: test_grp {
+    :title = "Test group";
+
+    dimensions:
+        time = UNLIMITED ;
+
+    variables:
+        float time(time);
+            time:standard_name = "time";
+            time:long_name = "time of fred";
+            time:timezone = "UTC";
+            time:units = "days since 2019-10-28 00:00:00";
+            time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+
+        float test_var(time);
+            test_var:long_name = "test of test_grp";
+            test_var:comment = "Testing";
+ 
+    data:
+        time = 4;
+        test_var = 111;
+    
+
+    group: testtest_grp {
+        :title = "Nested group";
+
+        variables:
+            float testtest_var(time);
+                testtest_var:long_name = "test of nested testtest_grp";
+                testtest_var:comment = "Testing again";
+     
+        data:
+            testtest_var = 222;    
+        }
+    }
+
 
 group: flow_cal {
     // Group containing calibration of flow rates of the PCASP
@@ -77,8 +113,8 @@ group: flow_cal {
             time:standard_name = "time";
             time:long_name = "time of calibration";
             time:timezone = "UTC";
-            time:units = "days since 1970-01-01 00:00:00";
-            time:strftime_format = "days since %Y-%m-%d %H:%M:%S%Z";
+            time:units = "seconds since 1970-01-01 00:00:00";
+            time:strftime_format = "seconds since %Y-%m-%d %H:%M:%S%Z";
 
     // Define group variables
         string applies_to(time);
@@ -126,7 +162,7 @@ group: flow_cal {
         // var = np.array([[11,12,13],[21,22,23]]) then var.flatten() or 
         // np.ravel(var) will write the array in the correct way.
 
-        time = "20170307";
+        time = 1572220800;
         applies_to = "C027-C055";
         traceability = "Gilibrator calibration certificate number here";
         cal_flag = 0;

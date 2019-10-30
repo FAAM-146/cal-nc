@@ -11,6 +11,23 @@ import netCDF4
 
 import pdb
 
+
+
+def walk_dstree(ds):
+    """
+    Recursive Dataset group generator
+
+    from: http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2
+
+    param ds: Dataset object
+    """
+    values = ds.groups.values()
+    yield values
+    for value in ds.groups.values():
+        for children in walk_dstree(value):
+            yield children
+
+
 class Generic():
     """
     Minimal parent class for instrument-specific parsing and processing
@@ -176,16 +193,7 @@ class Generic():
         """
 
 
-        def walktree(ds_):
-            values = ds_.groups.values()
-            yield values
-            for value in ds_.groups.values():
-                for children in walktree(value):
-                    yield children
-
-
-
-        def append_dsgroup(mgrp,ngrp):
+        def append_group(mgrp,ngrp):
             """
             Update master ds group with values from new ds group
 
@@ -259,12 +267,21 @@ class Generic():
                     except AttributeError:
                         ncalendar = 'standard'
 
-                    mtime = netCDF4.num2date(mgrp.variables[n_][:],
-                                             mgrp.variables[n_].units,
-                                             mcalendar)
-                    ntime = netCDF4.num2date(ngrp.variables[n_][:],
-                                             ngrp.variables[n_].units,
-                                             ncalendar)
+                    try:
+                        mtime = netCDF4.num2date(mgrp.variables[n_][:],
+                                                 mgrp.variables[n_].units,
+                                                 mcalendar)
+                    except IndexError:
+                        # num2date does not work on empty arrays
+                        mtime = np.array([])
+
+                    try:
+                        ntime = netCDF4.num2date(ngrp.variables[n_][:],
+                                                 ngrp.variables[n_].units,
+                                                 ncalendar)
+                    except IndexError:
+                        # num2date does not work on empty arrays
+                        ntime = np.array([])
 
                     atime = np.ma.concatenate((mtime,ntime),axis=i)
 
@@ -274,97 +291,40 @@ class Generic():
 
                 else:
 
-        ### TODO: Use pint to make sure any units in variables are comparable and
-        ###       convert new variables to those used in master
+    ### TODO: Use pint to make sure any units in variables are comparable
+    ###       and convert new variables to those used in master
 
                     mod_var[n_] = np.ma.concatenate((mgrp.variables[n_][:],
                                                      ngrp.variables[n_][:]),
                                                     axis=i)
-
 
             # Write modified variables back into master
             for n_,v_ in mod_var.items():
                 mgrp.variables[n_][:] = v_
 
 
+        # Determine path strings to all (sub-)groups in both datasets
+        mgrps = []
+        for grps in walk_dstree(self.ds):
+            mgrps.extend([g_.path for g_ in grps])
+
+        ngrps = []
+        for grps in walk_dstree(ds):
+            ngrps.extend([g_.path for g_ in grps])
+
+        # Determine groups that are in the new dataset that are not in the master
+        # Create an equivalent empty group in the master, group will be filled
+        # by calling append_dsgroup(). Sort list by length of string so
+        # create upper level groups before any sub-groups.
+        for grp in sorted(set(ngrps).difference(mgrps),key=len):
+            self.ds.createGroup(grp)
+
+        # Copy any new root attributes, dimensions, and/or variables to master
+        append_group(self.ds,ds)
+
+        # Do the same for all groups and sub-groups
+        for grp in ngrps:
+            append_group(self.ds[grp],ds[grp])
 
 
 
-        # Operate on root first the go through subsequent groups
-
-        append_dsgroup(self.ds,ds)
-
-
-        pdb.set_trace()
-
-        for ds_grp in ds.groups:
-            # Go
-            pass
-        root_attr = {k_:v_ for (k_,v_) in set(self.ds.__dict__.items()).intersection(ds.__dict__.items()) if k_ not in exclude}
-
-        for k_,v_ in set(ds1.__dict__.items()).symmetric_difference(ds2.__dict__.items()):
-            # Add attributes that are unique to one dataset or differ between datasets
-            if k_ in root_attr:
-                root_attr[k_] = ', '.join([ds1.getncattr(k_),ds2.getncattr(k_)])
-            else:
-                try:
-                    root_attr[k_] = ds1.getncattr(k_)
-                except AttributeError:
-                    root_attr[k_] = ds2.getncattr(k_)
-
-        for k_ in force_append:
-            # Add attributes that are required
-            try:
-                root_attr[k_] = ', '.join([ds1.getncattr(k_),ds2.getncattr(k_)])
-            except AttributeError:
-                # This will only happen if the attribute k_ is not in either dataset
-                pass
-
-        ds3.setncatts(root_attr)
-
-        # Find unlimited dimension. Assumes that all datasets have the same unlimited
-        # dimension. If not then the files are not comparable and cannot be concatenated
-        dim_ul = [dim_ for dim_ in ds1.dimensions.keys() \
-                  if ds1.dimensions[dim_].isunlimited()][0]
-
-        # Create dimensions from both datasets
-        for dim_,val_ in set(ds1.dimensions.items()).union(ds2.dimensions.items()):
-            if dim_ not in ds3.dimensions:
-                ds3.createDimension(dim_, len(val_) if not val_.isunlimited() else None)
-
-        # Create variables
-        for var_,val_ in set(ds1.variables.items()).union(ds2.variables.items()):
-
-            if var_ not in ds3.variables and var_ not in exclude:
-
-                try:
-                    fill_ = val_._FillValue
-                except AttributeError:
-                    # _FillValue has not been set so use default
-                    fill_ = None
-
-                ds3.createVariable(var_,
-                                   datatype=val_.datatype,
-                                   dimensions=val_.dimensions)
-
-                try:
-                    var1 = ds1.variables[var_][:]
-                except:
-                    var1 = [ds2.variables[var_]._FillValue]
-                try:
-                    var2 = ds2.variables[var_][:]
-                except:
-                    var2 = [ds1.variables[var_]._FillValue]
-
-                ds3.variables[var_][:] = np.ma.concatenate((var1,var2))
-
-                pdb.set_trace()
-                # Set variable attributes
-                var_attr1 = {k_:v_ for (k_,v_) in ds1.variables[var_].__dict__.items()}
-                var_attr2 = {k_:v_ for (k_,v_) in ds2.variables[var_].__dict__.items()}
-
-                #  Merge attribute dictionaries with ds1 variable attributes
-                # taking precedence over ds2 attributes of the same name.
-                var_attr = {**var_attr2, **var_attr1}
-
-                ds3[var_].setncatts(var_attr)

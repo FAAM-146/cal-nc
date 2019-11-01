@@ -68,6 +68,10 @@ group: bin_cal {
             applies_to:long_name = "Each calibration applies to these measurements";
             applies_to:comment = "String of applicable flight numbers or other unique identifier for each calibration time/date";
 
+        string descr(time);
+            descr:long_name = "Description of calibration";
+            descr:comment = "Any descriptive string used as an addition identifier of this calibration";
+
         string traceability(time);
             traceability:long_name = "Traceability trail for each calibration";
             traceability:comment = "Link to file/s showing traceability of calibration materials and instruments or unique lot numbers for each calibration PSL.";
@@ -191,6 +195,10 @@ group: flow_cal {
             applies_to:long_name = "Each calibration applies to these measurements";
             applies_to:comments = "String of applicable flight numbers for each calibration date";
 
+        string descr(time);
+            descr:long_name = "Description of calibration";
+            descr:comment = "Any descriptive string used as an addition identifier of this calibration";
+            
         string traceability(time);
             traceability:long_name = "Traceability trail for each calibration";
             traceability:comment = "Link to file/s showing traceability of calibration materials and instruments";

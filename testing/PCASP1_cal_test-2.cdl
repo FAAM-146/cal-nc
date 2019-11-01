@@ -83,7 +83,7 @@ group: test_grp {
         :title = "Nested group";
 
         variables:
-            float testtest_var(time);
+            float testtest_var(/test_grp/time);
                 testtest_var:long_name = "test of nested testtest_grp";
                 testtest_var:comment = "Testing again";
      
@@ -120,6 +120,10 @@ group: flow_cal {
         string applies_to(time);
             applies_to:long_name = "Each calibration applies to these measurements";
             applies_to:comments = "String of applicable flight numbers for each calibration date";
+
+        string descr(time);
+            descr:long_name = "Description of calibration";
+            descr:comment = "Any descriptive string used as an addition identifier of this calibration";
 
         string traceability(time);
             traceability:long_name = "Traceability trail for each calibration";
@@ -164,6 +168,7 @@ group: flow_cal {
 
         time = 1572220800;
         applies_to = "C027-C055";
+        descr = "CLARIFY flow-cal";
         traceability = "Gilibrator calibration certificate number here";
         cal_flag = 0;
         flows_reported = 1.318, 

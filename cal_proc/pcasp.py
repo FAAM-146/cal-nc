@@ -9,19 +9,20 @@ import pdb
 
 
 # Map cal file variable names to nc variables
-var_map = {'bin_cal/ADC_thres': lambda d: np.vstack((d['Lower Boundaries'].base,
-                                                     d['Lower Boundaries'].base)),
-
-           'bin_cal/x-section': lambda d: np.vstack((d['Lower Cross Section Boundaries'].base,
-                                                     d['Upper Cross Section Boundaries'].base)),
-           'bin_cal/bin_cal/x-section_err': lambda d: np.vstack((d['Lower Cross Section Boundary Errors'].base,
-                                                                 d['Upper Cross Section Boundary Errors'].base)),
-           'bin_cal/x-section_width': lambda d: d['Width of Cross Section Boundaries'],
-           'bin_cal/x-section_width_err': lambda d: d['Width of Cross Section Boundary Errors'],
-           'bin_cal/dia_centre': lambda d: d['Channel Centre'],
-           'bin_cal/dia_centre_err': lambda d: d['Channel Centre Errors'],
-           'bin_cal/dia_width': lambda d: d['Channel Widths'],
-           'bin_cal/dia_width_err': lambda d: d['Channel Width Errors']}
+var_map = {'bin_cal/ADC_thres': lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
+                                                     d['data']['Lower Thresholds'])),
+           'bin_cal/x-section': lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundaries'],
+                                                     d['data']['Upper Cross Section Boundaries'])),
+           'bin_cal/x-section_err': lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundary Errors'].base,
+                                                         d['data']['Upper Cross Section Boundary Errors'].base)),
+           'bin_cal/x-section_width': lambda d: d['data']['Width of Cross Section Boundaries'],
+           'bin_cal/x-section_width_err': lambda d: d['data']['Width of Cross Section Boundary Errors'],
+           'bin_cal/dia_centre': lambda d: d['data']['Channel Centre'],
+           'bin_cal/dia_centre_err': lambda d: d['data']['Channel Centre Errors'],
+           'bin_cal/dia_width': lambda d: d['data']['Channel Widths'],
+           'bin_cal/dia_width_err': lambda d: d['data']['Channel Width Errors'],
+           'bin_cal/calibration_file': lambda d: d['metadata']['cal file'],
+           'bin_cal/source_file': lambda d: d['metadata']['input file']}
 
 
 # -----------------------------------------------------------------------------
@@ -499,31 +500,56 @@ class PCASP(Generic):
 
 
 
-    def update_bincal(self,datafiles):
+    def update_bincal_from_file(self,calfile,vars):
         """
-        Append bin calibration data in datafile/s to that already in nc
+        Append bin calibration data in datafile to that already in nc
 
-        :param datafiles: list of strings of path/filename
+        :param calfile: PCASP calibration csv file. Is recognised as
+            ending in 'cs' or 'd' so user needs to provide some quality
+            assurance on the input files
+        :type calfile: Path/filename strings or pathlib obj
+        :param vars: Additional variables associated with those contained
+            within the datafile. At the very least this should contain any
+            associated coordinate variables, eg time.
+        :type vars: Dictionary of variable name and value pairs.
         """
 
-
-
-        if datafiles == None:
+        if any((calfile == None, os.path.isfile(calfile) == False)):
             # Nothing to do
             return
 
-        for dfile in datafiles:
-            pdb.set_trace()
-            if os.path.isfile(dfile):
-                if os.path.splitext(datafiles[0])[0].endswith('cs'):
-                    data = read_cal_file(dfile,f_type='pcasp_cs')
-                elif os.path.splitext(datafiles[0])[0].endswith('d'):
-                    data = read_cal_file(dfile,f_type='pcasp_d')
-                else:
-                    # Ignore unrelated file
-                    pass
+        data = None
+        if all((os.path.splitext(calfile)[0].endswith('cs'),
+               os.path.splitext(calfile)[1].lower() == '.csv')):
+            data = read_cal_file(calfile,f_type='pcasp_cs')
+        elif all((os.path.splitext(calfile)[0].endswith('d'),
+                 os.path.splitext(calfile)[1].lower() == '.csv')):
+            data = read_cal_file(calfile,f_type='pcasp_d')
 
-                # Append data to ds
+        if data == None:
+            # Error in the calfile
+            return
+
+        try:
+            # Note hard-coding of bin_cal group :-/
+            self.append_time(vars.pop('time'),'bin_cal')
+        except KeyError:
+            # Must have 'time' variable update
+            return
+
+        for k_,v_ in var_map.items():
+            try:
+                self._add_var(k_,v_(data))
+            except KeyError:
+                # Variable has not yet been created, do we create of skip?
+                #self.ds.createVariable(k_,type(v_(self.ds)),dimensions(...
+                #continue?
                 pdb.set_trace()
-                #self.ds.
+            except:
+                pdb.set_trace()
+                pass
+
+        pdb.set_trace()
+
+        # Add extra variables
 

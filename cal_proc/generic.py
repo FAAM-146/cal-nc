@@ -7,10 +7,24 @@ Generic instrument class.
 
 import datetime, pytz
 import numpy as np
+import os.path
 import netCDF4
 
 import pdb
 
+
+# Project information
+__title__ = 'FAAM Calibration netCDF - generic instrument processor'
+__description__ = 'Functions and class for all child instrument processors'
+__institution__ = 'FAAM - Facility for Airborne Atmospheric Measurements'
+__version__ = '0.1'
+__date__ = '2019 11 01'
+__author__ = 'Graeme Nott'
+__author_email__ = 'graeme.nott@faam.ac.uk'
+__copyright__ = '2019, FAAM'
+
+
+#__all__ = ['walk_dstress','append_time','append_var']
 
 
 def walk_dstree(ds):
@@ -26,6 +40,128 @@ def walk_dstree(ds):
     for value in ds.groups.values():
         for children in walk_dstree(value):
             yield children
+
+
+def append_time(otime,ntime,concat_axis=0):
+    """
+    Method to append time variable/s to existing time coordinate
+
+    :param otime: Original Dataset time coordinate. As is coordinate is 1d
+    :type otime: netCDF4 variable
+    :param ntime: New time variables to append to otime.
+    :type ntime: May either be a netCDF4 variable or a simple iterable of
+        values. The values may be datetime objects. If the values are
+        strings some attempt to convert them will be done. If they are numbers
+        then it is assumed that units, calendar are compatible with those in
+        otime.
+
+    :returns: a netCDF4 variable with the same units and calendar as otime
+    """
+
+    import datetime
+
+    time_fmts = ['%Y%m%dT%H:%M:%S.%f','%Y-%m-%dT%H:%M:%S.%f',
+                 '%Y%m%dT%H:%M:%S',   '%Y-%m-%dT%H:%M:%S',
+                 '%Y%m%dT%H:%M',      '%Y-%m-%dT%H:%M',
+                 '%Y%m%dT%H',         '%Y-%m-%dT%H',
+                 '%Y%m%d',            '%Y-%m-%d']
+
+    # Convert original times into datetime objects
+    try:
+        ocalendar = otime.calendar
+    except AttributeError:
+        ocalendar = 'standard'
+
+    try:
+        odatetime = netCDF4.num2date(otime[:],otime.units,ocalendar)
+    except IndexError:
+        # num2date does not work on empty arrays
+        odatetime = np.array([])
+
+    if type(ntime) == netCDF4.Variable:
+        # Convert new times into datetime objects
+        try:
+            ncalendar = ntime.calendar
+        except AttributeError:
+            ncalendar = 'standard'
+
+        try:
+            ndatetime = netCDF4.num2date(ntime[:],ntime.units,ncalendar)
+        except IndexError:
+            # num2date does not work on empty arrays
+            ndatetime = np.array([])
+
+    else:
+        if isinstance(ntime,(int,float,str)):
+            ntime = [ntime]
+
+        if type(ntime[0]) == str:
+            # Attempt to convert the times into a list of datetime object
+            # Assume that all formats are the same!
+            for t_fmt in time_fmts:
+                try:
+                    _ = datetime.datetime.strptime(ntime[0],t_fmt)
+                except ValueError:
+                    pass
+                else:
+                    break
+
+                # Reverse date part of t_fmt
+                try:
+                    indx = t_fmt.index('T')
+                except ValueError:
+                    t_fmt = t_fmt[::-1]
+                else:
+                    t_fmt = t_fmt[:indx][::-1]+t_fmt[indx:]
+
+                try:
+                    _ = datetime.datetime.strptime(ntime[0],t_fmt)
+                except ValueError:
+                    continue
+                else:
+                    break
+
+            ndatetime = [datetime.datetime.strptime(n_,t_fmt) for n_ in ntime]
+
+        else:
+            # Assume are numbers in same format as those in otime
+            ndatetime = netCDF4.num2date(ntime,otime.units,ocalendar)
+
+
+    adatetime = np.ma.concatenate((odatetime,ndatetime),axis=concat_axis)
+
+    return netCDF4.date2num(adatetime,otime.units,ocalendar)
+
+
+# def append_var(ovar,ncoord,nvar,ncoord):
+#     """
+#     Method to append to an existing netCDF4 variable and associated coord
+
+#     :param ovar: Original Dataset variable.
+#     :type ovar: netCDF4 variable
+#     :param nvar: New variable to append to otime.
+#     :type nvar: May either be a netCDF4 variable or a iterable of values.
+
+#     :returns: a netCDF4 variable
+#     """
+
+#     # Find unlimited dimension of variable
+#     for i,dim_ in enumerate(ovar.dimensions):
+#         if ovar.isunlimited():
+#             break
+
+#     if type(nvar) == netCDF4.Variable:
+#         # Extract values out of variable
+#         nvars = nvar[:]
+#     elif isinstance(nvar,(int,float,str)):
+#         # Ensure that new variables is a list if not a netCDF4 variable
+#         nvars = [nvar]
+
+#     if ovar.dtype == str:
+#         avar = ovar.rstrip(',') + ','.join(nvars)
+#     else:
+#         avar = np.ma.concatenate((ovar[:],nvars), axis=i)
+
 
 
 class Generic():
@@ -156,13 +292,136 @@ class Generic():
 
         pass
 
+    def append_time(self,ntime,grp='/',tname='time'):
+        """
+
+        :param grp: Path to group in which time coordinate exits or group object
+        """
+
+        # Get group that variable tname exists in
+        if type(grp) == netCDF4.Group:
+            grp
+        else:
+            assert str(grp), 'grp is not a netCDF4.Group or path string'
+            if grp == '/':
+                grp = self.ds
+            else:
+                grp = self.ds[grp]
+
+        # Find unlimited dimension of variable
+        for i,dim_ in enumerate(grp.dimensions):
+            if grp.dimensions[dim_].isunlimited():
+                break
+
+        try:
+            self.ds[os.path.join(grp.path,
+                                 tname.lstrip('/'))][:] = append_time(grp[tname],
+                                                                      ntime,i)
+        except KeyError:
+            # Group does not exist
+            print('Group `{}` does not exist'.format(grp.path))
+            return
+        except IndexError:
+            # Variable and/or group does not exist in
+            print('Variable `{}` does not exist in group `{}`'.format(tname,
+                                                                      grp.path))
+            return
 
 
 
+    def _add_var(self,var,vals):
+        """
+        Method to add extra values to end of an already extended variable
 
-    def append_datasets(self,ds,
-                        force_append=['username','history'],
-                        exclude=[]):
+        If a coordinate is increased in size then all of the variables that
+        depend on that coordinate are increased to the same size along the
+        unlimited dimension. These extra values are masked. This method writes
+        the new values in vals into these masked array positions of var. If the
+        number of values is > number of masked elements at the end of the
+        array then it is assumed that there is an error and no action is taken.
+
+        :param var: string of path/name of variable. This can be found with
+            ``os.path.join(self.ds[var].group.path,self.ds[var].name)``
+        :type var: String
+        :param vals: Iterable of values to append to the end of var. Types must
+            match the dtype of the variable
+        :type vals: List or array
+        """
+        # Ensure vals is an array and preserve any masking
+        vals = np.ma.asarray(vals)
+
+        if vals.ndim == self.ds[var].ndim - 1:
+            # Assume that only a single element in the unlimited dimension
+            # has been given in vals. Increase number of dimension to match var
+            vals = np.expand_dims(vals[::],axis=0)
+
+        assert vals.ndim == self.ds[var].ndim, \
+               'Mismatch in number of dimensions'
+
+        # Annoyingly have to split path and variable name
+        vpath,vname = os.path.split(var)
+
+        i_found = False
+        for i,d_ in enumerate(self.ds[var].dimensions):
+            try:
+                unlim_dim = self.ds[vpath].dimensions[d_].isunlimited()
+            except IndexError as err:
+                # Assume this is because you're in the root
+                unlim_dim = self.ds.dimensions[d_].isunlimited()
+
+            if unlim_dim:
+                i_found = True
+                break
+
+        # Create slice to write to the correct dimension
+        # That is the last elements of the unlimited dimension
+        idx = [slice(None)] * self.ds[var].ndim
+        idx[i] = -1
+
+        # Check appropriate number of elements at end of var are masked
+        # Note that it is possible that legitimate values may be masked
+        # so also check for any non-finite numbers.
+        if any((self.ds[var][idx].mask.all(),
+                np.isfinite(self.ds[var][idx].base).all())):
+            self.ds[var][idx] = vals
+        else:
+            print('No empty space!')
+
+    # def append_var(self,vnames,nvar,ncoord):
+    #     """
+    #     Method to append to an existing netCDF4 variable and associated coord
+
+    #     The extra coordinate values are appended to the coordinate of vname
+    #     in self. This automatically creates the same number of masked entries
+    #     in all of the variables that depend on that coordinate
+    #     :param ovar: Original Dataset variable.
+    #     :type ovar: netCDF4 variable
+    #     :param nvar: New variable to append to otime.
+    #     :type nvar: May either be a netCDF4 variable or a iterable of values.
+
+    #     :returns: a netCDF4 variable
+    #     """
+
+    #     # Find unlimited dimension of variable
+    #     for i,dim_ in enumerate(ovar.dimensions):
+    #         if ovar.isunlimited():
+    #             break
+
+    #     if type(nvar) == netCDF4.Variable:
+    #         # Extract values out of variable
+    #         nvars = nvar[:]
+    #     elif isinstance(nvar,(int,float,str)):
+    #         # Ensure that new variables is a list if not a netCDF4 variable
+    #         nvars = [nvar]
+
+    #     if ovar.dtype == str:
+    #         avar = ovar.rstrip(',') + ','.join(nvars)
+    #     else:
+    #         avar = np.ma.concatenate((ovar[:],nvars), axis=i)
+
+    def append_dataset(self,ds,
+                       force_append=['username','history'],
+                       exclude=[]):
         """
         Add groups, attributes, dimensions, and variables from ds.
 
@@ -257,37 +516,8 @@ class Generic():
                         'units' in mgrp.variables[n_].ncattrs()]) \
                    and 'since' in mgrp.variables[n_].units.lower():
 
-                    try:
-                        mcalendar = mgrp.variables[n_].calendar
-                    except AttributeError:
-                        mcalendar = 'standard'
-
-                    try:
-                        ncalendar = ngrp.variables[n_].calendar
-                    except AttributeError:
-                        ncalendar = 'standard'
-
-                    try:
-                        mtime = netCDF4.num2date(mgrp.variables[n_][:],
-                                                 mgrp.variables[n_].units,
-                                                 mcalendar)
-                    except IndexError:
-                        # num2date does not work on empty arrays
-                        mtime = np.array([])
-
-                    try:
-                        ntime = netCDF4.num2date(ngrp.variables[n_][:],
-                                                 ngrp.variables[n_].units,
-                                                 ncalendar)
-                    except IndexError:
-                        # num2date does not work on empty arrays
-                        ntime = np.array([])
-
-                    atime = np.ma.concatenate((mtime,ntime),axis=i)
-
-                    mod_var[n_] = netCDF4.date2num(atime,
-                                                   mgrp.variables[n_].units,
-                                                   mcalendar)
+                    mod_var[n_] = append_time(mgrp.variables[n_],
+                                              ngrp.variables[n_])
 
                 else:
 

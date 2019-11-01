@@ -230,16 +230,14 @@ def call(infile,args):
     modal_len = max(set(update_lens),key=update_lens.count) - 1
 
     # Restructure update args into list of dictionaries.
-    # Note that this does not cope with flattened dictionaries
-    updates = {l_[0]:l_[1:] for l_ in args['update_arg'] if
-               len(l_) == modal_len + 1}
-
-    # Include some user feedback if any items discarded
-    for u_arg in args['update_arg']:
-        if u_arg[0] not in updates:
-            print('\nUpdate argument discarded as incorrect length')
-            print('  ',u_arg)
-            print()
+    # If the same update key called multiple times then make value a list
+    pdb.set_trace()
+    updates = {}
+    for u_ in args['update_arg']:
+        if u_[0] in updates:
+            updates[u_[0]].extend(u_[1:])
+        else:
+            updates[u_[0]] = u_[1:]
 
     pdb.set_trace()
     ### Process ########################################################

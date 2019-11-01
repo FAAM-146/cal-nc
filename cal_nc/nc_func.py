@@ -14,6 +14,7 @@ import pdb
 
 import cal_proc
 from cal_proc import *
+from .nc_conf import *
 
 
 
@@ -103,7 +104,7 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
 
 
 
-   # Create a temporary copy of the master
+    # Create a temporary copy of the master
     # Note that all 'master' operations are done on this temporary copy
     tmp_nc = '{}_tmp.nc'.format(os.path.splitext(master_nc)[0])
     shutil.copy2(master_nc,tmp_nc)
@@ -148,13 +149,39 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
     except KeyError:
         pass
 
-    # Read in all additional nc files
-    aux_ds = [netCDF4.Dataset(f_, mode='r', format='NETCDF4') for f_ in aux_nc]
+    # Read in all additional nc files and add/append to master
+    aux_ds = []
+    for aux in aux_nc:
+        try:
+            aux_ds.append(netCDF4.Dataset(aux, mode='r', format='NETCDF4'))
+        except FileNotFoundError:
+            continue
+        else:
+            master.append_dataset(aux_ds[-1])
 
     pdb.set_trace()
-    master.append_datasets(aux_ds[0])
 
-    pdb.set_trace()
+    # Read in any ancillary files
+    for anc in anc_files:
+
+        if os.path.splitext(anc)[-1].lower() in ['.cfg','.config']:
+            cfg_dict = read_config(anc)
+
+            # Separate file to parse and associated variables
+            var_dicts = [d_ for d_ in cfg_dict.values() if 'parsefile' in d_]
+            p_files = []
+            for var_d in var_dicts:
+                p_files.append(var_d.pop('parsefile'))
+
+        else:
+            var_dicts = []
+            p_files = [anc]
+
+        for p_,v_ in zip(p_files,var_dicts):
+            master.update_bincal_from_file(p_,v_)
+
+        print('Back in nc_func')
+        pdb.set_trace()
 
 
 def run_ncgen(fin,fout,nc_fmt=3):

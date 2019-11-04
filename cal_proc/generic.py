@@ -66,6 +66,8 @@ def append_time(otime,ntime,concat_axis=0):
                  '%Y%m%dT%H',         '%Y-%m-%dT%H',
                  '%Y%m%d',            '%Y-%m-%d']
 
+
+    pdb.set_trace()
     # Convert original times into datetime objects
     try:
         ocalendar = otime.calendar
@@ -292,7 +294,7 @@ class Generic():
 
         pass
 
-    def append_time(self,ntime,grp='/',tname='time'):
+    def append_time_2(self,ntime,grp='/',tname='time'):
         """
 
         :param grp: Path to group in which time coordinate exits or group object
@@ -329,6 +331,45 @@ class Generic():
 
 
 
+    def _add_coord(self,coord,vals):
+        """
+        Method to add extra values to end of an unlimited coordinate
+
+        If a coordinate is increased in size then all of the variables that
+        depend on that coordinate are increased to the same size along the
+        unlimited dimension. This internal method is called along with
+        _add_var().
+
+        :param coord: string of path/name of coordinate variable. This can be found with
+            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``
+        :type var: String
+        :param vals: Iterable of values to append to the end of var. Types must
+            match the dtype of the variable
+        :type vals: List or array
+        """
+        
+        # Ensure that is unlimited coordinate
+        # Annoyingly have to split path and variable name
+        cpath,cname = os.path.split(coord)
+
+        if (self.ds[coord].ndim != 1) or \
+           (self.ds[coord].name != self.ds[coord].dimensions[0]) or \
+           (self.ds[cpath].dimensions[cname].isunlimited() is False):
+            # Either the variable name passed is not a coordinate (ie the
+            # variable name and dimension are the same and 1d) or the
+            # coordinate is not unlimited and thus cannot be extended.
+            return
+
+        # Ensure vals is an array and preserve any masking
+        vals = np.ma.atleast_1d(vals)
+
+        try:
+            self.ds[coord][:] = append_time(self.ds[coord],vals,0)
+        except:
+            pdb.set_trace()
+
+        pdb.set_trace()
+
     def _add_var(self,var,vals):
         """
         Method to add extra values to end of an already extended variable
@@ -341,7 +382,7 @@ class Generic():
         array then it is assumed that there is an error and no action is taken.
 
         :param var: string of path/name of variable. This can be found with
-            ``os.path.join(self.ds[var].group.path,self.ds[var].name)``
+            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``
         :type var: String
         :param vals: Iterable of values to append to the end of var. Types must
             match the dtype of the variable

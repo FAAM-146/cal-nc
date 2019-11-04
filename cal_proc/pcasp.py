@@ -530,9 +530,11 @@ class PCASP(Generic):
             # Error in the calfile
             return
 
+        pdb.set_trace()
         try:
             # Note hard-coding of bin_cal group :-/
-            self.append_time(vars.pop('time'),'bin_cal')
+            #self.append_time(vars.pop('time'),'bin_cal')
+            self._add_coord('/bin_cal/time',vars.pop('time'))
         except KeyError:
             # Must have 'time' variable update
             return

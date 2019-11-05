@@ -500,7 +500,7 @@ class PCASP(Generic):
 
 
 
-    def update_bincal_from_file(self,calfile,vars):
+    def update_bincal_from_file(self,calfile,vars_d):
         """
         Append bin calibration data in datafile to that already in nc
 
@@ -508,50 +508,76 @@ class PCASP(Generic):
             ending in 'cs' or 'd' so user needs to provide some quality
             assurance on the input files
         :type calfile: Path/filename strings or pathlib obj
-        :param vars: Additional variables associated with those contained
+        :param vars_d: Additional variables associated with those contained
             within the datafile. At the very least this should contain any
             associated coordinate variables, eg time.
-        :type vars: Dictionary of variable name and value pairs.
+        :type vars_d: Dictionary of variable name and value pairs.
         """
 
-        if any((calfile == None, os.path.isfile(calfile) == False)):
+        if (calfile == None) and (os.path.isfile(calfile) == False):
             # Nothing to do
             return
 
-        data = None
+        caldata = None
         if all((os.path.splitext(calfile)[0].endswith('cs'),
                os.path.splitext(calfile)[1].lower() == '.csv')):
-            data = read_cal_file(calfile,f_type='pcasp_cs')
+            caldata = read_cal_file(calfile,f_type='pcasp_cs')
         elif all((os.path.splitext(calfile)[0].endswith('d'),
                  os.path.splitext(calfile)[1].lower() == '.csv')):
-            data = read_cal_file(calfile,f_type='pcasp_d')
+            caldata = read_cal_file(calfile,f_type='pcasp_d')
 
-        if data == None:
+        if caldata == None:
             # Error in the calfile
             return
 
-        pdb.set_trace()
-        try:
-            # Note hard-coding of bin_cal group :-/
-            #self.append_time(vars.pop('time'),'bin_cal')
-            self._add_coord('/bin_cal/time',vars.pop('time'))
-        except KeyError:
-            # Must have 'time' variable update
-            return
-
-        for k_,v_ in var_map.items():
+        # Add var_map data to vars. However do not overwrite any items in var
+        # That is, items explicitly given in config file have precedence over
+        # items in var_map. This can be used to overwrite defaults in var_map
+        # with an entry in the config file if required.
+        for k,v in ((k_,v_) for k_,v_ in var_map.items() if k_ not in vars_d):
+            #print('Add {} to self.ds'.format(k_))
             try:
-                self._add_var(k_,v_(data))
-            except KeyError:
-                # Variable has not yet been created, do we create of skip?
-                #self.ds.createVariable(k_,type(v_(self.ds)),dimensions(...
-                #continue?
-                pdb.set_trace()
-            except:
+                vars_d[k] = v(caldata)
+            except KeyError as err:
+                # Variable in var_map does not exist in file therefore skip
+                pass
+            except Exception as err:
+                print('  Failed. ',err)
                 pdb.set_trace()
                 pass
 
-        pdb.set_trace()
+        try:
+            self.append_dict(vars_d)
+        except Exception as err:
+            print(err)
+            pdb.set_trace()
 
-        # Add extra variables
+
+        # try:
+        #     # Note hard-coding of bin_cal group :-/
+        #     self._add_coord('/bin_cal/time',vars.pop('time'))
+        # except KeyError as err:
+        #     # Must have 'time' variable update
+        #     return
+        # except Exception as err:
+        #     # Unknown error
+        #     pdb.set_trace()
+
+        # for k_,v_ in var_map.items():
+        #     #print('Add {} to self.ds'.format(k_))
+        #     try:
+        #         self._add_var(k_,v_(caldata))
+        #     except KeyError as err:
+        #         # Variable in var_map does not exist in file therefore skip
+        #         pdb.set_trace()
+        #     except IndexError as err:
+        #         # Variable in var_map does not exist in dataset. Skip these
+        #         # variables, if they are created they may become mismatched
+        #         # wrt the cal time and other variables.
+        #     #    print('  Failed: Variable does not already exist in dataset')
+        #         pass
+        #     except Exception as err:
+        #         print('  Failed. ',err)
+        #         pdb.set_trace()
+        #         pass
 

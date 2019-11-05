@@ -70,7 +70,7 @@ def read_nc(master,aux=[]):
 
 
 def process_nc(master_nc,aux_nc=[],anc_files=[],
-               out_nc=None,instr=None,updates=None):
+               out_nc=None,instr=None,updates={}):
     """
     Open all netCDF files for processing.
 
@@ -111,7 +111,8 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
 
     # Create a instrument processor from the master nc file. This file remains
     # open until explicitly closed.
-    master_ds = netCDF4.Dataset(tmp_nc, mode='r+', format='NETCDF4')
+    master_ds = netCDF4.Dataset(tmp_nc, mode='r+', format='NETCDF4',
+                                diskless=True,persist=True)
 
     # If instrument name has not explicitly been given then obtain intrument
     # from master dataset
@@ -145,7 +146,7 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
 
     # Extract any ancillary files from updates with key 'parsefile'
     try:
-        anc_files.extend(updates.pop('parsefile'))
+        anc_files.extend(updates.pop('_parsefile'))
     except KeyError:
         pass
 
@@ -160,7 +161,6 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
             master.append_dataset(aux_ds[-1])
 
     pdb.set_trace()
-
     # Read in any ancillary files
     for anc in anc_files:
 
@@ -168,21 +168,55 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
             cfg_dict = read_config(anc)
 
             # Separate file to parse and associated variables
-            var_dicts = [d_ for d_ in cfg_dict.values() if 'parsefile' in d_]
+            (v_dicts,
+             s_dicts) = zip(*[extract_specials(d_) for d_ in cfg_dict.values()])
+
+            # Obtain list of files to parse and variable groups
             p_files = []
-            for var_d in var_dicts:
-                p_files.append(var_d.pop('parsefile'))
+            var_dicts = []
+            grps = []
+            for i,s in enumerate(s_dicts):
+                try:
+                    p_files.append(s.pop('_parsefile'))
+                except KeyError as err:
+                    p_files.append(None)
+
+                try:
+                    grp = s.pop('_group')
+                except KeyError as err:
+                    grp = ''
+                else:
+                    # If not given then assume is root group
+                    if grp == None:
+                        grp = ''
+
+                # 'Correct' variable names to include group path
+                var_dicts.append({os.path.join(grp,k_):v_ for (k_,v_) in v_dicts[i].items()})
 
         else:
             var_dicts = []
             p_files = [anc]
 
         for p_,v_ in zip(p_files,var_dicts):
-            master.update_bincal_from_file(p_,v_)
+            if p_ == None:
+                pdb.set_trace()
+                master.append_dict(v_)
+            else:
+                master.update_bincal_from_file(p_,v_)
 
         print('Back in nc_func')
         pdb.set_trace()
 
+    # Add any updates
+    for k_,update in updates.items():
+        if k_.lower() == 'username':
+            master.update_user(update)
+
+        elif k_.lower() == 'history':
+            master.update_hist(update)
+
+        else:
+            append_var
 
 def run_ncgen(fin,fout,nc_fmt=3):
     """

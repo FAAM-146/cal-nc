@@ -199,15 +199,14 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
 
         for p_,v_ in zip(p_files,var_dicts):
             if p_ == None:
-                pdb.set_trace()
                 master.append_dict(v_)
             else:
                 master.update_bincal_from_file(p_,v_)
 
-        print('Back in nc_func')
-        pdb.set_trace()
-
     # Add any updates
+
+    ### TODO: This needs sorting!
+
     for k_,update in updates.items():
         if k_.lower() == 'username':
             master.update_user(update)
@@ -215,8 +214,22 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
         elif k_.lower() == 'history':
             master.update_hist(update)
 
-        else:
-            append_var
+
+
+    # Close nc datasets
+    for ds_ in [master_ds] + aux_ds:
+        if ds_.isopen():
+            ds_.close()
+
+    if out_nc == None:
+        # Write back over existing master nc file
+        shutil.move(tmp_nc, master_nc)
+    else:
+        shutil.move(tmp_nc, out_nc)
+
+
+    return 0, ''
+
 
 def run_ncgen(fin,fout,nc_fmt=3):
     """

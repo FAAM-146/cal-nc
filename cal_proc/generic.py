@@ -66,8 +66,6 @@ def append_time(otime,ntime,concat_axis=0):
                  '%Y%m%dT%H',         '%Y-%m-%dT%H',
                  '%Y%m%d',            '%Y-%m-%d']
 
-
-    pdb.set_trace()
     # Convert original times into datetime objects
     try:
         ocalendar = otime.calendar
@@ -95,9 +93,9 @@ def append_time(otime,ntime,concat_axis=0):
 
     else:
         if isinstance(ntime,(int,float,str)):
-            ntime = [ntime]
+            ntime = np.array([ntime])
 
-        if type(ntime[0]) == str:
+        if (type(ntime[0]) == str) or (ntime.dtype.kind in ['U','S']):
             # Attempt to convert the times into a list of datetime object
             # Assume that all formats are the same!
             for t_fmt in time_fmts:
@@ -123,6 +121,7 @@ def append_time(otime,ntime,concat_axis=0):
                 else:
                     break
 
+            print('t_fmt = ',t_fmt)
             ndatetime = [datetime.datetime.strptime(n_,t_fmt) for n_ in ntime]
 
         else:
@@ -347,28 +346,36 @@ class Generic():
             match the dtype of the variable
         :type vals: List or array
         """
-        
+
         # Ensure that is unlimited coordinate
         # Annoyingly have to split path and variable name
         cpath,cname = os.path.split(coord)
 
+        if cpath in ['','/']:
+            unlim = self.ds.dimensions[cname].isunlimited()
+        else:
+            unlim = self.ds[cpath].dimensions[cname].isunlimited()
+
         if (self.ds[coord].ndim != 1) or \
            (self.ds[coord].name != self.ds[coord].dimensions[0]) or \
-           (self.ds[cpath].dimensions[cname].isunlimited() is False):
+           (unlim is False):
             # Either the variable name passed is not a coordinate (ie the
             # variable name and dimension are the same and 1d) or the
             # coordinate is not unlimited and thus cannot be extended.
-            return
+            print('{} is not an unlimited coordinate'.format(coord))
+            return -1
 
         # Ensure vals is an array and preserve any masking
         vals = np.ma.atleast_1d(vals)
 
         try:
             self.ds[coord][:] = append_time(self.ds[coord],vals,0)
-        except:
+        except Exception as err:
+            print(err)
             pdb.set_trace()
 
-        pdb.set_trace()
+        return 0
+
 
     def _add_var(self,var,vals):
         """
@@ -376,9 +383,11 @@ class Generic():
 
         If a coordinate is increased in size then all of the variables that
         depend on that coordinate are increased to the same size along the
-        unlimited dimension. These extra values are masked. This method writes
-        the new values in vals into these masked array positions of var. If the
-        number of values is > number of masked elements at the end of the
+        unlimited dimension. If the variable holds numbers then these extra
+        values are masked. If the variable holds strings then they are just
+        empty strings and there is no masking. This method writes the new
+        values in vals into these new array positions of var. If the
+        number of values is > number of new elements at the end of the
         array then it is assumed that there is an error and no action is taken.
 
         :param var: string of path/name of variable. This can be found with
@@ -389,7 +398,7 @@ class Generic():
         :type vals: List or array
         """
         # Ensure vals is an array and preserve any masking
-        vals = np.ma.asarray(vals)
+        vals = np.ma.atleast_1d(vals)
 
         if vals.ndim == self.ds[var].ndim - 1:
             # Assume that only a single element in the unlimited dimension
@@ -403,6 +412,7 @@ class Generic():
         vpath,vname = os.path.split(var)
 
         i_found = False
+        # Find unlimited dimension for this var
         for i,d_ in enumerate(self.ds[var].dimensions):
             try:
                 unlim_dim = self.ds[vpath].dimensions[d_].isunlimited()
@@ -416,49 +426,133 @@ class Generic():
 
         # Create slice to write to the correct dimension
         # That is the last elements of the unlimited dimension
+
+        # .. TODO::
+        #   Need to check that this works for adding more than one new value
+
         idx = [slice(None)] * self.ds[var].ndim
         idx[i] = -1
 
-        # Check appropriate number of elements at end of var are masked
+        # Check appropriate number of elements at end of var are either
+        # masked or empty strings.
         # Note that it is possible that legitimate values may be masked
         # so also check for any non-finite numbers.
-        if any((self.ds[var][idx].mask.all(),
-                np.isfinite(self.ds[var][idx].base).all())):
+        print(var)
+        pdb.set_trace()
+
+        if (self.ds[var].dtype in [str]) and \
+           ((self.ds[var][idx] == '').all()):
+            # Strings are vlen arrays which have more limited access
+            # Need to write each individual string seperately (?)
+            for i,val in enumerate(vals[::-1]):
+                self.ds[var][-1*(i+1)] = val
+        elif any((self.ds[var][idx].mask.all(),
+                  np.isfinite(self.ds[var][idx].base).all())):
+            # Assume that all other types of variables are masked
             self.ds[var][idx] = vals
         else:
-            print('No empty space!')
+            print('Insufficient empty space in {}!'.format(var))
 
-    # def append_var(self,vnames,nvar,ncoord):
-    #     """
-    #     Method to append to an existing netCDF4 variable and associated coord
 
-    #     The extra coordinate values are appended to the coordinate of vname
-    #     in self. This automatically creates the same number of masked entries
-    #     in all of the variables that depend on that coordinate
-    #     :param ovar: Original Dataset variable.
-    #     :type ovar: netCDF4 variable
-    #     :param nvar: New variable to append to otime.
-    #     :type nvar: May either be a netCDF4 variable or a iterable of values.
+    def append_var(self,var,coord_vals,var_vals):
+        """
+        Method to append to an existing netCDF4 variable and associated coord
 
-    #     :returns: a netCDF4 variable
-    #     """
+        The extra coordinate values are appended to the coordinate of vname
+        in self. This automatically creates the same number of masked entries
+        in all of the variables that depend on that coordinate.
 
-    #     # Find unlimited dimension of variable
-    #     for i,dim_ in enumerate(ovar.dimensions):
-    #         if ovar.isunlimited():
-    #             break
+        :param var: String of path/name of variable. This can be found with
+            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``
+        :type var: String
+        :param coord_vals: Iterable of values to append to the end of unlimited
+            coordinate of variable var.
+        :type coord_vals: List or array
+        :param var_vals: Iterable of values to append to the end of var. Must
+            be the same length as coord_vals in the unlimited dimension.
+        :type var_vals: List or array
 
-    #     if type(nvar) == netCDF4.Variable:
-    #         # Extract values out of variable
-    #         nvars = nvar[:]
-    #     elif isinstance(nvar,(int,float,str)):
-    #         # Ensure that new variables is a list if not a netCDF4 variable
-    #         nvars = [nvar]
+        NOTE: This is a bit complicated/not sensible. It is possible/probable
+            to add a variable (along with the coord) then append to a different
+            variable that uses the same coordinate which then writes the same
+            coordinate values into the coordinate again.
+        """
 
-    #     if ovar.dtype == str:
-    #         avar = ovar.rstrip(',') + ','.join(nvars)
-    #     else:
-    #         avar = np.ma.concatenate((ovar[:],nvars), axis=i)
+        # # Find unlimited dimension of variable
+        # for i,dim_ in enumerate(var.dimensions):
+        #     if var.isunlimited():
+        #         break
+
+        # if type(nvar) == netCDF4.Variable:
+        #     # Extract values out of variable
+        #     nvars = nvar[:]
+        # elif isinstance(nvar,(int,float,str)):
+        #     # Ensure that new variables is a list if not a netCDF4 variable
+        #     nvars = [nvar]
+
+        # if ovar.dtype == str:
+        #     avar = ovar.rstrip(',') + ','.join(nvars)
+        # else:
+        #     avar = np.ma.concatenate((ovar[:],nvars), axis=i)
+
+
+    def append_dict(self,var_d):
+        """
+        Append multiple variables with a single coordinate
+
+        Multiple variable values that use the same coordinate can be appended
+        to existing dataset variables in one go. Variables that do not already
+        exist in the dataset are ignored. Use add instead...
+
+        Add variable attributes as well?
+
+        :param var_d: Dictionary of multiple variable values to be appended
+            arranged so that the dictionary keys are the variable path+names
+            and the dictionary values are either a netCDF variable or a
+            sub-dictionary of values and attributes
+        :type var_d: dictionary
+
+        Several options for inputs:
+
+        .. TODO::
+
+            Currently does not accept netCDF4 variable values.
+            Currently only accepts iterable of data.
+
+
+        .. codeblock:: python
+
+        var_d = {coord: netCDF4.Variable,
+                 var1:  [1,2,3,4,5],
+                 var2:  {'_data': [1,2,3,4,5],
+                         'var2_attr1': 'var2 attribute 1',
+                         'var2_attr1': 'var2 attribute 1', ...}}
+
+        There is nothing special about the coordinate variable, the function
+        identifies the coordinate as being the variable with the same name
+        as its dimension.
+        """
+
+        # Find coordinate variable
+        coord_d = {}
+        var_keys = list(var_d.keys())
+        for k_ in var_keys:
+            try:
+                if self.ds[k_].name == self.ds[k_].dimensions[0]:
+                    coord_d[k_] = var_d.pop(k_)
+            except IndexError as err:
+                # Variable does not exist in dataset so remove from var_d
+                _ = var_d.pop(k_)
+
+        for k_,v_ in coord_d.items():
+            err = self._add_coord(k_,v_)
+            if err == -1:
+                return -1
+
+        for k_,v_ in var_d.items():
+            self._add_var(k_,v_)
+
+
 
     def append_dataset(self,ds,
                        force_append=['username','history'],
@@ -536,6 +630,15 @@ class Generic():
             # directly on the dataset coordinate/s affects the dependent
             # variables immediately.
             # Note that new/changed variable attributes are not added.
+
+            for n_ in ngrp.variables.keys():
+                try:
+                    fred = np.array_equal(ngrp.variables[n_][:],
+                                      mgrp.variables[n_][:])
+                except:
+                    print('Error with array_equal')
+                    pdb.set_trace()
+
             app_var = {n_:v_ for (n_,v_) in ngrp.variables.items() \
                        if all([n_ in mgrp.variables,
                                not np.array_equal(ngrp.variables[n_][:],

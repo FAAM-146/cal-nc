@@ -140,14 +140,14 @@ group: flow_cal {
             flows_reported:long_name = "Array of flow rates reported by PCASP for each value in flows_actual";
             flows_reported:comment = "The number of different flows included in each calibration will differ depending on operator and circumstance. The maximum possible flows is given by the dimension max_flows. The variable is padded by the _FillValue. It is the users obligation to check that the number of flows_reported for each time is the same as flows_actual for that time.";
             flows_reported:units = "cc/s";
-            flows_reported:valid_min = 0;
+            //flows_reported:valid_min = 0;
             flows_reported:_FillValue = NaN;
 
         float flows_actual(time,max_flows);
             flows_actual:long_name = "Array of measured flow rate for each value in flows_reported";
             flows_actual:comment = "The number of different flows included in each calibration will differ depending on operator and circumstance. The maximum possible flows is given by the dimension max_flows. The variable is padded by the _FillValue. It is the users obligation to check that the number of flows_actual for each time is the same as flows_reported for that time.";
             flows_actual:units = "cc/s";
-            flows_actual:valid_min = 0;
+            //flows_actual:valid_min = 0;
             flows_actual:_FillValue = NaN;
 
         string flow_fit(time);

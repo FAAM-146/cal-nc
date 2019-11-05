@@ -134,37 +134,6 @@ def append_time(otime,ntime,concat_axis=0):
     return netCDF4.date2num(adatetime,otime.units,ocalendar)
 
 
-# def append_var(ovar,ncoord,nvar,ncoord):
-#     """
-#     Method to append to an existing netCDF4 variable and associated coord
-
-#     :param ovar: Original Dataset variable.
-#     :type ovar: netCDF4 variable
-#     :param nvar: New variable to append to otime.
-#     :type nvar: May either be a netCDF4 variable or a iterable of values.
-
-#     :returns: a netCDF4 variable
-#     """
-
-#     # Find unlimited dimension of variable
-#     for i,dim_ in enumerate(ovar.dimensions):
-#         if ovar.isunlimited():
-#             break
-
-#     if type(nvar) == netCDF4.Variable:
-#         # Extract values out of variable
-#         nvars = nvar[:]
-#     elif isinstance(nvar,(int,float,str)):
-#         # Ensure that new variables is a list if not a netCDF4 variable
-#         nvars = [nvar]
-
-#     if ovar.dtype == str:
-#         avar = ovar.rstrip(',') + ','.join(nvars)
-#     else:
-#         avar = np.ma.concatenate((ovar[:],nvars), axis=i)
-
-
-
 class Generic():
     """
     Minimal parent class for instrument-specific parsing and processing
@@ -293,42 +262,6 @@ class Generic():
 
         pass
 
-    def append_time_2(self,ntime,grp='/',tname='time'):
-        """
-
-        :param grp: Path to group in which time coordinate exits or group object
-        """
-
-        # Get group that variable tname exists in
-        if type(grp) == netCDF4.Group:
-            grp
-        else:
-            assert str(grp), 'grp is not a netCDF4.Group or path string'
-            if grp == '/':
-                grp = self.ds
-            else:
-                grp = self.ds[grp]
-
-        # Find unlimited dimension of variable
-        for i,dim_ in enumerate(grp.dimensions):
-            if grp.dimensions[dim_].isunlimited():
-                break
-
-        try:
-            self.ds[os.path.join(grp.path,
-                                 tname.lstrip('/'))][:] = append_time(grp[tname],
-                                                                      ntime,i)
-        except KeyError:
-            # Group does not exist
-            print('Group `{}` does not exist'.format(grp.path))
-            return
-        except IndexError:
-            # Variable and/or group does not exist in
-            print('Variable `{}` does not exist in group `{}`'.format(tname,
-                                                                      grp.path))
-            return
-
-
 
     def _add_coord(self,coord,vals):
         """
@@ -437,8 +370,6 @@ class Generic():
         # masked or empty strings.
         # Note that it is possible that legitimate values may be masked
         # so also check for any non-finite numbers.
-        print(var)
-        pdb.set_trace()
 
         if (self.ds[var].dtype in [str]) and \
            ((self.ds[var][idx] == '').all()):
@@ -526,7 +457,19 @@ class Generic():
                  var1:  [1,2,3,4,5],
                  var2:  {'_data': [1,2,3,4,5],
                          'var2_attr1': 'var2 attribute 1',
-                         'var2_attr1': 'var2 attribute 1', ...}}
+                         'var2_attr1': 'var2 attribute 1', ...}
+                 var3:  'Fred'}
+
+        Note that all variables should be the same length if they are
+        list-like. Any variables not the same length as the maximum length
+        variable will be broadcast so that they are longer. This could well
+        have unintended concequences however it does mean that variables that
+        are the same thing repeated for all coordinate values (eg var3)
+        will be replicated automatically.
+
+        .. NOTE::
+
+            This is not done yet!
 
         There is nothing special about the coordinate variable, the function
         identifies the coordinate as being the variable with the same name
@@ -548,6 +491,11 @@ class Generic():
             err = self._add_coord(k_,v_)
             if err == -1:
                 return -1
+
+        # Check lengths of variables
+        # pdb.set_trace()
+        # var_len = [len(v_) for v_ in var_d.values()]
+
 
         for k_,v_ in var_d.items():
             self._add_var(k_,v_)

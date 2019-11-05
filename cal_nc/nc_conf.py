@@ -97,9 +97,14 @@ def read_config(cfg_file,destr=False):
                     # String does not include comma so not a list
                     # Raised by list_converter()
                     continue
+                except (TypeError,AttributeError) as err:
+                    # Generally attempting to convert a None
+                    # If None then loop through to cfg.get()
+                    continue
                 except Exception as err:
                     print('exception on {}!'.format(option))
-                    cfg_d[option] = None
+                    print(err)
+                    pdb.set_trace()
                     break
                 else:
                     break

@@ -51,11 +51,14 @@ netcdf PCASP1_cal_template {
             bob:long_name = "bob number";
             bob:comment = "This is the number of bobs as a function of fred.";
 
+        string text(fred);
+            text:long_name = "Test text";
+            text:comment = "Testing appending to string variables";
     data:
         time = 1572220800,1572307200,1572393600;
         fred = 0,1;
         bob = 1.1,1.2,2.1,2.2,3.1,3.2;
-
+        text = "fred 0", "fred 1";
 
 group: bin_cal {
     // Group containing calibration of size bins of the PCASP

@@ -113,6 +113,10 @@ default_cdl_dir = ['.','cal_cdl']
 default_tmp_dir = './tmp'
 
 
+import warnings
+warnings.filterwarnings('error')
+
+
 def call(infile,args):
     """
     Convenience function for cal_ncgen
@@ -219,19 +223,8 @@ def call(infile,args):
             print('Written: {}'.format(os.path.relpath(outfile)))
         return
 
-
-    ### What is the following for?
-    ### Why do all of the updates need to be the same length?
-
-    # Basic check on update argument, make sure that they are all the
-    # same length. If there are equal number of different lengths, the
-    # first one shall be selected and the other discarded.
-    update_lens = [len(v_) for v_ in args['update_arg']]
-    modal_len = max(set(update_lens),key=update_lens.count) - 1
-
     # Restructure update args into list of dictionaries.
     # If the same update key called multiple times then make value a list
-    pdb.set_trace()
     updates = {}
     for u_ in args['update_arg']:
         if u_[0] in updates:
@@ -239,7 +232,6 @@ def call(infile,args):
         else:
             updates[u_[0]] = u_[1:]
 
-    pdb.set_trace()
     ### Process ########################################################
     proc_rtn, proc_err = process_nc(master_infile,
                                     nc_infile + tmpfile,
@@ -372,7 +364,7 @@ if __name__=='__main__':
     # Optional arguments
     parser.add_argument('-u', '--update', action='append',
                         nargs = '*',
-                        dest='update_arg', default=None,
+                        dest='update_arg', default=[],
                         help=('Space-delineated list of data parameters '
                         'as required by the specific instrument class. '
                         "'--update' can be given multiple times, each time "
@@ -420,6 +412,13 @@ if __name__=='__main__':
     # Process arguments and convert to dictionary ----------------------------
     args_dict = vars(parser.parse_args())
     opts_dict = {k:v for k,v in args_dict.items() if k not in ['files']}
+
+    for i,l in enumerate(opts_dict['update_arg']):
+        # Replace special option arguments strings with those recognised
+        opts_dict['update_arg'][i][0] = \
+                    opts_dict['update_arg'][i][0].replace('parsefile',
+                                                          '_parsefile')
+
     print()
 
     # Welcome splash

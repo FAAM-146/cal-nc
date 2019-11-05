@@ -241,91 +241,95 @@ def call(infile,args):
 
 
 
+    # Delete any temporary files
+    for file in tmpfile:
+        os.remove(file)
 
     if proc_rtn != 0:
         # Error occured in process_nc
         print(proc_err)
         return
 
+    return
 
-    pdb.set_trace()
+    # pdb.set_trace()
 
-    # Create a instrument processor from the master nc file. This file remains
-    # open until explicitly closed.
-    master_ds, _ = read_nc(master_infile)
+    # # Create a instrument processor from the master nc file. This file remains
+    # # open until explicitly closed.
+    # master_ds, _ = read_nc(master_infile)
 
-    # Create list of all additional nc files
-    aux_nc = nc_infile[1:] + tmp_outfile
+    # # Create list of all additional nc files
+    # aux_nc = nc_infile[1:] + tmp_outfile
 
-    # Obtain intrument from master or, if provided, from user arguments
-    if args['instr'] is None:
-        try:
-            instr = master_ds.getncattr('instr')
-        except AttributeError:
-            print('No instrument name given in master file.')
-            print('Use --update instr instrument argument.')
-            return
-    else:
-        # User-given arguement overrides instrument name in input files
-        instr = args['instr']
+    # # Obtain intrument from master or, if provided, from user arguments
+    # if args['instr'] is None:
+    #     try:
+    #         instr = master_ds.getncattr('instr')
+    #     except AttributeError:
+    #         print('No instrument name given in master file.')
+    #         print('Use --update instr instrument argument.')
+    #         return
+    # else:
+    #     # User-given arguement overrides instrument name in input files
+    #     instr = args['instr']
 
-    # Obtain appropriate instrument processing class
-    instr_class = cal_proc.proc_map(instr)
+    # # Obtain appropriate instrument processing class
+    # instr_class = cal_proc.proc_map(instr)
 
-    try:
-        # Initialise the nc object
-        master = instr_class(master_ds)
-    except Exception as err:
-        print('Instrument processing class not found: {}\n'.format(instr))
-        return
+    # try:
+    #     # Initialise the nc object
+    #     master = instr_class(master_ds)
+    # except Exception as err:
+    #     print('Instrument processing class not found: {}\n'.format(instr))
+    #     return
 
-    # Print out instrument processor help if required
-    try:
-        if 'help' in args['update_arg']:
-            print(master)
-            return
-    except TypeError:
-        # eg if args['update_arg'] is None
-        pass
-
-
-    pdb.set_trace()
-    combine_datasets(master.ds,aux_ds[0],master.ds)
+    # # Print out instrument processor help if required
+    # try:
+    #     if 'help' in args['update_arg']:
+    #         print(master)
+    #         return
+    # except TypeError:
+    #     # eg if args['update_arg'] is None
+    #     pass
 
 
-    # Want to apply history and user attributes for each update so make
-    # sure are correct length.
-    # The username is the same for all updates
-    if args['user'] == None:
-        user = None
-    else:
-        user = [' '.join(args['user'])] * modal_len
+    # pdb.set_trace()
+    # combine_datasets(master.ds,aux_ds[0],master.ds)
 
-    if args['hist'] == None:
-        history = None
-    else:
-        if len(args['hist']) > modal_len:
-            history = args['hist'][:modal_len]
-            discard_hist = args['hist'][modal_len:]
-        elif len(args['hist']) != modal_len:
-            history = [args['hist'][0]] * modal_len
-            discard_hist = args['hist'][1:]
-        else:
-            history = args['hist']
-            discard_hist = []
 
-        if discard_hist != []:
-            print('\nUpdate history argument is incorrect length, '
-                  'discarding entries:')
-            print(' ','\n  '.join(discard_hist))
-            print()
+    # # Want to apply history and user attributes for each update so make
+    # # sure are correct length.
+    # # The username is the same for all updates
+    # if args['user'] == None:
+    #     user = None
+    # else:
+    #     user = [' '.join(args['user'])] * modal_len
 
-    # Update the variables/attributes
-    nc.update(updates)
+    # if args['hist'] == None:
+    #     history = None
+    # else:
+    #     if len(args['hist']) > modal_len:
+    #         history = args['hist'][:modal_len]
+    #         discard_hist = args['hist'][modal_len:]
+    #     elif len(args['hist']) != modal_len:
+    #         history = [args['hist'][0]] * modal_len
+    #         discard_hist = args['hist'][1:]
+    #     else:
+    #         history = args['hist']
+    #         discard_hist = []
 
-    # Update the history and username attributes
-    nc.update_hist(history)
-    nc.update_user(user)
+    #     if discard_hist != []:
+    #         print('\nUpdate history argument is incorrect length, '
+    #               'discarding entries:')
+    #         print(' ','\n  '.join(discard_hist))
+    #         print()
+
+    # # Update the variables/attributes
+    # nc.update(updates)
+
+    # # Update the history and username attributes
+    # nc.update_hist(history)
+    # nc.update_user(user)
 
 # root closed
 

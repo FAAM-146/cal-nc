@@ -56,8 +56,9 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.intersphinx',
     'sphinx.ext.autosummary',
+    'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
+    'sphinx.ext.napoleon'
 ]
 
 ## Include Python objects as they appear in source files

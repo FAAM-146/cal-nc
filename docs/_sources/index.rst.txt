@@ -15,6 +15,8 @@ This document defines the netCDF file structure for storage of instrument calibr
           - |ProjectTitle|
         * - Description
           - |ProjectDescription|
+        * - Project repository
+          - `<https://github.com/FAAM-146/cal-nc>`_
         * - Project version
           - |ProjectVersion|
         * - Python version

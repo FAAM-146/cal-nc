@@ -27,16 +27,6 @@ This document defines the netCDF file structure for storage of instrument calibr
           - |todays_date|
 
 
-Documentation
--------------
-
-.. toctree::
-    :maxdepth: 2
-    :glob:
-
-    readme
-
-
 Functions and Modules
 ---------------------
 
@@ -44,11 +34,16 @@ Functions and Modules
     :maxdepth: 2
     :glob:
 
-
     /_source/modules
 ..    /_source/cal_cdl
     /_source/cal_ncgen
     /_source/cal_proc*
+
+
+
+.. include:: ../README.rst
+
+
 
 
 .. |todays_date| date::

@@ -120,7 +120,7 @@ It is possible to add/update individual attributes and variables as script argum
 
     .. warning::
     
-    The testing for this option has been limited. Need to complete this.
+        The testing for this option has been limited. Need to complete this.
 
 
 Installation
@@ -128,12 +128,12 @@ Installation
 
     .. note::
 
-    These instructions assume that you are in a shell, either a terminal on a linux box or a `git bash` terminal on a Windows machine. You can also use various GUIs such as `GitHub Desktop <https://desktop.github.com>`_ but in this case you're on your own.
+        These instructions assume that you are in a shell, either a terminal on a linux box or a `git bash` terminal on a Windows machine. You can also use various GUIs such as `GitHub Desktop <https://desktop.github.com>`_ but in this case you're on your own.
 
 
     .. note::
 
-    This application uses ``ncgen`` which is part of the `netCDF <https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html>`_ package. It must be in the OS path so that it can be found by the script. It will usually be installed as part of the ``netcdf4-python`` package.
+        This application uses ``ncgen`` which is part of the `netCDF <https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html>`_ package. It must be in the OS path so that it can be found by the script. It will usually be installed as part of the ``netcdf4-python`` package.
 
 * In a terminal clone the ``cal-nc`` repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)
    

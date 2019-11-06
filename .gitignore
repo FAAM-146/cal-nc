@@ -9,7 +9,8 @@
 *.pyc
 
 # Sphinx documentation
-docsource/build/
+docsource/_build/
+docsource/_source/
 
 # Built netCDF files
 *.nc

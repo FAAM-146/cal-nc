@@ -7,7 +7,7 @@ Script for creating FAAM calibration netCDF files.
 
     $ python3 cal_ncgen.py SEA-WCM2000.cdl
 
-creates a netCDF4 file, ``SEA-WCM2000.nc`` from the cdl source file.To
+creates a netCDF4 file, ``SEA-WCM2000.nc`` from the cdl source file. To
 update variables in the netCDF directly from the command line;
 
 .. code-block:: console
@@ -64,23 +64,23 @@ example the config file `PCASP1_CLARIFY_cals.cfg` contained;
 .. code-block::
 
     [pre-CLARIFY]
+    _group = bin_cal
     time = 20170701
     applied_to = C027-
     user = Graeme Nott
     traceability = List of PSL lot number information
     comments = After realignment of inlet jet
     cal_flag = 0
-
-    parsefile = testing/data/20170801_P1_cal_results_cs.csv
+    _parsefile = testing/data/20170801_P1_cal_results_cs.csv
 
     [post-CLARIFY]
+    _group = bin_cal
     time = 20170919
     applied_to = C027-C055
     user = Graeme Nott
     traceability = List of PSL lot number information
     cal_flag = 0
-
-    parsefile = testing/data/20170919_P1_cal_results_cs.csv
+    _parsefile = testing/data/20170919_P1_cal_results_cs.csv
 
 this could be inserted into an existing netCDF file that has been created from
 the PCASP1 template cdl file as follows;
@@ -92,7 +92,9 @@ the PCASP1 template cdl file as follows;
 
 Note that such a config file must have a recognisable format and the `.cfg.` or
 `.config` extension to ensure that the instrument parser is not invoked on the
-config file directly.
+config file directly. The *special* options in each section that start with
+an ``_`` are not treated as netCDF attributes or variables but are used to
+assist in the processing of the options.
 
 """
 

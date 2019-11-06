@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>cal_ncgen module &#8212; Creation/updates of nc files for FAAM calibration data 0.2 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/_source/cal_ncgen.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-cal_ncgen">
+<span id="cal-ncgen-module"></span><h1>cal_ncgen module<a class="headerlink" href="#module-cal_ncgen" title="Permalink to this headline">¶</a></h1>
+<p>Script for creating FAAM calibration netCDF files.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 cal_ncgen.py SEA-WCM2000.cdl
+</pre></div>
+</div>
+<p>creates a netCDF4 file, <code class="docutils literal notranslate"><span class="pre">SEA-WCM2000.nc</span></code> from the cdl source file. To
+update variables in the netCDF directly from the command line;</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 cal_ncgen.py SEA-WCM2000.nc -u <span class="nb">time</span> <span class="m">700</span> <span class="m">800</span>
+<span class="go">  -u applies_to C150- C180- -u TWC/r100 31.4473 31.5585</span>
+<span class="go">  -u TWC/dtdr 33.9276 34.0387 --user &#39;Graeme Nott &lt;graeme.nott@faam.ac.uk&gt;&#39;</span>
+<span class="go">  --hist \&lt;now\&gt;\ Artificial\ update\ 1 &#39;&lt;today&gt; Artificial update 2&#39;</span>
+</pre></div>
+</div>
+<p>where the nc file is read in and four parameters are updated. Two entries
+are appended to the global variables <code class="docutils literal notranslate"><span class="pre">time</span></code> and <code class="docutils literal notranslate"><span class="pre">applies_to</span></code>, and to the
+TWC group variables <code class="docutils literal notranslate"><span class="pre">TWC/r100</span></code> and <code class="docutils literal notranslate"><span class="pre">TWC/dtdr</span></code>. The same username is
+appended to the <code class="docutils literal notranslate"><span class="pre">username</span></code> global attribute for both entries. Different
+history strings are appended to the global <code class="docutils literal notranslate"><span class="pre">history</span></code> attribute however (note
+the two different ways to escape history strings) with <code class="docutils literal notranslate"><span class="pre">&lt;now&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;today&gt;</span></code>
+being converted to the current date.</p>
+<p>An existing calibration netCDF may have values appended to to it from a cdl or
+nc file with;</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 cal_ncgen.py SEA-WCM2000_cal_20180810.nc SEA-WCM2000_20190805.cdl
+</pre></div>
+</div>
+<p>Explicitly giving a different output filename with the –output argument will
+leave WCM2000_cal_20180810.nc unaltered and create a new calibration netCDF;</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 cal_ncgen.py SEA-WCM2000_cal_20180810.nc SEA-WCM2000_20190805.cdl
+<span class="go">  --output WCM2000_cal_2018-19.nc</span>
+</pre></div>
+</div>
+<p>It is possible to update variables using one or more external files. This
+requires a custom parser to be part of the instrument processor class so that
+these files can be read and injested. A single external file may be added to an
+existing calibration netCDF file with;</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 cal_ncgen.py PCASP_faam_20170701_v001_r000_cal.nc -u <span class="nb">time</span> <span class="m">20170919</span>
+<span class="go">  -u applies_to C027-C055 -u parsefile testing/data/20170919_P1_cal_results_cs.csv</span>
+</pre></div>
+</div>
+<p>Additional metadata associated with the text file
+<cite>testing/data/20170919_P1_cal_results_cs.csv</cite> is given with <cite>-u</cite> arguments. The
+special –update key <cite>parsefile</cite> indicates that the following value needs to be
+parsed with the instrument-specific parser method.</p>
+<p>It is also possible to add multiple external calibration files at the same time
+as the associated metadata with an external configuration file. This file uses
+the standard ascii format that is parsed with the <a class="reference external" href="https://docs.python.org/3.7/library/configparser.html">configparser</a> package. So if for
+example the config file <cite>PCASP1_CLARIFY_cals.cfg</cite> contained;</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">pre</span><span class="o">-</span><span class="n">CLARIFY</span><span class="p">]</span>
+<span class="n">_group</span> <span class="o">=</span> <span class="n">bin_cal</span>
+<span class="n">time</span> <span class="o">=</span> <span class="mi">20170701</span>
+<span class="n">applied_to</span> <span class="o">=</span> <span class="n">C027</span><span class="o">-</span>
+<span class="n">user</span> <span class="o">=</span> <span class="n">Graeme</span> <span class="n">Nott</span>
+<span class="n">traceability</span> <span class="o">=</span> <span class="n">List</span> <span class="n">of</span> <span class="n">PSL</span> <span class="n">lot</span> <span class="n">number</span> <span class="n">information</span>
+<span class="n">comments</span> <span class="o">=</span> <span class="n">After</span> <span class="n">realignment</span> <span class="n">of</span> <span class="n">inlet</span> <span class="n">jet</span>
+<span class="n">cal_flag</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">_parsefile</span> <span class="o">=</span> <span class="n">testing</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="mi">20170801</span><span class="n">_P1_cal_results_cs</span><span class="o">.</span><span class="n">csv</span>
+
+<span class="p">[</span><span class="n">post</span><span class="o">-</span><span class="n">CLARIFY</span><span class="p">]</span>
+<span class="n">_group</span> <span class="o">=</span> <span class="n">bin_cal</span>
+<span class="n">time</span> <span class="o">=</span> <span class="mi">20170919</span>
+<span class="n">applied_to</span> <span class="o">=</span> <span class="n">C027</span><span class="o">-</span><span class="n">C055</span>
+<span class="n">user</span> <span class="o">=</span> <span class="n">Graeme</span> <span class="n">Nott</span>
+<span class="n">traceability</span> <span class="o">=</span> <span class="n">List</span> <span class="n">of</span> <span class="n">PSL</span> <span class="n">lot</span> <span class="n">number</span> <span class="n">information</span>
+<span class="n">cal_flag</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">_parsefile</span> <span class="o">=</span> <span class="n">testing</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="mi">20170919</span><span class="n">_P1_cal_results_cs</span><span class="o">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+<p>this could be inserted into an existing netCDF file that has been created from
+the PCASP1 template cdl file as follows;</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 cal_ncgen.py PCASP1_cal.cdl -u parsefile PCASP1_CLARIFY_cals.cfg
+<span class="go">  -o PCASP_faam_20170701_v001_r000_cal.nc</span>
+</pre></div>
+</div>
+<p>Note that such a config file must have a recognisable format and the <cite>.cfg.</cite> or
+<cite>.config</cite> extension to ensure that the instrument parser is not invoked on the
+config file directly. The <em>special</em> options in each section that start with
+an <code class="docutils literal notranslate"><span class="pre">_</span></code> are not treated as netCDF attributes or variables but are used to
+assist in the processing of the options.</p>
+<dl class="function">
+<dt id="cal_ncgen.call">
+<code class="sig-prename descclassname">cal_ncgen.</code><code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param">infile</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_ncgen.html#call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_ncgen.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function for cal_ncgen</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>infile</strong> (<em>list</em>) – One or more cdl files. If multiple files then concat,
+if single cdl then ncgen to nc.</p></li>
+<li><p><strong>args</strong> (<em>Dictionary</em>) – Arguments for adding to cdl file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">How this function works:</dt>
+<dd class="field-odd"><ul>
+<li><div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>concatenate multiple cdl input files</p>
+</div>
+</li>
+<li><p>If infile is cdl then create nc by calling <code class="docutils literal notranslate"><span class="pre">ncgen</span></code>.
+If no other arguments for nc then finish</p></li>
+<li><p>open nc file as <code class="docutils literal notranslate"><span class="pre">root</span></code></p></li>
+<li><p>determine instrument to operate on from nc or args[‘instr’]</p></li>
+<li><p>Instantiate instrument class</p></li>
+<li><p>Write or append data to variables</p></li>
+<li><p>write nc</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, FAAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

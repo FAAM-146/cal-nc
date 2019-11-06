@@ -1,0 +1,729 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>cal_proc.generic &#8212; Creation/updates of nc files for FAAM calibration data 0.2 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cal_proc.generic</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Generic instrument class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">datetime</span><span class="o">,</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">netCDF4</span>
+
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+
+<span class="c1"># Project information</span>
+<span class="n">__title__</span> <span class="o">=</span> <span class="s1">&#39;FAAM Calibration netCDF - generic instrument processor&#39;</span>
+<span class="n">__description__</span> <span class="o">=</span> <span class="s1">&#39;Functions and class for all child instrument processors&#39;</span>
+<span class="n">__institution__</span> <span class="o">=</span> <span class="s1">&#39;FAAM - Facility for Airborne Atmospheric Measurements&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s1">&#39;2019 11 01&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Graeme Nott&#39;</span>
+<span class="n">__author_email__</span> <span class="o">=</span> <span class="s1">&#39;graeme.nott@faam.ac.uk&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;2019, FAAM&#39;</span>
+
+
+<span class="c1">#__all__ = [&#39;walk_dstress&#39;,&#39;append_time&#39;,&#39;append_var&#39;]</span>
+
+
+<div class="viewcode-block" id="walk_dstree"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.walk_dstree">[docs]</a><span class="k">def</span> <span class="nf">walk_dstree</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursive Dataset group generator</span>
+
+<span class="sd">    from: http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2</span>
+
+<span class="sd">    param ds: Dataset object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="n">values</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">children</span> <span class="ow">in</span> <span class="n">walk_dstree</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">children</span></div>
+
+
+<div class="viewcode-block" id="append_time"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.append_time">[docs]</a><span class="k">def</span> <span class="nf">append_time</span><span class="p">(</span><span class="n">otime</span><span class="p">,</span><span class="n">ntime</span><span class="p">,</span><span class="n">concat_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method to append time variable/s to existing time coordinate</span>
+
+<span class="sd">    :param otime: Original Dataset time coordinate. As is coordinate is 1d</span>
+<span class="sd">    :type otime: netCDF4 variable</span>
+<span class="sd">    :param ntime: New time variables to append to otime.</span>
+<span class="sd">    :type ntime: May either be a netCDF4 variable or a simple iterable of</span>
+<span class="sd">        values. The values may be datetime objects. If the values are</span>
+<span class="sd">        strings some attempt to convert them will be done. If they are numbers</span>
+<span class="sd">        then it is assumed that units, calendar are compatible with those in</span>
+<span class="sd">        otime.</span>
+
+<span class="sd">    :returns: a netCDF4 variable with the same units and calendar as otime</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">datetime</span>
+
+    <span class="n">time_fmts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>   <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H:%M&#39;</span><span class="p">,</span>      <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H&#39;</span><span class="p">,</span>         <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>            <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Convert original times into datetime objects</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ocalendar</span> <span class="o">=</span> <span class="n">otime</span><span class="o">.</span><span class="n">calendar</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">ocalendar</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">odatetime</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span><span class="n">otime</span><span class="p">[:],</span><span class="n">otime</span><span class="o">.</span><span class="n">units</span><span class="p">,</span><span class="n">ocalendar</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="c1"># num2date does not work on empty arrays</span>
+        <span class="n">odatetime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ntime</span><span class="p">)</span> <span class="o">==</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="c1"># Convert new times into datetime objects</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ncalendar</span> <span class="o">=</span> <span class="n">ntime</span><span class="o">.</span><span class="n">calendar</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">ncalendar</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ndatetime</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span><span class="n">ntime</span><span class="p">[:],</span><span class="n">ntime</span><span class="o">.</span><span class="n">units</span><span class="p">,</span><span class="n">ncalendar</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c1"># num2date does not work on empty arrays</span>
+            <span class="n">ndatetime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ntime</span><span class="p">,(</span><span class="nb">int</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">str</span><span class="p">)):</span>
+            <span class="n">ntime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ntime</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ntime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ntime</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">,</span><span class="s1">&#39;S&#39;</span><span class="p">]):</span>
+            <span class="c1"># Attempt to convert the times into a list of datetime object</span>
+            <span class="c1"># Assume that all formats are the same!</span>
+            <span class="k">for</span> <span class="n">t_fmt</span> <span class="ow">in</span> <span class="n">time_fmts</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">ntime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">t_fmt</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># Reverse date part of t_fmt</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">indx</span> <span class="o">=</span> <span class="n">t_fmt</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">t_fmt</span> <span class="o">=</span> <span class="n">t_fmt</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">t_fmt</span> <span class="o">=</span> <span class="n">t_fmt</span><span class="p">[:</span><span class="n">indx</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">t_fmt</span><span class="p">[</span><span class="n">indx</span><span class="p">:]</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">ntime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">t_fmt</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;t_fmt = &#39;</span><span class="p">,</span><span class="n">t_fmt</span><span class="p">)</span>
+            <span class="n">ndatetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">n_</span><span class="p">,</span><span class="n">t_fmt</span><span class="p">)</span> <span class="k">for</span> <span class="n">n_</span> <span class="ow">in</span> <span class="n">ntime</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Assume are numbers in same format as those in otime</span>
+            <span class="n">ndatetime</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span><span class="n">ntime</span><span class="p">,</span><span class="n">otime</span><span class="o">.</span><span class="n">units</span><span class="p">,</span><span class="n">ocalendar</span><span class="p">)</span>
+
+
+    <span class="n">adatetime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">odatetime</span><span class="p">,</span><span class="n">ndatetime</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="n">concat_axis</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">adatetime</span><span class="p">,</span><span class="n">otime</span><span class="o">.</span><span class="n">units</span><span class="p">,</span><span class="n">ocalendar</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Generic"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic">[docs]</a><span class="k">class</span> <span class="nc">Generic</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Minimal parent class for instrument-specific parsing and processing</span>
+<span class="sd">    of calibration data suitable for writing to the calibration netCDF.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param ds: dataset from ingested cal_nc file</span>
+<span class="sd">            Note that cal_nc file as been read using r+. Thus variables (?)</span>
+<span class="sd">            and attributes cannot be appended to. Values must be read to</span>
+<span class="sd">            a python variable, the nc key deleted, then rewritten with</span>
+<span class="sd">            appropriate modfications.</span>
+<span class="sd">        :type ds:  netCDF4.dataset</span>
+<span class="sd">        :returns ds:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span>
+
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Help, specifically with regards to structure of update() method if</span>
+<span class="sd">        it exists. If update() does not exist then use docstr of processor</span>
+<span class="sd">        class __init__()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># To print name of instance use: type(self).__name__</span>
+        <span class="kn">import</span> <span class="nn">pdb</span>
+
+        <span class="n">h1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="o">.</span><span class="vm">__doc__</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+            <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">h3</span> <span class="o">=</span> <span class="n">h2</span>  <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add__str__</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+            <span class="n">h3</span> <span class="o">=</span> <span class="n">h2</span>
+
+        <span class="k">return</span> <span class="n">h3</span>
+
+
+<div class="viewcode-block" id="Generic.update_hist"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_hist">[docs]</a>    <span class="k">def</span> <span class="nf">update_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the global history attribute.</span>
+
+<span class="sd">        The history nc attribute is a single string of comma-delineated text.</span>
+
+<span class="sd">        :param update: Update for history string. If None (default) then</span>
+<span class="sd">            auto-generate string based on today&#39;s date. If given then append</span>
+<span class="sd">            update/s to history attribute string. Any ``&lt;now&gt;`` or ``&lt;today&gt;``</span>
+<span class="sd">            strings are changed to today&#39;s date.</span>
+<span class="sd">        :type update: List</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">t_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">update</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># With datetime v3.6 can use timespec=&#39;seconds&#39; to drop ms</span>
+            <span class="c1"># Timezone aware timestamp is generated by default.</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> Auto update&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t_</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">update</span> <span class="ow">is</span> <span class="s1">&#39;NA&#39;</span><span class="p">:</span>
+            <span class="c1"># This assumes that all updates have been handled in the cdl</span>
+            <span class="c1"># file. So nothing needs to be done here.</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span><span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="c1"># If is a list of strings then join</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">update</span><span class="p">[:])</span>
+
+        <span class="c1"># Change any shortcuts to today&#39;s date</span>
+        <span class="n">update</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;today&gt;&#39;</span><span class="p">,</span><span class="n">t_</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;now&gt;&#39;</span><span class="p">,</span><span class="n">t_</span><span class="p">)</span>
+
+        <span class="n">hist_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span>
+        <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist_</span><span class="p">,</span><span class="n">update</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Generic.update_user"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_user">[docs]</a>    <span class="k">def</span> <span class="nf">update_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the global username attribute.</span>
+
+<span class="sd">        The username nc attribute is a single string of comma-delineated text.</span>
+
+<span class="sd">        :param update: Update for username string. If None (default) then</span>
+<span class="sd">            ask user, usually given as &#39;username &lt;user@email&gt;&#39;. If given</span>
+<span class="sd">            then append username/s to existing attribute string.</span>
+<span class="sd">        :type update: List</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">update</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># May be able to automatically generate a username but</span>
+            <span class="c1"># ask user to be sure.</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Enter username &lt;email&gt; [Enter for cdl]: &#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">update</span> <span class="ow">is</span> <span class="s1">&#39;NA&#39;</span><span class="p">:</span>
+            <span class="c1"># This assumes that all updates have been handed in the cdl</span>
+            <span class="c1"># file. So nothing needs to be done here</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span><span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="c1"># If is a list of strings then join</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">update</span><span class="p">[:])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">user_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_</span><span class="p">,</span><span class="n">update</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Generic.change_val"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.change_val">[docs]</a>    <span class="k">def</span> <span class="nf">change_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">old_val</span><span class="p">,</span><span class="n">new_val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to change a single variable/attribute value.</span>
+
+<span class="sd">        The variable or attribute name must be given along with the old</span>
+<span class="sd">        value, ``old_val``, that is to be change to ``new_val``. If ``old_val``</span>
+<span class="sd">        is not found then nothing is done.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">pass</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_add_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">coord</span><span class="p">,</span><span class="n">vals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to add extra values to end of an unlimited coordinate</span>
+
+<span class="sd">        If a coordinate is increased in size then all of the variables that</span>
+<span class="sd">        depend on that coordinate are increased to the same size along the</span>
+<span class="sd">        unlimited dimension. This internal method is called along with</span>
+<span class="sd">        _add_var().</span>
+
+<span class="sd">        :param coord: string of path/name of coordinate variable. This can be found with</span>
+<span class="sd">            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``</span>
+<span class="sd">        :type var: String</span>
+<span class="sd">        :param vals: Iterable of values to append to the end of var. Types must</span>
+<span class="sd">            match the dtype of the variable</span>
+<span class="sd">        :type vals: List or array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Ensure that is unlimited coordinate</span>
+        <span class="c1"># Annoyingly have to split path and variable name</span>
+        <span class="n">cpath</span><span class="p">,</span><span class="n">cname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cpath</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">]:</span>
+            <span class="n">unlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">cname</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">unlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">cpath</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">cname</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> \
+           <span class="p">(</span><span class="n">unlim</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># Either the variable name passed is not a coordinate (ie the</span>
+            <span class="c1"># variable name and dimension are the same and 1d) or the</span>
+            <span class="c1"># coordinate is not unlimited and thus cannot be extended.</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> is not an unlimited coordinate&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># Ensure vals is an array and preserve any masking</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">coord</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">append_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">coord</span><span class="p">],</span><span class="n">vals</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="mi">0</span>
+
+
+    <span class="k">def</span> <span class="nf">_add_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">vals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to add extra values to end of an already extended variable</span>
+
+<span class="sd">        If a coordinate is increased in size then all of the variables that</span>
+<span class="sd">        depend on that coordinate are increased to the same size along the</span>
+<span class="sd">        unlimited dimension. If the variable holds numbers then these extra</span>
+<span class="sd">        values are masked. If the variable holds strings then they are just</span>
+<span class="sd">        empty strings and there is no masking. This method writes the new</span>
+<span class="sd">        values in vals into these new array positions of var. If the</span>
+<span class="sd">        number of values is &gt; number of new elements at the end of the</span>
+<span class="sd">        array then it is assumed that there is an error and no action is taken.</span>
+
+<span class="sd">        :param var: string of path/name of variable. This can be found with</span>
+<span class="sd">            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``</span>
+<span class="sd">        :type var: String</span>
+<span class="sd">        :param vals: Iterable of values to append to the end of var. Types must</span>
+<span class="sd">            match the dtype of the variable</span>
+<span class="sd">        :type vals: List or array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure vals is an array and preserve any masking</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">vals</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Assume that only a single element in the unlimited dimension</span>
+            <span class="c1"># has been given in vals. Increase number of dimension to match var</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vals</span><span class="p">[::],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">vals</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> \
+               <span class="s1">&#39;Mismatch in number of dimensions&#39;</span>
+
+        <span class="c1"># Annoyingly have to split path and variable name</span>
+        <span class="n">vpath</span><span class="p">,</span><span class="n">vname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+        <span class="n">i_found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Find unlimited dimension for this var</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">d_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">unlim_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">vpath</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">d_</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="c1"># Assume this is because you&#39;re in the root</span>
+                <span class="n">unlim_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">d_</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">unlim_dim</span><span class="p">:</span>
+                <span class="n">i_found</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Create slice to write to the correct dimension</span>
+        <span class="c1"># That is the last elements of the unlimited dimension</span>
+
+        <span class="c1"># .. TODO::</span>
+        <span class="c1">#   Need to check that this works for adding more than one new value</span>
+
+        <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+        <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># Check appropriate number of elements at end of var are either</span>
+        <span class="c1"># masked or empty strings.</span>
+        <span class="c1"># Note that it is possible that legitimate values may be masked</span>
+        <span class="c1"># so also check for any non-finite numbers.</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> \
+           <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
+            <span class="c1"># Strings are vlen arrays which have more limited access</span>
+            <span class="c1"># Need to write each individual string seperately (?)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vals</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span>
+                  <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())):</span>
+            <span class="c1"># Assume that all other types of variables are masked</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Insufficient empty space in </span><span class="si">{}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Generic.append_var"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.append_var">[docs]</a>    <span class="k">def</span> <span class="nf">append_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">coord_vals</span><span class="p">,</span><span class="n">var_vals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to append to an existing netCDF4 variable and associated coord</span>
+
+<span class="sd">        The extra coordinate values are appended to the coordinate of vname</span>
+<span class="sd">        in self. This automatically creates the same number of masked entries</span>
+<span class="sd">        in all of the variables that depend on that coordinate.</span>
+
+<span class="sd">        :param var: String of path/name of variable. This can be found with</span>
+<span class="sd">            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``</span>
+<span class="sd">        :type var: String</span>
+<span class="sd">        :param coord_vals: Iterable of values to append to the end of unlimited</span>
+<span class="sd">            coordinate of variable var.</span>
+<span class="sd">        :type coord_vals: List or array</span>
+<span class="sd">        :param var_vals: Iterable of values to append to the end of var. Must</span>
+<span class="sd">            be the same length as coord_vals in the unlimited dimension.</span>
+<span class="sd">        :type var_vals: List or array</span>
+
+<span class="sd">        NOTE: This is a bit complicated/not sensible. It is possible/probable</span>
+<span class="sd">            to add a variable (along with the coord) then append to a different</span>
+<span class="sd">            variable that uses the same coordinate which then writes the same</span>
+<span class="sd">            coordinate values into the coordinate again.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+        <span class="c1"># # Find unlimited dimension of variable</span>
+        <span class="c1"># for i,dim_ in enumerate(var.dimensions):</span>
+        <span class="c1">#     if var.isunlimited():</span>
+        <span class="c1">#         break</span>
+
+        <span class="c1"># if type(nvar) == netCDF4.Variable:</span>
+        <span class="c1">#     # Extract values out of variable</span>
+        <span class="c1">#     nvars = nvar[:]</span>
+        <span class="c1"># elif isinstance(nvar,(int,float,str)):</span>
+        <span class="c1">#     # Ensure that new variables is a list if not a netCDF4 variable</span>
+        <span class="c1">#     nvars = [nvar]</span>
+
+        <span class="c1"># if ovar.dtype == str:</span>
+        <span class="c1">#     avar = ovar.rstrip(&#39;,&#39;) + &#39;,&#39;.join(nvars)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     avar = np.ma.concatenate((ovar[:],nvars), axis=i)</span>
+
+
+<div class="viewcode-block" id="Generic.append_dict"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.append_dict">[docs]</a>    <span class="k">def</span> <span class="nf">append_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var_d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append multiple variables with a single coordinate</span>
+
+<span class="sd">        Multiple variable values that use the same coordinate can be appended</span>
+<span class="sd">        to existing dataset variables in one go. Variables that do not already</span>
+<span class="sd">        exist in the dataset are ignored. Use add instead...</span>
+
+<span class="sd">        Add variable attributes as well?</span>
+
+<span class="sd">        :param var_d: Dictionary of multiple variable values to be appended</span>
+<span class="sd">            arranged so that the dictionary keys are the variable path+names</span>
+<span class="sd">            and the dictionary values are either a netCDF variable or a</span>
+<span class="sd">            sub-dictionary of values and attributes</span>
+<span class="sd">        :type var_d: dictionary</span>
+
+<span class="sd">        Several options for inputs:</span>
+
+<span class="sd">        .. TODO::</span>
+
+<span class="sd">            Currently does not accept netCDF4 variable values.</span>
+<span class="sd">            Currently only accepts iterable of data.</span>
+
+
+<span class="sd">        .. codeblock:: python</span>
+
+<span class="sd">        var_d = {coord: netCDF4.Variable,</span>
+<span class="sd">                 var1:  [1,2,3,4,5],</span>
+<span class="sd">                 var2:  {&#39;_data&#39;: [1,2,3,4,5],</span>
+<span class="sd">                         &#39;var2_attr1&#39;: &#39;var2 attribute 1&#39;,</span>
+<span class="sd">                         &#39;var2_attr1&#39;: &#39;var2 attribute 1&#39;, ...}</span>
+<span class="sd">                 var3:  &#39;Fred&#39;}</span>
+
+<span class="sd">        Note that all variables should be the same length if they are</span>
+<span class="sd">        list-like. Any variables not the same length as the maximum length</span>
+<span class="sd">        variable will be broadcast so that they are longer. This could well</span>
+<span class="sd">        have unintended concequences however it does mean that variables that</span>
+<span class="sd">        are the same thing repeated for all coordinate values (eg var3)</span>
+<span class="sd">        will be replicated automatically.</span>
+
+<span class="sd">        .. NOTE::</span>
+
+<span class="sd">            This is not done yet!</span>
+
+<span class="sd">        There is nothing special about the coordinate variable, the function</span>
+<span class="sd">        identifies the coordinate as being the variable with the same name</span>
+<span class="sd">        as its dimension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Find coordinate variable</span>
+        <span class="n">coord_d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">var_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var_d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">k_</span> <span class="ow">in</span> <span class="n">var_keys</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">coord_d</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="c1"># Variable does not exist in dataset so remove from var_d</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">var_d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="n">coord_d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_coord</span><span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># Check lengths of variables</span>
+        <span class="c1"># pdb.set_trace()</span>
+        <span class="c1"># var_len = [len(v_) for v_ in var_d.values()]</span>
+
+
+        <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="n">var_d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_var</span><span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Generic.append_dataset"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.append_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">append_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">,</span>
+                       <span class="n">force_append</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">,</span><span class="s1">&#39;history&#39;</span><span class="p">],</span>
+                       <span class="n">exclude</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add groups, attributes, dimensions, and variables from ds.</span>
+
+<span class="sd">        Attributes of *self* shall take priority over those of the same name</span>
+<span class="sd">        in ds, such attribute values of ds shall be ignored. The exception is</span>
+<span class="sd">        if the attribute key is included in ``force_append``. In this case the</span>
+<span class="sd">        resultant attribute shall be a comma-delineated combination of the</span>
+<span class="sd">        individual attributes with that from ds being appended to that of</span>
+<span class="sd">        *self*.</span>
+
+<span class="sd">        Variables from ds are appended to the same variable in *self*. The</span>
+<span class="sd">        variables are sorted by the unlimited dimension. Variables only in</span>
+<span class="sd">        ds shall be added to *self*.</span>
+
+<span class="sd">        If any groups, attributes, or variables in ds that are not to be</span>
+<span class="sd">        added or appended can be specified as a list with ``exclude``.</span>
+
+<span class="sd">        :param ds: netCDF dataset.</span>
+<span class="sd">        :type ds: dataset</span>
+<span class="sd">        :param force_append: Any attribute strings that should always be</span>
+<span class="sd">            appended to, even if they are identical. Default is</span>
+<span class="sd">            [&#39;username&#39;,&#39;history&#39;].</span>
+<span class="sd">        :type force_append: List of root or group attributes strings.</span>
+<span class="sd">        :param exclude: List of attribute or variable names (but not variable</span>
+<span class="sd">            attributes) that are not to be added or appended.</span>
+<span class="sd">        :type exclude: List of identifying strings.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="k">def</span> <span class="nf">append_group</span><span class="p">(</span><span class="n">mgrp</span><span class="p">,</span><span class="n">ngrp</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Update master ds group with values from new ds group</span>
+
+<span class="sd">            Either input may be a dataset, in which case the root group is</span>
+<span class="sd">            operated on, or a group/subgroup within the dataset. This function</span>
+<span class="sd">            does not walk down through any subsequent groups.</span>
+
+<span class="sd">            param mgrp: Master dataset object which may be root or a group</span>
+<span class="sd">            param ngrp: Dataset object the contents of which shall be added or</span>
+<span class="sd">                appended to those in the master dataset object.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="c1"># Add any new attributes, ignore any conflicts, string append any others</span>
+            <span class="n">new_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ngrp</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                         <span class="k">if</span> <span class="n">k_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()}</span>
+            <span class="n">app_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ngrp</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                         <span class="k">if</span> <span class="p">(</span><span class="n">k_</span> <span class="ow">in</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()</span> <span class="ow">and</span> <span class="n">v_</span> <span class="o">!=</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span> <span class="ow">and</span> <span class="n">k_</span> <span class="ow">in</span> <span class="n">force_append</span><span class="p">)}</span>
+
+            <span class="n">mgrp</span><span class="o">.</span><span class="n">setncatts</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="n">app_attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">app_attr</span> <span class="o">=</span> <span class="n">ngrp</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">app_attr</span> <span class="o">=</span>  <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">mgrp</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)[::],</span>
+                                           <span class="n">ngrp</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)])</span>
+                <span class="n">mgrp</span><span class="o">.</span><span class="n">setncattr_string</span><span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">app_attr</span><span class="p">)</span>
+
+            <span class="c1"># Add any new dimensions</span>
+            <span class="n">new_dim</span> <span class="o">=</span> <span class="p">{</span><span class="n">d_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">d_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ngrp</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">d_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">dimensions</span><span class="p">}</span>
+            <span class="n">mgrp</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_dim</span><span class="p">)</span>
+
+            <span class="c1"># Add any new variables</span>
+            <span class="n">new_var</span> <span class="o">=</span> <span class="p">{</span><span class="n">n_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">n_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ngrp</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                       <span class="k">if</span> <span class="n">n_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">}</span>
+            <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_var</span><span class="p">)</span>
+
+            <span class="c1"># Concatenate any variables along the unlimited dimension</span>
+            <span class="c1"># that exist in master already. Do this in two steps as operating</span>
+            <span class="c1"># directly on the dataset coordinate/s affects the dependent</span>
+            <span class="c1"># variables immediately.</span>
+            <span class="c1"># Note that new/changed variable attributes are not added.</span>
+
+            <span class="k">for</span> <span class="n">n_</span> <span class="ow">in</span> <span class="n">ngrp</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">ngrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">][:],</span>
+                                      <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">][:])</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error with array_equal&#39;</span><span class="p">)</span>
+                    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+            <span class="n">app_var</span> <span class="o">=</span> <span class="p">{</span><span class="n">n_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">n_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ngrp</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                       <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">n_</span> <span class="ow">in</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span>
+                               <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">ngrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">][:],</span>
+                                                  <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">][:])])}</span>
+
+            <span class="n">mod_var</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">n_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="n">app_var</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                <span class="c1"># Find unlimited dimension</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">d_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">d_</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">():</span>
+                        <span class="k">break</span>
+
+                <span class="c1"># Convert datetime stamps to datetime then back again ensuring</span>
+                <span class="c1"># units are those of the master group.</span>
+                <span class="c1"># Determine if timestamp with variable name and units that</span>
+                <span class="c1"># include &#39;since&#39;. A bit flakey but hopefully ok.</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="s1">&#39;time&#39;</span> <span class="ow">in</span> <span class="n">n_</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                        <span class="s1">&#39;units&#39;</span> <span class="ow">in</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">]</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()])</span> \
+                   <span class="ow">and</span> <span class="s1">&#39;since&#39;</span> <span class="ow">in</span> <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+
+                    <span class="n">mod_var</span><span class="p">[</span><span class="n">n_</span><span class="p">]</span> <span class="o">=</span> <span class="n">append_time</span><span class="p">(</span><span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">],</span>
+                                              <span class="n">ngrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">])</span>
+
+                <span class="k">else</span><span class="p">:</span>
+
+    <span class="c1">### TODO: Use pint to make sure any units in variables are comparable</span>
+    <span class="c1">###       and convert new variables to those used in master</span>
+
+                    <span class="n">mod_var</span><span class="p">[</span><span class="n">n_</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">][:],</span>
+                                                     <span class="n">ngrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">][:]),</span>
+                                                    <span class="n">axis</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="c1"># Write modified variables back into master</span>
+            <span class="k">for</span> <span class="n">n_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="n">mod_var</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">mgrp</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">n_</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">v_</span>
+
+
+        <span class="c1"># Determine path strings to all (sub-)groups in both datasets</span>
+        <span class="n">mgrps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">grps</span> <span class="ow">in</span> <span class="n">walk_dstree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">):</span>
+            <span class="n">mgrps</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">g_</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">g_</span> <span class="ow">in</span> <span class="n">grps</span><span class="p">])</span>
+
+        <span class="n">ngrps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">grps</span> <span class="ow">in</span> <span class="n">walk_dstree</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="n">ngrps</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">g_</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">g_</span> <span class="ow">in</span> <span class="n">grps</span><span class="p">])</span>
+
+        <span class="c1"># Determine groups that are in the new dataset that are not in the master</span>
+        <span class="c1"># Create an equivalent empty group in the master, group will be filled</span>
+        <span class="c1"># by calling append_dsgroup(). Sort list by length of string so</span>
+        <span class="c1"># create upper level groups before any sub-groups.</span>
+        <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ngrps</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">mgrps</span><span class="p">),</span><span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createGroup</span><span class="p">(</span><span class="n">grp</span><span class="p">)</span>
+
+        <span class="c1"># Copy any new root attributes, dimensions, and/or variables to master</span>
+        <span class="n">append_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">,</span><span class="n">ds</span><span class="p">)</span>
+
+        <span class="c1"># Do the same for all groups and sub-groups</span>
+        <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="n">ngrps</span><span class="p">:</span>
+            <span class="n">append_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">grp</span><span class="p">],</span><span class="n">ds</span><span class="p">[</span><span class="n">grp</span><span class="p">])</span></div></div>
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, FAAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

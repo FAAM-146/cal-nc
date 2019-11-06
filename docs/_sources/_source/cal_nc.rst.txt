@@ -1,0 +1,38 @@
+cal\_nc package
+===============
+
+Submodules
+----------
+
+cal\_nc.ds\_func module
+-----------------------
+
+.. automodule:: cal_nc.ds_func
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cal\_nc.nc\_conf module
+-----------------------
+
+.. automodule:: cal_nc.nc_conf
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cal\_nc.nc\_func module
+-----------------------
+
+.. automodule:: cal_nc.nc_func
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: cal_nc
+   :members:
+   :undoc-members:
+   :show-inheritance:

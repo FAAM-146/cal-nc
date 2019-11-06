@@ -1,0 +1,558 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>cal_proc package &#8212; Creation/updates of nc files for FAAM calibration data 0.2 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">cal_proc package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-cal_proc.generic">cal_proc.generic module</a></li>
+<li><a class="reference internal" href="#module-cal_proc.pcasp">cal_proc.pcasp module</a></li>
+<li><a class="reference internal" href="#module-cal_proc.temperature">cal_proc.temperature module</a></li>
+<li><a class="reference internal" href="#module-cal_proc.wcm2000">cal_proc.wcm2000 module</a></li>
+<li><a class="reference internal" href="#module-cal_proc">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/_source/cal_proc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="cal-proc-package">
+<h1>cal_proc package<a class="headerlink" href="#cal-proc-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-cal_proc.generic">
+<span id="cal-proc-generic-module"></span><h2>cal_proc.generic module<a class="headerlink" href="#module-cal_proc.generic" title="Permalink to this headline">¶</a></h2>
+<p>Generic instrument class.</p>
+<dl class="function">
+<dt id="cal_proc.generic.walk_dstree">
+<code class="sig-prename descclassname">cal_proc.generic.</code><code class="sig-name descname">walk_dstree</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#walk_dstree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.walk_dstree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursive Dataset group generator</p>
+<p>from: <a class="reference external" href="http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2">http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2</a></p>
+<p>param ds: Dataset object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cal_proc.generic.append_time">
+<code class="sig-prename descclassname">cal_proc.generic.</code><code class="sig-name descname">append_time</code><span class="sig-paren">(</span><em class="sig-param">otime</em>, <em class="sig-param">ntime</em>, <em class="sig-param">concat_axis=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#append_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.append_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to append time variable/s to existing time coordinate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>otime</strong> (<em>netCDF4 variable</em>) – Original Dataset time coordinate. As is coordinate is 1d</p></li>
+<li><p><strong>ntime</strong> (<em>May either be a netCDF4 variable</em><em> or </em><em>a simple iterable of
+values. The values may be datetime objects. If the values are
+strings some attempt to convert them will be done. If they are numbers
+then it is assumed that units</em><em>, </em><em>calendar are compatible with those in
+otime.</em>) – New time variables to append to otime.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a netCDF4 variable with the same units and calendar as otime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="cal_proc.generic.Generic">
+<em class="property">class </em><code class="sig-prename descclassname">cal_proc.generic.</code><code class="sig-name descname">Generic</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Minimal parent class for instrument-specific parsing and processing
+of calibration data suitable for writing to the calibration netCDF.</p>
+<dl class="method">
+<dt id="cal_proc.generic.Generic.update_hist">
+<code class="sig-name descname">update_hist</code><span class="sig-paren">(</span><em class="sig-param">update=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.update_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.update_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the global history attribute.</p>
+<p>The history nc attribute is a single string of comma-delineated text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>update</strong> (<em>List</em>) – Update for history string. If None (default) then
+auto-generate string based on today’s date. If given then append
+update/s to history attribute string. Any <code class="docutils literal notranslate"><span class="pre">&lt;now&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;today&gt;</span></code>
+strings are changed to today’s date.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="cal_proc.generic.Generic.update_user">
+<code class="sig-name descname">update_user</code><span class="sig-paren">(</span><em class="sig-param">update=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.update_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.update_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the global username attribute.</p>
+<p>The username nc attribute is a single string of comma-delineated text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>update</strong> (<em>List</em>) – Update for username string. If None (default) then
+ask user, usually given as ‘username &lt;<a class="reference external" href="mailto:user&#37;&#52;&#48;email">user<span>&#64;</span>email</a>&gt;’. If given
+then append username/s to existing attribute string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="cal_proc.generic.Generic.change_val">
+<code class="sig-name descname">change_val</code><span class="sig-paren">(</span><em class="sig-param">var</em>, <em class="sig-param">old_val</em>, <em class="sig-param">new_val</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.change_val"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.change_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to change a single variable/attribute value.</p>
+<p>The variable or attribute name must be given along with the old
+value, <code class="docutils literal notranslate"><span class="pre">old_val</span></code>, that is to be change to <code class="docutils literal notranslate"><span class="pre">new_val</span></code>. If <code class="docutils literal notranslate"><span class="pre">old_val</span></code>
+is not found then nothing is done.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cal_proc.generic.Generic.append_var">
+<code class="sig-name descname">append_var</code><span class="sig-paren">(</span><em class="sig-param">var</em>, <em class="sig-param">coord_vals</em>, <em class="sig-param">var_vals</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.append_var"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.append_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to append to an existing netCDF4 variable and associated coord</p>
+<p>The extra coordinate values are appended to the coordinate of vname
+in self. This automatically creates the same number of masked entries
+in all of the variables that depend on that coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var</strong> (<em>String</em>) – String of path/name of variable. This can be found with
+<code class="docutils literal notranslate"><span class="pre">os.path.join(self.ds[var].group().path,self.ds[var].name)</span></code></p></li>
+<li><p><strong>coord_vals</strong> (<em>List</em><em> or </em><em>array</em>) – Iterable of values to append to the end of unlimited
+coordinate of variable var.</p></li>
+<li><p><strong>var_vals</strong> (<em>List</em><em> or </em><em>array</em>) – Iterable of values to append to the end of var. Must
+be the same length as coord_vals in the unlimited dimension.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>NOTE: This is a bit complicated/not sensible. It is possible/probable</dt><dd><p>to add a variable (along with the coord) then append to a different
+variable that uses the same coordinate which then writes the same
+coordinate values into the coordinate again.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="cal_proc.generic.Generic.append_dict">
+<code class="sig-name descname">append_dict</code><span class="sig-paren">(</span><em class="sig-param">var_d</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.append_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.append_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append multiple variables with a single coordinate</p>
+<p>Multiple variable values that use the same coordinate can be appended
+to existing dataset variables in one go. Variables that do not already
+exist in the dataset are ignored. Use add instead…</p>
+<p>Add variable attributes as well?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>var_d</strong> (<em>dictionary</em>) – Dictionary of multiple variable values to be appended
+arranged so that the dictionary keys are the variable path+names
+and the dictionary values are either a netCDF variable or a
+sub-dictionary of values and attributes</p>
+</dd>
+</dl>
+<p>Several options for inputs:</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Currently does not accept netCDF4 variable values.
+Currently only accepts iterable of data.</p>
+</div>
+<dl>
+<dt>var_d = {coord: netCDF4.Variable,</dt><dd><p>var1:  [1,2,3,4,5],
+var2:  {‘_data’: [1,2,3,4,5],</p>
+<blockquote>
+<div><p>‘var2_attr1’: ‘var2 attribute 1’,
+‘var2_attr1’: ‘var2 attribute 1’, …}</p>
+</div></blockquote>
+<p>var3:  ‘Fred’}</p>
+</dd>
+</dl>
+<p>Note that all variables should be the same length if they are
+list-like. Any variables not the same length as the maximum length
+variable will be broadcast so that they are longer. This could well
+have unintended concequences however it does mean that variables that
+are the same thing repeated for all coordinate values (eg var3)
+will be replicated automatically.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is not done yet!</p>
+</div>
+<p>There is nothing special about the coordinate variable, the function
+identifies the coordinate as being the variable with the same name
+as its dimension.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cal_proc.generic.Generic.append_dataset">
+<code class="sig-name descname">append_dataset</code><span class="sig-paren">(</span><em class="sig-param">ds, force_append=['username', 'history'], exclude=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.append_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.append_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add groups, attributes, dimensions, and variables from ds.</p>
+<p>Attributes of <em>self</em> shall take priority over those of the same name
+in ds, such attribute values of ds shall be ignored. The exception is
+if the attribute key is included in <code class="docutils literal notranslate"><span class="pre">force_append</span></code>. In this case the
+resultant attribute shall be a comma-delineated combination of the
+individual attributes with that from ds being appended to that of
+<em>self</em>.</p>
+<p>Variables from ds are appended to the same variable in <em>self</em>. The
+variables are sorted by the unlimited dimension. Variables only in
+ds shall be added to <em>self</em>.</p>
+<p>If any groups, attributes, or variables in ds that are not to be
+added or appended can be specified as a list with <code class="docutils literal notranslate"><span class="pre">exclude</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds</strong> (<em>dataset</em>) – netCDF dataset.</p></li>
+<li><p><strong>force_append</strong> (<em>List of root</em><em> or </em><em>group attributes strings.</em>) – Any attribute strings that should always be
+appended to, even if they are identical. Default is
+[‘username’,’history’].</p></li>
+<li><p><strong>exclude</strong> (<em>List of identifying strings.</em>) – List of attribute or variable names (but not variable
+attributes) that are not to be added or appended.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cal_proc.pcasp">
+<span id="cal-proc-pcasp-module"></span><h2>cal_proc.pcasp module<a class="headerlink" href="#module-cal_proc.pcasp" title="Permalink to this headline">¶</a></h2>
+<p>File containing all PCASP instrument processor classes.</p>
+<dl class="function">
+<dt id="cal_proc.pcasp.read_cal_file">
+<code class="sig-prename descclassname">cal_proc.pcasp.</code><code class="sig-name descname">read_cal_file</code><span class="sig-paren">(</span><em class="sig-param">cal_file</em>, <em class="sig-param">f_type='pcasp_d'</em>, <em class="sig-param">reject_bins=None</em>, <em class="sig-param">invalid=-9999</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/pcasp.html#read_cal_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.pcasp.read_cal_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to read in csv files outputted from various calibration programs</p>
+<p>The output format is defined for different types of files.
+Data is returned in a dictionary.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This has been ripped straight from datafile_utils.py. Probably
+can do this better.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cal_file</strong> (<em>string</em>) – path and filename of calibration csv file to be read</p></li>
+<li><p><strong>f_type</strong> (<em>string</em>) – type of calibration file to read. One of;
+‘pcasp_d’: output of CDtoDConverter.exe
+‘pcasp_cs’: output of pcaspcal.exe
+‘cdp_d’: output of CDtoDConverter.exe
+‘cdp_cs’: output from ADs calibration program</p></li>
+<li><p><strong>reject_bins</strong> (<em>list of integers</em>) – List of bins that are not returned. Default is None</p></li>
+<li><p><strong>invalid</strong> (<em>string</em><em> or </em><em>number</em>) – Gives value of invalid values as used by input csv file.
+Default is -9999</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return d</dt>
+<dd class="field-even"><p>dictionary of metadata and data masked arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="cal_proc.pcasp.PCASP">
+<em class="property">class </em><code class="sig-prename descclassname">cal_proc.pcasp.</code><code class="sig-name descname">PCASP</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/pcasp.html#PCASP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.pcasp.PCASP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cal_proc.generic.Generic" title="cal_proc.generic.Generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">cal_proc.generic.Generic</span></code></a></p>
+<p>Class for parsing and processing of calibration data files for
+instrument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PCASP</span><span class="p">:</span> <span class="n">Passive</span> <span class="n">Cavity</span> <span class="n">Aerosol</span> <span class="n">Spectrometer</span> <span class="n">Probe</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="cal_proc.pcasp.PCASP.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">largs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/pcasp.html#PCASP.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.pcasp.PCASP.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to make any change to the nc object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>largs</strong> – List of lists of arbitrary arguments to apply to nc</p>
+</dd>
+</dl>
+<p>The <em>largs</em> list is from</p>
+<dl class="field-list simple">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cal_ncgen</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">update</span> <span class="o">*</span><span class="n">option</span><span class="o">*</span>
+</pre></div>
+</div>
+<p>and may be one of the following types;</p>
+<ul>
+<li><p>A list [of lists] of cdl files of data to be written into the nc
+object. This option is chosen based on extension <code class="docutils literal notranslate"><span class="pre">.cdl</span></code>. If more than
+one cdl file is offered then it must be given as a single entry. eg;</p>
+<dl class="field-list simple">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cal_ncgen</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">u</span> <span class="n">PCASP_20170725</span><span class="o">.</span><span class="n">cdl</span> <span class="n">PCASP_20171114</span><span class="o">.</span><span class="n">cdl</span>
+</pre></div>
+</div>
+</li>
+<li><p>A list [of lists] of PCASP diameter calibration files output from
+<code class="docutils literal notranslate"><span class="pre">cstodconverter</span></code>. This option is chosen based on filename ending
+with <code class="docutils literal notranslate"><span class="pre">d.csv</span></code>. If more than one calibration file is offered then it
+must be given as a single entry. eg;</p>
+<dl class="field-list simple">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cal_ncgen</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">u</span> <span class="mi">20170725</span><span class="n">_P1_cal_results_PSLd</span><span class="o">.</span><span class="n">csv</span> <span class="mi">20171114</span><span class="n">_P1_cal_results_PSLd</span><span class="o">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+</li>
+<li><p>A list nc attribute/value or variable/value pairs. For attributes
+that are strings, the value is concatenated to the existing string
+with a delimiting comma (non-char attributes will probably throw
+an error). Variables will be appended to the end of the existing
+variable numpy array. Note that variable attributes cannot be
+appended to. The attribute/variable names must be given exactly as
+in the existing nc file. Any containing group/s is given with
+forward slashes, eg</p>
+<dl class="field-list simple">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cal_ncgen</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">u</span> <span class="n">bin_cal</span><span class="o">/</span><span class="n">time</span> <span class="mi">2769</span> <span class="mi">2874</span> <span class="o">-</span><span class="n">u</span> <span class="n">bin_cal</span><span class="o">/</span><span class="n">applies_to</span> <span class="n">C027</span><span class="o">-</span><span class="n">C055</span> <span class="n">C057</span><span class="o">-</span><span class="n">C071</span> <span class="mf">2818.5</span><span class="p">,</span> <span class="mf">2864.5</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Note that any spaces in filenames must be enclosed in quotes. All
+files are assumed to the same type as the first filename in the list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cal_proc.pcasp.PCASP.update_bincal_from_file">
+<code class="sig-name descname">update_bincal_from_file</code><span class="sig-paren">(</span><em class="sig-param">calfile</em>, <em class="sig-param">vars_d</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/pcasp.html#PCASP.update_bincal_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.pcasp.PCASP.update_bincal_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append bin calibration data in datafile to that already in nc</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>calfile</strong> (<em>Path/filename strings</em><em> or </em><em>pathlib obj</em>) – PCASP calibration csv file. Is recognised as
+ending in ‘cs’ or ‘d’ so user needs to provide some quality
+assurance on the input files</p></li>
+<li><p><strong>vars_d</strong> (<em>Dictionary of variable name and value pairs.</em>) – Additional variables associated with those contained
+within the datafile. At the very least this should contain any
+associated coordinate variables, eg time.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cal_proc.temperature">
+<span id="cal-proc-temperature-module"></span><h2>cal_proc.temperature module<a class="headerlink" href="#module-cal_proc.temperature" title="Permalink to this headline">¶</a></h2>
+<p>File containing all primary instrument temperature instrument processor
+classes.</p>
+<dl class="class">
+<dt id="cal_proc.temperature.NDIT">
+<em class="property">class </em><code class="sig-prename descclassname">cal_proc.temperature.</code><code class="sig-name descname">NDIT</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/temperature.html#NDIT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.temperature.NDIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cal_proc.generic.Generic" title="cal_proc.generic.Generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">cal_proc.generic.Generic</span></code></a></p>
+<p>Class for parsing and processing of calibration data files for
+instruments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NDIT</span><span class="p">:</span> <span class="n">Non</span><span class="o">-</span><span class="n">deiced</span> <span class="n">temperature</span> <span class="n">probe</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="cal_proc.temperature.NDIT.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">largs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/temperature.html#NDIT.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.temperature.NDIT.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to determine any other additional changes to the nc obj</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kargs</strong> (<em>dictionary</em>) – dictionary of optional arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cal_proc.temperature.DIT">
+<em class="property">class </em><code class="sig-prename descclassname">cal_proc.temperature.</code><code class="sig-name descname">DIT</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/temperature.html#DIT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.temperature.DIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cal_proc.generic.Generic" title="cal_proc.generic.Generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">cal_proc.generic.Generic</span></code></a></p>
+<p>Class for parsing and processing of calibration data files for
+instruments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DIT</span><span class="p">:</span> <span class="n">Deiced</span> <span class="n">temperature</span> <span class="n">probe</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="cal_proc.temperature.DIT.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">largs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/temperature.html#DIT.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.temperature.DIT.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to determine any other additional changes to the nc obj</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kargs</strong> (<em>dictionary</em>) – dictionary of optional arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cal_proc.wcm2000">
+<span id="cal-proc-wcm2000-module"></span><h2>cal_proc.wcm2000 module<a class="headerlink" href="#module-cal_proc.wcm2000" title="Permalink to this headline">¶</a></h2>
+<p>File containing all SEA WCM-2000 total water probe processor classes.</p>
+<dl class="class">
+<dt id="cal_proc.wcm2000.WCM2000">
+<em class="property">class </em><code class="sig-prename descclassname">cal_proc.wcm2000.</code><code class="sig-name descname">WCM2000</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/wcm2000.html#WCM2000"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.wcm2000.WCM2000" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cal_proc.generic.Generic" title="cal_proc.generic.Generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">cal_proc.generic.Generic</span></code></a></p>
+<p>Class for parsing and processing of calibration data files for
+instrument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WCM2000</span><span class="p">:</span> <span class="n">SEA</span> <span class="n">WCM</span><span class="o">-</span><span class="mi">2000</span> <span class="n">total</span> <span class="n">water</span> <span class="n">probe</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="cal_proc.wcm2000.WCM2000.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">dvars</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/wcm2000.html#WCM2000.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.wcm2000.WCM2000.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to update attributes and variables of wcm2000 nc object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dvars</strong> (<em>dictionary</em>) – Dictionary of attribute/variable key and value
+pairs. The dict keys are the attribute/variable name,
+including group paths relative to the root. Each dict either
+contains a scalar or iterable data value or, if applied to a
+variable (but not an attribute), a sub-dict that must
+include at least the key <em>‘data’</em>. Other keys in the sub-dicts
+are attributes associated with that variable. The data value
+is a scalar or iterable to append to that attribute/variable.
+If a variable is given that does not already exist then it is
+ignored.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – If True then print info to stdout for each update.
+Default is False.</p></li>
+</ul>
+</dd>
+</dl>
+<p>If the netCDF4 object <code class="docutils literal notranslate"><span class="pre">self</span></code> has only the following variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">float32</span> <span class="n">time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">standard_name</span><span class="p">:</span> <span class="n">time</span>
+    <span class="n">long_name</span><span class="p">:</span> <span class="n">time</span> <span class="n">of</span> <span class="n">calibration</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="mf">569.</span><span class="p">,</span> <span class="mf">669.</span><span class="p">;</span>
+
+<span class="n">group</span> <span class="o">/</span><span class="n">TWC</span><span class="p">:</span>
+    <span class="n">float32</span> <span class="n">r100</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">long_name</span><span class="p">:</span> <span class="n">TWC</span> <span class="n">element</span> <span class="n">resistance</span> <span class="n">at</span> <span class="mi">100</span><span class="n">deg</span> <span class="n">C</span>
+        <span class="n">units</span><span class="p">:</span> <span class="n">milliohm</span>
+
+    <span class="n">float32</span> <span class="n">dtdr</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">long_name</span><span class="p">:</span> <span class="n">Change</span> <span class="ow">in</span> <span class="n">TWC</span> <span class="n">element</span> <span class="n">resistance</span> <span class="k">with</span> <span class="n">temperature</span>
+        <span class="n">units</span><span class="p">:</span> <span class="n">deg</span> <span class="n">C</span> <span class="o">/</span> <span class="n">milliohm</span>
+
+    <span class="n">r100</span> <span class="o">=</span> <span class="mf">31.4473</span><span class="p">,</span> <span class="mf">31.3362</span><span class="p">;</span>
+    <span class="n">dtdr</span> <span class="o">=</span> <span class="mf">33.9276</span><span class="p">,</span> <span class="mf">33.8165</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Then the following call,</p>
+<p>. .code-block:: python</p>
+<blockquote>
+<div><dl>
+<dt>self.update({‘time’: 769,</dt><dd><dl class="simple">
+<dt>‘TWC/r100’, {‘data’: 31.2251,</dt><dd><p>‘comment’: ‘Added comment’},</p>
+</dd>
+</dl>
+<p>‘TWC/dtdr’, 33.7064})</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>Shall result in the following nc structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">float32</span> <span class="n">time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">standard_name</span><span class="p">:</span> <span class="n">time</span>
+    <span class="n">long_name</span><span class="p">:</span> <span class="n">time</span> <span class="n">of</span> <span class="n">calibration</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="mf">569.</span><span class="p">,</span> <span class="mf">669.</span> <span class="mf">769.</span><span class="p">];</span>
+
+<span class="n">group</span> <span class="o">/</span><span class="n">TWC</span><span class="p">:</span>
+    <span class="n">float32</span> <span class="n">r100</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">long_name</span><span class="p">:</span> <span class="s1">&#39;TWC element resistance at 100deg C&#39;</span>
+        <span class="n">units</span><span class="p">:</span> <span class="s1">&#39;milliohm&#39;</span>
+        <span class="n">comment</span><span class="p">:</span> <span class="s1">&#39;Added comment&#39;</span>
+
+    <span class="n">float32</span> <span class="n">dtdr</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">long_name</span><span class="p">:</span> <span class="s1">&#39;Change in TWC element resistance with temperature&#39;</span>
+        <span class="n">units</span><span class="p">:</span> <span class="s1">&#39;deg C / milliohm&#39;</span>
+
+    <span class="n">r100</span> <span class="o">=</span> <span class="p">[</span><span class="mf">31.4473</span><span class="p">,</span> <span class="mf">31.3362</span><span class="p">,</span> <span class="mf">31.2251</span><span class="p">];</span>
+    <span class="n">dtdr</span> <span class="o">=</span> <span class="p">[</span><span class="mf">33.9276</span><span class="p">,</span> <span class="mf">33.8165</span><span class="p">,</span> <span class="mf">33.7064</span><span class="p">];</span>
+</pre></div>
+</div>
+<p>Attribute and variables names may be given as strings, as in the example
+above or as the netCDF4 object variables. Efforts are made to coerse
+given variable data into the correct type, if this is impossible the
+update shall be ignored.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cal_proc">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cal_proc" title="Permalink to this headline">¶</a></h2>
+<p>Import all cal parser functions</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, FAAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

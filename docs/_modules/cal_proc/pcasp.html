@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>cal_proc.pcasp &#8212; Creation/updates of nc files for FAAM calibration data 0.2 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cal_proc.pcasp</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File containing all PCASP instrument processor classes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.generic</span> <span class="k">import</span> <span class="n">Generic</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+
+<span class="c1"># Map cal file variable names to nc variables</span>
+<span class="n">var_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bin_cal/ADC_thres&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Lower Thresholds&#39;</span><span class="p">],</span>
+                                                     <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Lower Thresholds&#39;</span><span class="p">])),</span>
+           <span class="s1">&#39;bin_cal/x-section&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Lower Cross Section Boundaries&#39;</span><span class="p">],</span>
+                                                     <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Upper Cross Section Boundaries&#39;</span><span class="p">])),</span>
+           <span class="s1">&#39;bin_cal/x-section_err&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Lower Cross Section Boundary Errors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
+                                                         <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Upper Cross Section Boundary Errors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)),</span>
+           <span class="s1">&#39;bin_cal/x-section_width&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Width of Cross Section Boundaries&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;bin_cal/x-section_width_err&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Width of Cross Section Boundary Errors&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;bin_cal/dia_centre&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Channel Centre&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;bin_cal/dia_centre_err&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Channel Centre Errors&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;bin_cal/dia_width&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Channel Widths&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;bin_cal/dia_width_err&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Channel Width Errors&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;bin_cal/calibration_file&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;cal file&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;bin_cal/source_file&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;input file&#39;</span><span class="p">]}</span>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="read_cal_file"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.pcasp.read_cal_file">[docs]</a><span class="k">def</span> <span class="nf">read_cal_file</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span><span class="n">f_type</span><span class="o">=</span><span class="s1">&#39;pcasp_d&#39;</span><span class="p">,</span><span class="n">reject_bins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">invalid</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to read in csv files outputted from various calibration programs</span>
+
+<span class="sd">    The output format is defined for different types of files.</span>
+<span class="sd">    Data is returned in a dictionary.</span>
+
+<span class="sd">    .. NOTE::</span>
+<span class="sd">        This has been ripped straight from datafile_utils.py. Probably</span>
+<span class="sd">        can do this better.</span>
+
+<span class="sd">    :param cal_file: path and filename of calibration csv file to be read</span>
+<span class="sd">    :type cal_file: string</span>
+<span class="sd">    :param f_type: type of calibration file to read. One of;</span>
+<span class="sd">                    &#39;pcasp_d&#39;: output of CDtoDConverter.exe</span>
+<span class="sd">                    &#39;pcasp_cs&#39;: output of pcaspcal.exe</span>
+<span class="sd">                    &#39;cdp_d&#39;: output of CDtoDConverter.exe</span>
+<span class="sd">                    &#39;cdp_cs&#39;: output from ADs calibration program</span>
+<span class="sd">    :type f_type: string</span>
+<span class="sd">    :param reject_bins: List of bins that are not returned. Default is None</span>
+<span class="sd">    :type reject_bins: list of integers</span>
+<span class="sd">    :param invalid: Gives value of invalid values as used by input csv file.</span>
+<span class="sd">                    Default is -9999</span>
+<span class="sd">    :type invalid: string or number</span>
+
+<span class="sd">    :return d: dictionary of metadata and data masked arrays</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">csv</span><span class="o">,</span> <span class="nn">os.path</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+
+
+
+    <span class="c1"># List of known types for help</span>
+    <span class="n">valid_types</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pcasp_d&#39;</span><span class="p">:</span>   <span class="s1">&#39;output of CDtoDConverter.exe [default]&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;pcasp_cs&#39;</span><span class="p">:</span>  <span class="s1">&#39;output of pcaspcal.exe&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;cdp_d&#39;</span><span class="p">:</span>     <span class="s1">&#39;output of CDtoDConverter.exe [default]&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;cdp_cs&#39;</span><span class="p">:</span>    <span class="s1">&#39;output of CDP calibration program&#39;</span><span class="p">}</span>
+
+
+    <span class="c1"># Initialise dictionary</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="p">{},</span>
+         <span class="s1">&#39;data&#39;</span>    <span class="p">:</span> <span class="p">{}}</span>
+
+
+    <span class="k">def</span> <span class="nf">read_row_with_heading</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Read comma-delineated row that starts with a heading and return the</span>
+<span class="sd">        heading as a string and the row of data as an array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Strip off white space and extra commas</span>
+        <span class="c1"># Split into heading and data</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">is</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Try to create a list of numbers</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Create a list of strings</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Mask invalid array entries but need to cope with float(&#39;NaN&#39;)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">invalid</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">invalid</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span>
+
+
+    <span class="k">if</span> <span class="n">f_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pcasp_d&#39;</span><span class="p">,</span><span class="s1">&#39;cdp_d&#39;</span><span class="p">]:</span>
+        <span class="c1"># The file formats for cdp and pcasp diameter files are identical</span>
+        <span class="c1"># Input file is from CDtoDConverter.exe</span>
+        <span class="c1"># Format is;</span>
+        <span class="c1"># Line 1: Input filename</span>
+        <span class="c1"># Line 2: Mie table filename</span>
+        <span class="c1"># Line 4-13: Table of values, one row for each of the bins</span>
+
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;cal file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Read metadata at top of file</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="c1"># Read the metadata, is seperated from data table by blank line</span>
+            <span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read the rest of the file</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">line</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="c1"># For some reason may get an extra &#39;,&#39; at the end thus double strip</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Create masked array where masked values are invalid value</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)):</span>
+                <span class="c1"># Loop through line and convert to numbers</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;-1.#IND&#39;</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="c1"># This is a C++ indeterminant. Convert to &#39;invalid&#39; so</span>
+                        <span class="c1"># is masked but print warning to user as this may</span>
+                        <span class="c1"># signify problems with cal processing.</span>
+                        <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">invalid</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WARNING: &#39;-1.#IND&#39; converted to </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">invalid</span><span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; File: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Unknown character encounted: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; File: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; Line: &#39;</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">()</span>
+                        <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; File: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)))</span>
+                    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_equal</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">invalid</span><span class="p">)</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Create array of bin numbers *** Starting at 1 ***</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;bin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Channel Centre&#39;</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># Close file</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+    <span class="k">elif</span> <span class="n">f_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;pcasp_cs&#39;</span><span class="p">:</span>
+        <span class="c1"># Input file is from pcaspcal.exe.</span>
+
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;cal file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Straight line fits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="c1"># originally &#39;rb&#39; for some reason</span>
+
+        <span class="c1"># Read metadata at top of file</span>
+        <span class="c1"># Read any empty/extra lines at top of file</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>\
+                                      <span class="s1">&#39;data files used for calibration:&#39;</span><span class="p">):</span>
+            <span class="c1">#pdb.set_trace()</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read through all data files used to create calibration</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;input files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="c1"># Read the metadata, is seperated from data table by blank line</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;input files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Find column headings for raw data table.</span>
+        <span class="c1"># Problem is that currently (Sept2012) the first column heading is</span>
+        <span class="c1"># misspelt Partricle Diameter (micron)&#39;. So match characters &#39;P&#39;,&#39;D&#39;,</span>
+        <span class="c1"># and &#39;(&#39; at beginning of line incase it is corrected in future.</span>
+        <span class="k">def</span> <span class="nf">find_headings</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39;Put in func as need a try/except&#39;&#39;&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span> <span class="o">&amp;</span> \
+                       <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">)</span> <span class="o">&amp;</span> \
+                       <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="n">find_headings</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Create list keys from headings. Ignore any extra &#39;,&#39; at end of line</span>
+        <span class="c1"># Plus some headings seem to have an additional space at end</span>
+        <span class="n">headings</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> \
+                    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">headings</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Read in the raw data table, is seperated from fits by blank line</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+
+            <span class="c1"># &#39;Mode Channel (1-28)&#39; data (row 10) may be non-integer which</span>
+            <span class="c1"># generally means that histogram peak could not be found so was</span>
+            <span class="c1"># not used in fitting procedure. Don&#39;t include this row in arrays</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">10</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c1"># Line has some non-int string so go onto next line</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">v</span><span class="p">,</span><span class="n">h</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">),</span><span class="n">headings</span><span class="p">):</span>
+                    <span class="c1"># Columns of raw data have the following headings</span>
+                    <span class="c1"># Partricle Diameter (micron),+/- (micron),</span>
+                    <span class="c1"># Standard Deviation (micron),Particle Composition ,</span>
+                    <span class="c1"># Refractive Index,</span>
+                    <span class="c1"># Scattering Cross Section (micron squared),</span>
+                    <span class="c1"># +/- (micron squared),Start Time (hh:mm:ss),</span>
+                    <span class="c1"># End Time (hh:mm:ss),Date (yyyymmdd),Mode Channel (1-28),</span>
+                    <span class="c1"># Mode Voltage (A-D counts),+/- (A-D counts)</span>
+
+                    <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">h</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Sort out variable types in the raw data table and convert to arrays</span>
+        <span class="k">for</span> <span class="n">h_i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">]:</span>
+            <span class="c1"># Convert folowing columns to arrays of floats;</span>
+            <span class="c1"># &#39;Partricle Diameter (micron)&#39;, &#39;+/- (micron)&#39;,</span>
+            <span class="c1"># &#39;Standard Deviation (micron)&#39;,</span>
+            <span class="c1"># &#39;Scattering Cross Section (micron squared)&#39;,</span>
+            <span class="c1"># &#39;+/- (micron squared)&#39;, &#39;Mode Voltage (A-D counts)&#39;,</span>
+            <span class="c1"># &#39;+/- (A-D counts)&#39;</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">h_i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span>
+            <span class="c1"># Convert following columns to array of complex numbers</span>
+            <span class="c1"># &#39;Refractive Index&#39;</span>
+
+            <span class="c1"># Create a 2d list of real and img parts of each number</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span> <span class="k">for</span> \
+                   <span class="n">c</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]]]</span>
+
+            <span class="c1"># Then convert tuples into complex numbers</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]]</span> <span class="o">=</span> \
+                   <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">complex</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">h_i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">10</span><span class="p">]:</span>
+            <span class="c1"># Convert the following columns to arrays of integers</span>
+            <span class="c1"># &#39;Mode Channel (1-28)&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">h_i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]:</span>
+            <span class="c1"># Convert the remaining columns to arrays of strings</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">headings</span><span class="p">[</span><span class="n">h_i</span><span class="p">]],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+        <span class="c1"># Sort the raw data in terms of aerosol size</span>
+        <span class="n">sort_i</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">]</span>\
+                               <span class="p">[</span><span class="s1">&#39;Partricle Diameter (micron)&#39;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">headings</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">sort_i</span><span class="p">)</span>
+
+        <span class="c1"># Skip any blank lines</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;Straight line fits&#39;</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read lines that contain raw input data</span>
+        <span class="c1"># Read the straight line fit data</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Lower Thresholds&#39;</span><span class="p">):</span>
+            <span class="c1"># Straight line fit data is separated from bin table by blank line</span>
+            <span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_row_with_heading</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Straight line fits&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Skip over empty lines</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read bin data and put into arrays</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="c1"># Read through to the end of file</span>
+            <span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_row_with_heading</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Create array of bin numbers *** Starting at 1 ***</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;bin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Lower Thresholds&#39;</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># Close file</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">f_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;cdp_cs&#39;</span><span class="p">:</span>
+        <span class="c1"># Input file is from ADs CDP calibration program/s.</span>
+
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;cal file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)</span>
+<span class="c1">#        d[&#39;data&#39;][&#39;raw data&#39;] = {}</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Straight line fits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Read any empty/extra lines at top of file</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read through metadata</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Straight Line Fits&#39;</span><span class="p">):</span>
+            <span class="c1"># Discard empty lines</span>
+            <span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_row_with_heading</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read the straight line fit data</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Lower Thresholds&#39;</span><span class="p">):</span>
+            <span class="c1"># Straight line fit data is separated from bin table by blank line</span>
+            <span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_row_with_heading</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Straight line fits&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read bin data and put into arrays</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="c1"># Read through to the end of file</span>
+            <span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_row_with_heading</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Create array of bin numbers *** Starting at 1 ***</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;bin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;Lower Thresholds&#39;</span><span class="p">]))</span><span class="o">+</span><span class="mi">1</span>
+
+        <span class="c1"># Close file</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Unknown calibration file type:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> Valid types are;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">valid_types</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; </span><span class="si">{0}</span><span class="se">\t</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="c1"># Return arrays of only bins required</span>
+    <span class="k">if</span> <span class="n">reject_bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">del_bins</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">reject_bins</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># Something happened</span>
+            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+        <span class="c1"># Find bins to remove</span>
+        <span class="n">del_bins_i</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;bin&#39;</span><span class="p">],</span><span class="n">del_bins</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">len_bins</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;bin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># Loop through all data arrays and delete offending elements</span>
+        <span class="c1"># Note that metadata and raw data arrays are left unmodified</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">v</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">len_bins</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">del_bins_i</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">d</span></div>
+
+
+
+
+<div class="viewcode-block" id="PCASP"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.pcasp.PCASP">[docs]</a><span class="k">class</span> <span class="nc">PCASP</span><span class="p">(</span><span class="n">Generic</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for parsing and processing of calibration data files for</span>
+<span class="sd">    instrument::</span>
+
+<span class="sd">        PCASP: Passive Cavity Aerosol Spectrometer Probe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param ds: dataset from ingested cal_nc file</span>
+<span class="sd">        :type ds:  netCDF4.dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Generic</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">)</span>
+
+        <span class="c1"># datafiles is included in kargs and is not none and is relevant to</span>
+        <span class="c1"># bin calibration</span>
+
+
+<div class="viewcode-block" id="PCASP.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.pcasp.PCASP.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">largs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to make any change to the nc object</span>
+
+<span class="sd">        :param largs: List of lists of arbitrary arguments to apply to nc</span>
+
+<span class="sd">        The *largs* list is from</span>
+
+<span class="sd">        :Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; cal_ncgen.py --update *option*</span>
+
+<span class="sd">        and may be one of the following types;</span>
+
+<span class="sd">        * A list [of lists] of cdl files of data to be written into the nc</span>
+<span class="sd">          object. This option is chosen based on extension ``.cdl``. If more than</span>
+<span class="sd">          one cdl file is offered then it must be given as a single entry. eg;</span>
+
+<span class="sd">          :Example:</span>
+
+<span class="sd">          &gt;&gt;&gt; cal_ncgen.py -u PCASP_20170725.cdl PCASP_20171114.cdl</span>
+
+<span class="sd">        * A list [of lists] of PCASP diameter calibration files output from</span>
+<span class="sd">          ``cstodconverter``. This option is chosen based on filename ending</span>
+<span class="sd">          with ``d.csv``. If more than one calibration file is offered then it</span>
+<span class="sd">          must be given as a single entry. eg;</span>
+
+<span class="sd">          :Example:</span>
+
+<span class="sd">          &gt;&gt;&gt; cal_ncgen.py -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv</span>
+
+<span class="sd">        * A list nc attribute/value or variable/value pairs. For attributes</span>
+<span class="sd">          that are strings, the value is concatenated to the existing string</span>
+<span class="sd">          with a delimiting comma (non-char attributes will probably throw</span>
+<span class="sd">          an error). Variables will be appended to the end of the existing</span>
+<span class="sd">          variable numpy array. Note that variable attributes cannot be</span>
+<span class="sd">          appended to. The attribute/variable names must be given exactly as</span>
+<span class="sd">          in the existing nc file. Any containing group/s is given with</span>
+<span class="sd">          forward slashes, eg</span>
+
+<span class="sd">          :Example:</span>
+
+<span class="sd">          &gt;&gt;&gt; cal_ncgen.py -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071 2818.5, 2864.5</span>
+
+<span class="sd">        Note that any spaces in filenames must be enclosed in quotes. All</span>
+<span class="sd">        files are assumed to the same type as the first filename in the list.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">largs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Loop over outer list and determine action based on first element</span>
+        <span class="k">for</span> <span class="n">larg</span> <span class="ow">in</span> <span class="n">largs</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">larg</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cdl&#39;</span><span class="p">:</span>
+                <span class="c1"># Auxillary cdl file/s</span>
+                <span class="c1">#######</span>
+                <span class="c1"># Do something with cdl files</span>
+                <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">larg</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span> <span class="ow">and</span> \
+                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">larg</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+                <span class="c1"># PCASP calibration file/s</span>
+                <span class="n">update_bincal</span><span class="p">(</span><span class="n">larg</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">larg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">:</span>
+                <span class="c1"># Attribute/variable contained within nc object</span>
+
+                <span class="c1">#####</span>
+                <span class="c1"># Do something here to get attrib or var then append</span>
+                <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="PCASP.update_bincal_from_file"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.pcasp.PCASP.update_bincal_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">update_bincal_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">calfile</span><span class="p">,</span><span class="n">vars_d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append bin calibration data in datafile to that already in nc</span>
+
+<span class="sd">        :param calfile: PCASP calibration csv file. Is recognised as</span>
+<span class="sd">            ending in &#39;cs&#39; or &#39;d&#39; so user needs to provide some quality</span>
+<span class="sd">            assurance on the input files</span>
+<span class="sd">        :type calfile: Path/filename strings or pathlib obj</span>
+<span class="sd">        :param vars_d: Additional variables associated with those contained</span>
+<span class="sd">            within the datafile. At the very least this should contain any</span>
+<span class="sd">            associated coordinate variables, eg time.</span>
+<span class="sd">        :type vars_d: Dictionary of variable name and value pairs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">calfile</span> <span class="o">==</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">calfile</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># Nothing to do</span>
+            <span class="k">return</span>
+
+        <span class="n">caldata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">((</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">calfile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;cs&#39;</span><span class="p">),</span>
+               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">calfile</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.csv&#39;</span><span class="p">)):</span>
+            <span class="n">caldata</span> <span class="o">=</span> <span class="n">read_cal_file</span><span class="p">(</span><span class="n">calfile</span><span class="p">,</span><span class="n">f_type</span><span class="o">=</span><span class="s1">&#39;pcasp_cs&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">((</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">calfile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">),</span>
+                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">calfile</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.csv&#39;</span><span class="p">)):</span>
+            <span class="n">caldata</span> <span class="o">=</span> <span class="n">read_cal_file</span><span class="p">(</span><span class="n">calfile</span><span class="p">,</span><span class="n">f_type</span><span class="o">=</span><span class="s1">&#39;pcasp_d&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">caldata</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Error in the calfile</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Add var_map data to vars. However do not overwrite any items in var</span>
+        <span class="c1"># That is, items explicitly given in config file have precedence over</span>
+        <span class="c1"># items in var_map. This can be used to overwrite defaults in var_map</span>
+        <span class="c1"># with an entry in the config file if required.</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="p">((</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="n">var_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vars_d</span><span class="p">):</span>
+            <span class="c1">#print(&#39;Add {} to self.ds&#39;.format(k_))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">vars_d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">(</span><span class="n">caldata</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="c1"># Variable in var_map does not exist in file therefore skip</span>
+                <span class="k">pass</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  Failed. &#39;</span><span class="p">,</span><span class="n">err</span><span class="p">)</span>
+                <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append_dict</span><span class="p">(</span><span class="n">vars_d</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span></div></div>
+
+
+        <span class="c1"># try:</span>
+        <span class="c1">#     # Note hard-coding of bin_cal group :-/</span>
+        <span class="c1">#     self._add_coord(&#39;/bin_cal/time&#39;,vars.pop(&#39;time&#39;))</span>
+        <span class="c1"># except KeyError as err:</span>
+        <span class="c1">#     # Must have &#39;time&#39; variable update</span>
+        <span class="c1">#     return</span>
+        <span class="c1"># except Exception as err:</span>
+        <span class="c1">#     # Unknown error</span>
+        <span class="c1">#     pdb.set_trace()</span>
+
+        <span class="c1"># for k_,v_ in var_map.items():</span>
+        <span class="c1">#     #print(&#39;Add {} to self.ds&#39;.format(k_))</span>
+        <span class="c1">#     try:</span>
+        <span class="c1">#         self._add_var(k_,v_(caldata))</span>
+        <span class="c1">#     except KeyError as err:</span>
+        <span class="c1">#         # Variable in var_map does not exist in file therefore skip</span>
+        <span class="c1">#         pdb.set_trace()</span>
+        <span class="c1">#     except IndexError as err:</span>
+        <span class="c1">#         # Variable in var_map does not exist in dataset. Skip these</span>
+        <span class="c1">#         # variables, if they are created they may become mismatched</span>
+        <span class="c1">#         # wrt the cal time and other variables.</span>
+        <span class="c1">#     #    print(&#39;  Failed: Variable does not already exist in dataset&#39;)</span>
+        <span class="c1">#         pass</span>
+        <span class="c1">#     except Exception as err:</span>
+        <span class="c1">#         print(&#39;  Failed. &#39;,err)</span>
+        <span class="c1">#         pdb.set_trace()</span>
+        <span class="c1">#         pass</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, FAAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+cal\_ncgen module
+=================
+
+.. automodule:: cal_ncgen
+   :members:
+   :undoc-members:
+   :show-inheritance:

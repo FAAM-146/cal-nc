@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Calibration netCDF &#8212; Creation/updates of nc files for FAAM calibration data 0.2 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="FAAM Calibration netCDF documentation" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="index.html" title="FAAM Calibration netCDF documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Calibration netCDF</a><ul>
+<li><a class="reference internal" href="#calibration-data-background">Calibration Data Background:</a></li>
+<li><a class="reference internal" href="#introduction">Introduction:</a><ul>
+<li><a class="reference internal" href="#calibration-files">Calibration files</a></li>
+<li><a class="reference internal" href="#calibration-groups">Calibration groups</a></li>
+<li><a class="reference internal" href="#time-series-data">Time series data</a></li>
+<li><a class="reference internal" href="#data-and-calibration-referencing">Data and calibration referencing</a></li>
+<li><a class="reference internal" href="#traceability">Traceability</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#file-structure">File Structure:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#netcdf-construction">netCDF Construction</a><ul>
+<li><a class="reference internal" href="#cdl-templates">CDL templates:</a></li>
+<li><a class="reference internal" href="#ancillary-files">Ancillary files:</a></li>
+<li><a class="reference internal" href="#cal-ncgen-py-script-summary"><code class="docutils literal notranslate"><span class="pre">cal_ncgen.py</span></code> script summary:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">FAAM Calibration netCDF documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/readme.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="calibration-netcdf">
+<h1>Calibration netCDF<a class="headerlink" href="#calibration-netcdf" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="calibration-data-background">
+<h2>Calibration Data Background:<a class="headerlink" href="#calibration-data-background" title="Permalink to this headline">¶</a></h2>
+<p>Instrument calibration is an integral part of scientific operations at FAAM as part of the mission to provide the highest level of quality assurance with measurements. The calibration procedures, traceability, and data itself must be provided to the end user in a manner that is clear, robust, and linked with the measurement data to which it applies.</p>
+<p>Instrument calibration parameters to date have been dealt with in a somewhat piecemeal manner which has resulted in reduced transparency and clarity for the data user. Core primary instrument calibrations are generally held in a text file called the flight constants file. There is a unique file for each flight and the file contains all of the parameters that are applied to the raw data to convert them to physical units as contained within the FAAM core netCDF. Some instrument data, such as those contained within the core cloud physics netCDF, does not have calibrations applied. The relevant calibration data is supplied separately for the user to apply. These calibration text files are stored on the FAAM website and emailed out to users.</p>
+</div>
+<div class="section" id="introduction">
+<h2>Introduction:<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>To present calibration data in a consistent manner, facilitate archiving of the data, and improve traceability information and references, it is proposed to use a netCDF file of a specified structure. netCDF has been chosen as, although it is perhaps unnecessarily complicated for this application, it is commonly used for instrument data and is self-describing. The structure is flexible enough to hold many different types of instrument calibration information. The quantity of calibration information stored within the files will almost certainly be quite small so size and read/write speed are not a priority. Additionally, it is possible to insert these files into a netCDF4 data file as a sub-group and thus keep data and calibration together if that is beneficial.</p>
+<p>The proposed structure has been set with several central tenets in mind;</p>
+<ol class="arabic simple">
+<li><p>The calibration information of an instrument is contained within a single calibration file instead of being spread across multiple files,</p></li>
+<li><p>A single instrument may require several different calibrations in order to produce calibrated data. These different aspects of the calibration are contained in separate groups within the same netCDF file,</p></li>
+<li><p>A single file holds a time series of comparable calibrations,</p></li>
+<li><p>The calibration and measurement data files each contain references to the other. The data file should contain a boolean variable indicating whether the calibration has already been applied,</p></li>
+<li><p>Calibrations are traceable by the inclusion of calibration metadata,</p></li>
+<li><p>Future expansion with new instruments or more comprehensive calibrations of existing instrumentation can be accommodated.</p></li>
+</ol>
+<div class="section" id="calibration-files">
+<h3>Calibration files<a class="headerlink" href="#calibration-files" title="Permalink to this headline">¶</a></h3>
+<p>The idea is that each instrument has its own netCDF4 calibration file <a class="footnote-reference brackets" href="#fnote-multi-instr-nc" id="id1">1</a>, the filename shall follow current FAAM conventions with a structure such as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">instr_faam_YYYYDDMM_v001_r000_cal</span><span class="o">.</span><span class="n">nc</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">instr</span></code> is a unique string identifier for each instrument, <code class="docutils literal notranslate"><span class="pre">v001</span></code> refers to the version of the software that produced the netCDF, and <code class="docutils literal notranslate"><span class="pre">r000</span></code> gives the revision of the file.</p>
+</div>
+<div class="section" id="calibration-groups">
+<h3>Calibration groups<a class="headerlink" href="#calibration-groups" title="Permalink to this headline">¶</a></h3>
+<p>Some instruments may require different calibrations that are then both applied to the raw data within the processing software. An example of this is the PCASP; currently a calibration is applied to the flow meter readings plus a calibration is applied to the particle size bin boundaries. These two calibrations may be carried out at different times and they may be applied to the data at different times. Such instances  can be accommodated by using <code class="docutils literal notranslate"><span class="pre">groups</span></code> in a netCDF4 file. Calibrations are given in different groups within the same file with meaningful group names and metadata. The <code class="docutils literal notranslate"><span class="pre">time</span></code> coordinate may be in the root of the netCDF and apply to all groups or each group can have its own <code class="docutils literal notranslate"><span class="pre">time</span></code> coordinate if these differ between the different calibrations.</p>
+</div>
+<div class="section" id="time-series-data">
+<h3>Time series data<a class="headerlink" href="#time-series-data" title="Permalink to this headline">¶</a></h3>
+<p>Each file contains a time series of calibrations as long as these calibrations are comparable <a class="footnote-reference brackets" href="#fnote-noncomparable-cals" id="id2">2</a>.  Calibrations are held in an array with an unlimited dimension that is time/date of calibration. The standard name for this coordinate is <code class="docutils literal notranslate"><span class="pre">time</span></code> with the usual attributes of such a coordinate as detailed in the <a class="reference external" href="http://cfconventions.org/cf-conventions/cf-conventions.html#time-coordinate">CF conventions</a>.</p>
+<p>This way it is straightforward to detect changes in comparable calibrations over time but also remove the possibility of comparing calibrations that are not comparable. For example, if the instrument undergoes a sensor upgrade, comparing calibrations from before and after this hardware change may not be meaningful.</p>
+</div>
+<div class="section" id="data-and-calibration-referencing">
+<h3>Data and calibration referencing<a class="headerlink" href="#data-and-calibration-referencing" title="Permalink to this headline">¶</a></h3>
+<p>It is important that calibration information is easily linked to those datasets to which it applies and that the end user of the dataset understands whether the calibrations have already been applied or not. These are possibly quite difficult to satisfy depending on the instrument.</p>
+<p>In each calibration group there is a variable called <code class="docutils literal notranslate"><span class="pre">APPLIES_TO</span></code> which has an entry for each calibration time in the series that points to the applicable measurement data to which this calibration data has been or should be applied to. How this pointer is crafted at this stage is left to the individual as it may change instrument-to-instrument. It may be a data filename or it may be a string of applicable flight numbers for example. How a data file points to a particular calibration may also depend on the instrument and its particular calibration process.</p>
+</div>
+<div class="section" id="traceability">
+<h3>Traceability<a class="headerlink" href="#traceability" title="Permalink to this headline">¶</a></h3>
+<p>Traceability of calibrations, calibration materials, and procedures is vital for user confidence in the data. The calibration netCDF has to hold this information within the file. This may include certificates provided by manufacturers or third party calibration facilities, descriptions of procedures or links to these that detail the methods used, and/or references to papers or textbooks that serve as the basis of the procedures <a class="footnote-reference brackets" href="#fnote-graphics-inclusion" id="id3">3</a>.</p>
+<p>The structure provides several layers of references. In the root of the calibration netCDF file are global attributes <code class="docutils literal notranslate"><span class="pre">references</span></code> and <code class="docutils literal notranslate"><span class="pre">comment</span></code>, these apply to all calibration information within the entire file and so are necessarily general. Within each calibration group there may also be``references`` and <code class="docutils literal notranslate"><span class="pre">comment</span></code> attributes that provide direct textual information or a link to an external reference detailing the calibration procedure relevant to that calibration group.</p>
+<p>Most specific is a <code class="docutils literal notranslate"><span class="pre">TRACEABILITY</span></code> variable within each calibration group that provides, for each calibration time, any information specific to that individual calibration. These may include calibration certificate information for materials and/or equipment used, links to external files containing this information, etc.</p>
+</div>
+</div>
+<div class="section" id="file-structure">
+<h2>File Structure:<a class="headerlink" href="#file-structure" title="Permalink to this headline">¶</a></h2>
+<p>The file is divided into groups, as is possible with netCDF4, with the structure being as follows;</p>
+<dl class="simple">
+<dt>Global attributes of the root</dt><dd><p>Attributes that apply to the contents of the entire file. This metadata contains information about the netCDF conventions, institution where the data was produced, references, and any universally applicable instrument information such as name, serial number, etc. Additionally there is information about the history of the file. Many of these global attributes are defined in relevant conventions such as CF1.x.</p>
+</dd>
+<dt>Calibration groups</dt><dd><p>Separate calibration information is placed in different calibration groups. Each of these have group attributes with group-wide metadata.</p>
+</dd>
+</dl>
+<p>Array dimensions for calibration data are organised so that with each new calibration that is added, the datetime dimension increases by one. Second and tertiary dimensions are set by the requirements of the instrument calibration.</p>
+<dl class="simple">
+<dt>First dimension - time</dt><dd><p>This is the unlimited dimension. This dimension is expanded each time a calibration is added to the file, which may be once a year or numerous times per flight.</p>
+</dd>
+<dt>Second dimension - cal</dt><dd><p>This is a fixed dimension for the calibration information. For example, this may be a list of three parameters for a cubic fit or a list of thirty bin threshold values.</p>
+</dd>
+<dt>Further dimensions - vector</dt><dd><p>These are fixed dimensions for any additional information. For example if the thirty bins have upper and lower threshold values.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="netcdf-construction">
+<h1>netCDF Construction<a class="headerlink" href="#netcdf-construction" title="Permalink to this headline">¶</a></h1>
+<p>Templates for calibration netCDF files are done by hand in <a class="reference external" href="https://www.unidata.ucar.edu/software/netcdf/netcdf/CDL-Syntax.html">cdl</a>. This is a text equivalent of the binary netCDF. For some instruments, the amount of calibration data may be so small that it can all be included in the cdl template, if this is impractical extra data can be included in additional files. These other files may be cdl with the correct variables or they may have any other file format. These ancillary files are read in separately and the data written into variables of the calibration netCDF that is created with the cdl template.</p>
+<div class="section" id="cdl-templates">
+<h2>CDL templates:<a class="headerlink" href="#cdl-templates" title="Permalink to this headline">¶</a></h2>
+<p>There is a <em>master</em> cdl file that is used to create the <em>master</em> netCDF. This may be an empty template for a particular instrument, these are stored in the <code class="docutils literal notranslate"><span class="pre">cal_cdl/</span></code> directory. Alternatively it may be based on such a template but have data values written in to the file. These would be stored wherever is most appropriate for that instrument calibration. Further information can be included in separate cdl files that are added/appended to the netCDF file produced by the <em>master</em> cdl file.</p>
+<dl class="simple">
+<dt>Instrument cdl 1</dt><dd><p>The top level instrument cdl has convention, institution, and instrument metadata that are written as netCDF global attributes. Convention and institution metadata are fixed. Instrument metadata applies to the entire file and includes instrument name/s, serial number, references, etc. Groups may be included in this file if there are multiple types of calibration for the same instrument. The primary coordinate is <cite>time</cite>, this may be a global attribute if it applies to all groups or may be a group coordinate if more appropriate. This cdl produces the <em>master</em> netCDF file (if no nc files are given).</p>
+</dd>
+<dt>Instrument cdl <em>n</em></dt><dd><p>Auxiliary instrument cdl file/s can be written. These may be used if the quantity of data becomes unwieldy for a single file. Any conflicts in terms of attributes and dimensions in the primary cdl file will be ignored but new variables shall be added and existing variables will be expanded in the <code class="docutils literal notranslate"><span class="pre">time</span></code> dimension.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="ancillary-files">
+<h2>Ancillary files:<a class="headerlink" href="#ancillary-files" title="Permalink to this headline">¶</a></h2>
+<p>It may be that the quantity or dimensionality of calibration data makes it unwieldy to write into the cdl file by hand. In these situations it is easier to write the calibration data into another type of file and use a customized parser to ingest this data, massage it into the appropriate form, and write it into the netCDF. If this is the case the parser and processor of the ancillary data are included in the instrument processing class.</p>
+<p>These processors are stored in <code class="docutils literal notranslate"><span class="pre">cal_proc</span></code> in a file dedicated for each instrument. Universal methods are in <code class="docutils literal notranslate"><span class="pre">generic.py</span></code> and the instrument processors inherit from <code class="docutils literal notranslate"><span class="pre">Generic</span></code>.</p>
+</div>
+<div class="section" id="cal-ncgen-py-script-summary">
+<h2><code class="docutils literal notranslate"><span class="pre">cal_ncgen.py</span></code> script summary:<a class="headerlink" href="#cal-ncgen-py-script-summary" title="Permalink to this headline">¶</a></h2>
+<p>A helper script, <code class="docutils literal notranslate"><span class="pre">cal_ncgen.py</span></code> has been written to assist in creating and modifying the calibration netCDF files. The mandatory script argument is one or more cdl and/or nc files.</p>
+<ul class="simple">
+<li><p>If cdl, a new nc file will be created using the cdl as a template</p></li>
+<li><p>If nc then new data is appended into this nc file</p></li>
+</ul>
+<p>If the input is cdl then ncgen is run to create an nc file <a class="footnote-reference brackets" href="#fnote-direct-ncgen-call" id="id4">4</a>. The first netCDF file argument is assumed to the <em>master</em> to which any additional information is added. If there is no netCDF files given then the frist cdl file is used to create the <em>master</em> nc.</p>
+<p>This nc file is then read in with the netCDF4 module. The instrument nickname is extracted from the resulting datasets global <code class="docutils literal notranslate"><span class="pre">instr</span></code> attribute and this is used to instantiate the appropriate class for that instrument. The simplest class is <code class="docutils literal notranslate"><span class="pre">Generic</span></code> which has some universal methods. All other classes inherit from Generic and may include other methods to parse from ancillary files and and write this data into the nc file. This parsing will be highly specific to an instrument, thus the individual classes.</p>
+<p>It is possible to add/update individual attributes and variables as script arguments using the <code class="docutils literal notranslate"><span class="pre">--update</span></code> option.</p>
+<blockquote>
+<div><p>The testing for this option has been limited. Need to complete this.</p>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p>These instructions assume that you are in a shell, either a terminal on a linux box or a <cite>git bash</cite> terminal on a Windows machine. You can also use various GUIs such as <a class="reference external" href="https://desktop.github.com">GitHub Desktop</a> but in this case you’re on your own.</p>
+<p>This application uses <code class="docutils literal notranslate"><span class="pre">ncgen</span></code> which is part of the <a class="reference external" href="https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html">netCDF</a> package. It must be in the OS path so that it can be found by the script. It will usually be installed as part of the <code class="docutils literal notranslate"><span class="pre">netcdf4-python</span></code> package.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>In a terminal clone the <code class="docutils literal notranslate"><span class="pre">cal-nc</span></code> repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it$ git clone git@github.com:FAAM-146/cal-nc.git
+</pre></div>
+</div>
+<p>or if you prefer <cite>https</cite>,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it$ git clone https://github.com/FAAM-146/cal-nc.git
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Create a conda environment (after installing <a class="reference external" href="https://conda.io/en/latest/">conda</a> if necessary) using the environment file included in the repository;</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it$ <span class="nb">cd</span> cal-nc
+user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ conda env create -f calnc-environment.yml
+</pre></div>
+</div>
+<p>This shall create an environment called <code class="docutils literal notranslate"><span class="pre">cal-nc</span></code>.</p>
+<ul class="simple">
+<li><p>Activate the environment</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ conda activate cal-nc
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Classes, methods, and functions for the instrument processors are written in <code class="docutils literal notranslate"><span class="pre">cal_proc</span></code> while template instrument-specific cdl templates are in <code class="docutils literal notranslate"><span class="pre">cal_cdl</span></code>. The helper script <code class="docutils literal notranslate"><span class="pre">cal-ncgen.py</span></code> has been written to make the creation and maintenance of calibration netCDF files easier, full help exists so for examples of how to run it type</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>cal-nc<span class="o">)</span> user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ python cal_ncgen.py --help
+</pre></div>
+</div>
+<p>Files to test the code are in <code class="docutils literal notranslate"><span class="pre">testing</span></code>, see the readme in this directory for more information about running <code class="docutils literal notranslate"><span class="pre">cal_ncgen.py</span></code> with these files.</p>
+<dl class="footnote brackets">
+<dt class="label" id="fnote-multi-instr-nc"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Having only a single instrument in a file may mean a lot of almost empty files for many of the primary instruments. It may be possible to combine many such calibrations in a single calibration file through the use of links.</p>
+</dd>
+<dt class="label" id="fnote-noncomparable-cals"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>An exception to this may be when instrument calibrations are never comparable.</p>
+</dd>
+<dt class="label" id="fnote-graphics-inclusion"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>At this stage the feasibility of inclusion of graphics file/s of calibration certificates etc within the netCDF is unknown. Inclusion of raster data is done so should be possible to do. However no work on how practical in terms of writing, reading, and file sizes has been done so at this stage only links have been used. This means that a repository or database of these materials shall need to be kept separate to the calibration netCDF file.</p>
+</dd>
+<dt class="label" id="fnote-direct-ncgen-call"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>This means that a user can completely by-pass the use of this script and call <a class="reference external" href="https://www.unidata.ucar.edu/software/netcdf/netcdf/ncgen.html">ncgen</a> directly on a user-generated cdl file. This is by design as it allows greater flexibility.</p>
+</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="index.html" title="FAAM Calibration netCDF documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, FAAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

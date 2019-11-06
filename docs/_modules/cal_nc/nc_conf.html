@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>cal_nc.nc_conf &#8212; Creation/updates of nc files for FAAM calibration data 0.2 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cal_nc.nc_conf</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for parsing of configuration files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">datetime</span><span class="o">,</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">netCDF4</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="kn">import</span> <span class="nn">cal_proc</span>
+<span class="kn">from</span> <span class="nn">cal_proc</span> <span class="k">import</span> <span class="o">*</span>
+
+
+
+<span class="c1"># Project information</span>
+<span class="n">__title__</span> <span class="o">=</span> <span class="s1">&#39;FAAM Calibration netCDF - nc configuration parsing&#39;</span>
+<span class="n">__description__</span> <span class="o">=</span> <span class="s1">&#39;Functions for parsing of configuration files.&#39;</span>
+<span class="n">__institution__</span> <span class="o">=</span> <span class="s1">&#39;FAAM - Facility for Airborne Atmospheric Measurements&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s1">&#39;2019 10 31&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Graeme Nott&#39;</span>
+<span class="n">__author_email__</span> <span class="o">=</span> <span class="s1">&#39;graeme.nott@faam.ac.uk&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;2019, FAAM&#39;</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;read_config&#39;</span><span class="p">,</span><span class="s1">&#39;extract_specials&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># Directory where temporary files are stored</span>
+<span class="n">default_tmp_dir</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span>
+
+
+<span class="c1"># List of default &#39;special key strings&#39; in configuration dictionary</span>
+<span class="n">default_special_str</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_group&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;_parsefile&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">,</span><span class="n">destr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to read in configuration file and put entries in dictionary.</span>
+<span class="sd">    ConfigParser options used are;</span>
+<span class="sd">        allow_no_value=True</span>
+
+<span class="sd">    Input args:</span>
+<span class="sd">        cfg_file:   configuration path/filename with the required format</span>
+<span class="sd">        destr:      Boolean, if True then convert strings to other types</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cfg_dict:   dictionary with sub-dictionaries for each section</span>
+<span class="sd">                    returns None if cfg_file cannot be found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Manual configuration converters</span>
+    <span class="k">def</span> <span class="nf">list_converter</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert comma-delineated string to list of numbers or strings as</span>
+<span class="sd">        appropriate. &#39;none&#39; strings are converted to None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">s</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">s_</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s_</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">conv_</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">if</span> <span class="n">s_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;none&#39;</span> <span class="k">else</span> <span class="n">conv_</span><span class="p">(</span><span class="n">s_</span><span class="p">)</span> <span class="k">for</span> <span class="n">s_</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[:]]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">l</span>
+
+    <span class="k">def</span> <span class="nf">_ConfigSectionMap</span><span class="p">(</span><span class="n">section</span><span class="p">,</span><span class="n">rtn_str</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># Read each option within the given section</span>
+        <span class="c1"># If rtn_str is False then attempt to inteprete/convert string</span>
+        <span class="k">if</span> <span class="n">rtn_str</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">getter</span> <span class="o">=</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getter</span> <span class="o">=</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">getlist</span><span class="p">,</span>
+                      <span class="n">cfg</span><span class="o">.</span><span class="n">getint</span><span class="p">,</span><span class="n">cfg</span><span class="o">.</span><span class="n">getfloat</span><span class="p">,</span>
+                      <span class="n">cfg</span><span class="o">.</span><span class="n">getboolean</span><span class="p">,</span>   <span class="c1"># after get numbers so 0/1 are ints</span>
+                      <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">]</span>
+
+        <span class="n">cfg_d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">getter_</span> <span class="ow">in</span> <span class="n">getter</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">cfg_d</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">getter_</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="c1"># String does not include comma so not a list</span>
+                    <span class="c1"># Raised by list_converter()</span>
+                    <span class="k">continue</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span><span class="ne">AttributeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="c1"># Generally attempting to convert a None</span>
+                    <span class="c1"># If None then loop through to cfg.get()</span>
+                    <span class="k">continue</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;exception on </span><span class="si">{}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># Attempt to &#39;none&#39; strings to None</span>
+            <span class="k">if</span> <span class="n">cfg_d</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;NONE&#39;</span><span class="p">]:</span>
+                <span class="n">cfg_d</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">cfg_d</span>
+
+
+    <span class="c1"># Check file validity</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+        <span class="c1"># If file as named doesn&#39;t exist then add an extension if possible</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.cfg&#39;</span><span class="p">):</span>
+            <span class="n">cfg_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.cfg&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;filename </span><span class="si">{}</span><span class="s1"> does not exist.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">(</span><span class="n">allow_no_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                    <span class="n">converters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;list&#39;</span><span class="p">:</span> <span class="n">list_converter</span><span class="p">})</span>
+
+    <span class="n">cfg</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
+    <span class="n">cfg_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">sections</span><span class="p">():</span>
+        <span class="n">cfg_dict</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ConfigSectionMap</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cfg_dict</span> <span class="o">==</span> <span class="p">{}:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">cfg_dict is empty but &#39;</span> <span class="o">+</span>\
+              <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> exists.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cfg</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; This usually occurs when the eol is set incorrectly. &#39;</span><span class="o">+</span>\
+              <span class="s1">&#39;Unix eol characters are known to work.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cfg_dict</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">cfg_dict</span></div>
+
+
+<div class="viewcode-block" id="extract_specials"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.extract_specials">[docs]</a><span class="k">def</span> <span class="nf">extract_specials</span><span class="p">(</span><span class="n">cfg_dict</span><span class="p">,</span><span class="n">specials</span> <span class="o">=</span> <span class="p">[],</span><span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract special configuration keys and return</span>
+
+<span class="sd">    :param cfg_dict: Configuration dictionary</span>
+<span class="sd">    :type cfg_dict: dictionary</span>
+<span class="sd">    :param specials: list of special strings to extract if they are present.</span>
+<span class="sd">        Default is default_special_str. Any special strings given are appended</span>
+<span class="sd">        to default_special_str rather than replacing it if overwrite is False.</span>
+<span class="sd">    :type specials: list</span>
+<span class="sd">    :params overwrite: If False [default] then any specials given in kwargs</span>
+<span class="sd">        are appended to default_special_str. If True then only those strings</span>
+<span class="sd">        included in specials are searched for.</span>
+<span class="sd">    :type overwrite: boolean</span>
+<span class="sd">    :returns: Dictionary of specials with keys of the special strings and</span>
+<span class="sd">        input cfg_dict with special items removed. If no specials found then</span>
+<span class="sd">        specials_dict will be {}.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#pdb.set_trace()</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">specials</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">specials</span> <span class="o">=</span> <span class="p">[</span><span class="n">specials</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">overwrite</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">specials</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">specials</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default_special_str</span><span class="p">)</span>
+
+    <span class="n">s_l</span> <span class="o">=</span> <span class="p">[</span><span class="n">s_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">s_</span> <span class="ow">in</span> <span class="n">specials</span><span class="p">]</span>
+
+    <span class="n">specials_dict</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cfg_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k_</span> <span class="ow">in</span> <span class="n">s_l</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">k_</span> <span class="ow">in</span> <span class="n">specials_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">cfg_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cfg_dict</span><span class="p">,</span> <span class="n">specials_dict</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, FAAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>cal_nc.ds_func &#8212; Creation/updates of nc files for FAAM calibration data 0.2 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cal_nc.ds_func</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for reading, writing, and manipulating netCDF datasets.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">datetime</span><span class="o">,</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">netCDF4</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="c1">#from .. import cal_proc</span>
+
+
+<span class="c1"># Project information</span>
+<span class="n">__title__</span> <span class="o">=</span> <span class="s1">&#39;FAAM Calibration netCDF - ds functions&#39;</span>
+<span class="n">__description__</span> <span class="o">=</span> <span class="s1">&#39;Functions for reading, writing, and manipulating nc datasets.&#39;</span>
+<span class="n">__institution__</span> <span class="o">=</span> <span class="s1">&#39;FAAM - Facility for Airborne Atmospheric Measurements&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s1">&#39;2019 10 28&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Graeme Nott&#39;</span>
+<span class="n">__author_email__</span> <span class="o">=</span> <span class="s1">&#39;graeme.nott@faam.ac.uk&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;2019, FAAM&#39;</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;combine_datasets&#39;</span><span class="p">,</span><span class="s1">&#39;create_common_nc&#39;</span><span class="p">]</span>
+
+
+
+
+<div class="viewcode-block" id="combine_datasets"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.ds_func.combine_datasets">[docs]</a><span class="k">def</span> <span class="nf">combine_datasets</span><span class="p">(</span><span class="n">ds1</span><span class="p">,</span><span class="n">ds2</span><span class="p">,</span><span class="n">ds3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combine attributes, dimensions, and variables from ds1 and ds2</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+    <span class="n">root_attr</span> <span class="o">=</span> <span class="p">{</span><span class="n">k_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds1</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ds2</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="k">if</span> <span class="n">k_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds1</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">ds2</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="c1"># Add attributes that are unique to one dataset or differ between datasets</span>
+        <span class="k">if</span> <span class="n">k_</span> <span class="ow">in</span> <span class="n">root_attr</span><span class="p">:</span>
+            <span class="n">root_attr</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ds1</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">),</span><span class="n">ds2</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">root_attr</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds1</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">root_attr</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">k_</span> <span class="ow">in</span> <span class="n">force_append</span><span class="p">:</span>
+        <span class="c1"># Add attributes that are required</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">root_attr</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ds1</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">),</span><span class="n">ds2</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">k_</span><span class="p">)])</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="c1"># This will only happen if the attribute k_ is not in either dataset</span>
+            <span class="k">pass</span>
+
+    <span class="n">ds3</span><span class="o">.</span><span class="n">setncatts</span><span class="p">(</span><span class="n">root_attr</span><span class="p">)</span>
+
+    <span class="c1"># Find unlimited dimension. Assumes that all datasets have the same unlimited</span>
+    <span class="c1"># dimension. If not then the files are not comparable and cannot be concatenated</span>
+    <span class="n">dim_ul</span> <span class="o">=</span> <span class="p">[</span><span class="n">dim_</span> <span class="k">for</span> <span class="n">dim_</span> <span class="ow">in</span> <span class="n">ds1</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> \
+              <span class="k">if</span> <span class="n">ds1</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">dim_</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Create dimensions from both datasets</span>
+    <span class="k">for</span> <span class="n">dim_</span><span class="p">,</span><span class="n">val_</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds1</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">ds2</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">dim_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds3</span><span class="o">.</span><span class="n">dimensions</span><span class="p">:</span>
+            <span class="n">ds3</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="n">dim_</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">val_</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Create variables</span>
+    <span class="k">for</span> <span class="n">var_</span><span class="p">,</span><span class="n">val_</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds1</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">ds2</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+
+        <span class="k">if</span> <span class="n">var_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds3</span><span class="o">.</span><span class="n">variables</span> <span class="ow">and</span> <span class="n">var_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fill_</span> <span class="o">=</span> <span class="n">val_</span><span class="o">.</span><span class="n">_FillValue</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="c1"># _FillValue has not been set so use default</span>
+                <span class="n">fill_</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">ds3</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="n">var_</span><span class="p">,</span>
+                               <span class="n">datatype</span><span class="o">=</span><span class="n">val_</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span>
+                               <span class="n">dimensions</span><span class="o">=</span><span class="n">val_</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">var1</span> <span class="o">=</span> <span class="n">ds1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_</span><span class="p">][:]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">var1</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds2</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_</span><span class="p">]</span><span class="o">.</span><span class="n">_FillValue</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">var2</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_</span><span class="p">][:]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">var2</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_</span><span class="p">]</span><span class="o">.</span><span class="n">_FillValue</span><span class="p">]</span>
+
+            <span class="n">ds3</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">var1</span><span class="p">,</span><span class="n">var2</span><span class="p">))</span>
+
+            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+            <span class="c1"># Set variable attributes</span>
+            <span class="n">var_attr1</span> <span class="o">=</span> <span class="p">{</span><span class="n">k_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ds1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="n">var_attr2</span> <span class="o">=</span> <span class="p">{</span><span class="n">k_</span><span class="p">:</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ds2</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+            <span class="c1">#  Merge attribute dictionaries with ds1 variable attributes</span>
+            <span class="c1"># taking precedence over ds2 attributes of the same name.</span>
+            <span class="n">var_attr</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">var_attr2</span><span class="p">,</span> <span class="o">**</span><span class="n">var_attr1</span><span class="p">}</span>
+
+            <span class="n">ds3</span><span class="p">[</span><span class="n">var_</span><span class="p">]</span><span class="o">.</span><span class="n">setncatts</span><span class="p">(</span><span class="n">var_attr</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="create_common_nc"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.ds_func.create_common_nc">[docs]</a><span class="k">def</span> <span class="nf">create_common_nc</span><span class="p">(</span><span class="n">nc1</span><span class="p">,</span><span class="n">nc2</span><span class="p">,</span><span class="n">fnc3</span><span class="p">,</span>
+                     <span class="n">force_append</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">,</span><span class="s1">&#39;history&#39;</span><span class="p">],</span>
+                     <span class="n">exclude</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a new netCDF with all of the items of the two input datasets</span>
+
+<span class="sd">    netCDF inputs, nc1 and nc2, are used to create a new netCDF, nc3,</span>
+<span class="sd">    that contains all of the attributes, groups, and variables of nc1 and</span>
+<span class="sd">    nc2.</span>
+
+<span class="sd">    Attributes shall be that of nc1 if it is the same in both nc1 and</span>
+<span class="sd">    nc2 unless that attribute name is included in force_append. In this</span>
+<span class="sd">    case it shall be treated as if the attributes are different. When the</span>
+<span class="sd">    attribute value in nc1 and nc2 are different, the resultant attribute</span>
+<span class="sd">    in nc3 shall be a comma-delineated combination of the individuals,</span>
+<span class="sd">    that from nc1 preceeds that from nc2.</span>
+
+<span class="sd">    Variables from nc2 are appended to the same variable in nc1. The</span>
+<span class="sd">    variables are sorted by the unlimited dimension.</span>
+
+<span class="sd">    Variables in only one of the input datasets shall be included unaltered</span>
+<span class="sd">    in the resultant dataset.</span>
+
+<span class="sd">    :param nc1: netCDF file or dataset.</span>
+<span class="sd">    :type nc1: File string or PosixPath or netCDF4.dataset Must be</span>
+<span class="sd">        same type as nc2.</span>
+<span class="sd">    :param nc2: netCDF file or dataset.</span>
+<span class="sd">    :type nc2: File string or PosixPath or netCDF4.dataset. Must be</span>
+<span class="sd">        same type as nc1.</span>
+<span class="sd">    :param fnc3: Name of created netCDF file.</span>
+<span class="sd">    :type fnc3: File string or PosixPath for created nc file</span>
+<span class="sd">    :param force_append: Any attribute strings that should always be</span>
+<span class="sd">        appended, even if they are identical. Default is [&#39;username&#39;].</span>
+<span class="sd">    :type force_append: List of attribute case-sensitive strings.</span>
+<span class="sd">    :param exclude: List of attribute or variable names (but not variable</span>
+<span class="sd">        attributes) that are not to be included in nc3.</span>
+<span class="sd">    :type exclude: List of case-sensitive strings.</span>
+<span class="sd">    :returns nc3: netCDF file or dataset with combined attributes, groups,</span>
+<span class="sd">        and variables of nc1 and nc2.</span>
+<span class="sd">    :type nc3: Same type as nc1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># def compare_update_ncattrs(ds1,ds2,ds3):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Compare attributes and create/update any in ds_m as necessary</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     pdb.set_trace()</span>
+
+
+    <span class="c1">#     #</span>
+
+    <span class="c1">#     # Add all attributes in either ds1 and ds2 to the attributes dict</span>
+    <span class="c1">#     attr_dict = {a_:ds2.getncattr(a_) for a_ in set(ds2.ncattrs()).union(ds1.ncattrs()) \</span>
+    <span class="c1">#                  if a_ not in exclude}</span>
+
+    <span class="c1">#     # Test all attributes. If not the same then append strings</span>
+    <span class="c1">#     # with a comma to delineate entries. Note that attributes included in</span>
+    <span class="c1">#     # force_append are always appended even if they are identical.</span>
+    <span class="c1">#     for attr in (a_ for a_ in ds2.ncattrs() if (ds2.getncattr(a_) != ds1.getncattr(a_) or a_ in force_append)):</span>
+    <span class="c1">#         attr_dict[attr] = &#39;, &#39;.join([ds1.getncattr(attr),</span>
+    <span class="c1">#                                      ds2.getncattr(attr)])</span>
+
+
+    <span class="c1">#     print(set(ds2.ncattrs()).union(ds1.ncattrs()))</span>
+    <span class="c1">#     ds3.setncatts(attr_dict)</span>
+
+    <span class="c1">#     return ds3</span>
+
+
+
+
+
+
+
+
+
+
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">nc1</span><span class="p">)</span> <span class="o">==</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PosixPath</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">nc1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">nc1</span><span class="p">)):</span>
+        <span class="n">ds1</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">nc1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;NETCDF4&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">nc1</span><span class="p">)</span> <span class="o">==</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="n">ds1</span> <span class="o">=</span> <span class="n">nc1</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">nc2</span><span class="p">)</span> <span class="o">==</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PosixPath</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">nc2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">nc2</span><span class="p">)):</span>
+        <span class="n">ds2</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">nc2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;NETCDF4&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">nc2</span><span class="p">)</span> <span class="o">==</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="n">ds2</span> <span class="o">=</span> <span class="n">nc2</span>
+
+    <span class="k">with</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">fnc3</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;NETCDF4&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds3</span><span class="p">:</span>
+
+        <span class="n">combine_datasets</span><span class="p">(</span><span class="n">ds1</span><span class="p">,</span><span class="n">ds2</span><span class="p">,</span><span class="n">ds3</span><span class="p">)</span>
+
+    <span class="c1"># **************************</span>
+    <span class="c1"># Create root attributes dictionary</span>
+    <span class="c1"># Initially dictionary has all attributes from ds1 and ds2 that are</span>
+    <span class="c1"># identical. However does not have any multiples.</span>
+
+
+
+
+
+    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">grp_</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds1</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">ds2</span><span class="o">.</span><span class="n">groups</span><span class="p">):</span>
+        <span class="c1"># Add any groups that are not already in ds3</span>
+        <span class="n">ds3</span><span class="o">.</span><span class="n">createGroup</span><span class="p">(</span><span class="n">grp_</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="n">ds3</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
+        <span class="c1"># Loop through all groups</span>
+        <span class="c1"># .. NOTE:: This assumes no embedded groups</span>
+
+        <span class="c1"># Update any group attributes as necessary</span>
+        <span class="n">ds3</span><span class="p">[</span><span class="n">grp</span><span class="p">]</span> <span class="o">=</span> <span class="n">compare_update_ncattrs</span><span class="p">(</span><span class="n">ds1</span><span class="p">[</span><span class="n">grp</span><span class="p">],</span><span class="n">ds2</span><span class="p">[</span><span class="n">grp</span><span class="p">],</span><span class="n">ds3</span><span class="p">[</span><span class="n">grp</span><span class="p">])</span>
+
+        <span class="c1"># Update variables</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds_nc</span><span class="p">[</span><span class="n">grp</span><span class="p">]</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+            <span class="n">ds_nc</span><span class="p">[</span><span class="n">grp</span><span class="p">][</span><span class="n">var</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">ds_nc</span><span class="p">[</span><span class="n">grp</span><span class="p">][</span><span class="n">var</span><span class="p">][:],</span>
+                                                    <span class="n">ds</span><span class="p">[</span><span class="n">grp</span><span class="p">][</span><span class="n">var</span><span class="p">][:]))</span>
+
+
+
+
+    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+    <span class="n">ds1</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">ds2</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">nc3</span></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Creation/updates of nc files for FAAM calibration data 0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, FAAM.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

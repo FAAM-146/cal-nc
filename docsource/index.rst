@@ -2,7 +2,7 @@
 FAAM Calibration netCDF documentation
 =====================================
 
-This document defines the netCDF file structure for storage of instrument calibration information as used by FAAM - the Facility for Airborne Atmospheric Measurements. These files provide traceability for all instrument calibrations, the linking of calibration information with applicable instrument data, and relevant calibration metadata all within a framework suitable for archival.
+This document defines the netCDF file structure for storage of instrument calibration information as used by FAAM - the Facility for Airborne Atmospheric Measurements. These files provide traceability for all instrument calibrations, the linking of calibration information with applicable instrument data, and relevant calibration metadata all within a framework suitable for archiving.
 
     .. tabularcolumns:: |r|l|
 
@@ -44,9 +44,11 @@ Functions and Modules
     :maxdepth: 2
     :glob:
 
-    /_autosummary/cal_cdl
-    /_autosummary/cal_ncgen
-    /_autosummary/cal_proc*
+
+    /_source/modules
+..    /_source/cal_cdl
+    /_source/cal_ncgen
+    /_source/cal_proc*
 
 
 .. |todays_date| date::

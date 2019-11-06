@@ -231,15 +231,24 @@
 <p>This nc file is then read in with the netCDF4 module. The instrument nickname is extracted from the resulting datasets global <code class="docutils literal notranslate"><span class="pre">instr</span></code> attribute and this is used to instantiate the appropriate class for that instrument. The simplest class is <code class="docutils literal notranslate"><span class="pre">Generic</span></code> which has some universal methods. All other classes inherit from Generic and may include other methods to parse from ancillary files and and write this data into the nc file. This parsing will be highly specific to an instrument, thus the individual classes.</p>
 <p>It is possible to add/update individual attributes and variables as script arguments using the <code class="docutils literal notranslate"><span class="pre">--update</span></code> option.</p>
 <blockquote>
-<div><p>The testing for this option has been limited. Need to complete this.</p>
+<div><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The testing for this option has been limited. Need to complete this.</p>
+</div>
 </div></blockquote>
 </div>
 </div>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <blockquote>
-<div><p>These instructions assume that you are in a shell, either a terminal on a linux box or a <cite>git bash</cite> terminal on a Windows machine. You can also use various GUIs such as <a class="reference external" href="https://desktop.github.com">GitHub Desktop</a> but in this case you’re on your own.</p>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These instructions assume that you are in a shell, either a terminal on a linux box or a <cite>git bash</cite> terminal on a Windows machine. You can also use various GUIs such as <a class="reference external" href="https://desktop.github.com">GitHub Desktop</a> but in this case you’re on your own.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>This application uses <code class="docutils literal notranslate"><span class="pre">ncgen</span></code> which is part of the <a class="reference external" href="https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html">netCDF</a> package. It must be in the OS path so that it can be found by the script. It will usually be installed as part of the <code class="docutils literal notranslate"><span class="pre">netcdf4-python</span></code> package.</p>
+</div>
 </div></blockquote>
 <ul class="simple">
 <li><p>In a terminal clone the <code class="docutils literal notranslate"><span class="pre">cal-nc</span></code> repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)</p></li>
@@ -268,7 +277,7 @@ user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ conda env 
 <ul class="simple">
 <li><p>Classes, methods, and functions for the instrument processors are written in <code class="docutils literal notranslate"><span class="pre">cal_proc</span></code> while template instrument-specific cdl templates are in <code class="docutils literal notranslate"><span class="pre">cal_cdl</span></code>. The helper script <code class="docutils literal notranslate"><span class="pre">cal-ncgen.py</span></code> has been written to make the creation and maintenance of calibration netCDF files easier, full help exists so for examples of how to run it type</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>cal-nc<span class="o">)</span> user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ python cal_ncgen.py --help
+<div class="highlight-terminal notranslate"><div class="highlight"><pre><span></span>(cal-nc) user@pc:~\git\cal-nc$ python cal_ncgen.py --help
 </pre></div>
 </div>
 <p>Files to test the code are in <code class="docutils literal notranslate"><span class="pre">testing</span></code>, see the readme in this directory for more information about running <code class="docutils literal notranslate"><span class="pre">cal_ncgen.py</span></code> with these files.</p>

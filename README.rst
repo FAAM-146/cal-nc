@@ -137,20 +137,20 @@ Installation
 
 * In a terminal clone the ``cal-nc`` repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)
    
-.. code-block:: bash
+.. code-block:: console
 
     user@pc:~\git$ git clone git@github.com:FAAM-146/cal-nc.git
 
 
 or if you prefer `https`,
 
-.. code-block:: bash
+.. code-block:: console
 
     user@pc:~\git$ git clone https://github.com/FAAM-146/cal-nc.git
 
 * Create a conda environment (after installing `conda <https://conda.io/en/latest/>`_ if necessary) using the environment file included in the repository;
 
-.. code-block:: bash
+.. code-block:: console
 
     user@pc:~\git$ cd cal-nc
     user@pc:~\git\cal-nc$ conda env create -f calnc-environment.yml
@@ -159,13 +159,13 @@ This shall create an environment called ``cal-nc``.
 
 * Activate the environment
 
-.. code-block:: bash
+.. code-block:: console
 
     user@pc:~\git\cal-nc$ conda activate cal-nc
 
 * Classes, methods, and functions for the instrument processors are written in ``cal_proc`` while template instrument-specific cdl templates are in ``cal_cdl``. The helper script ``cal-ncgen.py`` has been written to make the creation and maintenance of calibration netCDF files easier, full help exists so for examples of how to run it type
 
-.. code-block:: bash
+.. code-block:: console
 
     (cal-nc) user@pc:~\git\cal-nc$ python cal_ncgen.py --help
 

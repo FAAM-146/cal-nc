@@ -498,7 +498,11 @@ class Generic():
 
 
         for k_,v_ in var_d.items():
-            self._add_var(k_,v_)
+            try:
+                self._add_var(k_,v_)
+            except Exception as err:
+                print(err)
+                pdb.set_trace()
 
 
 

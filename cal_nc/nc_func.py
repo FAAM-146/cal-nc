@@ -107,7 +107,11 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
     # Create a temporary copy of the master
     # Note that all 'master' operations are done on this temporary copy
     tmp_nc = '{}_tmp.nc'.format(os.path.splitext(master_nc)[0])
-    shutil.copy2(master_nc,tmp_nc)
+    try:
+        shutil.copy2(master_nc,tmp_nc)
+    except Exception as err:
+        # This always seems to give an error but does work
+        pass
 
     # Create a instrument processor from the master nc file. This file remains
     # open until explicitly closed.

@@ -17,18 +17,6 @@ from cal_proc import *
 from .nc_conf import *
 
 
-
-# Project information
-__title__ = 'FAAM Calibration netCDF - nc functions'
-__description__ = 'Functions for reading, writing, and manipulating netCDF files.'
-__institution__ = 'FAAM - Facility for Airborne Atmospheric Measurements'
-__version__ = '0.1'
-__date__ = '2019 10 24'
-__author__ = 'Graeme Nott'
-__author_email__ = 'graeme.nott@faam.ac.uk'
-__copyright__ = '2019, FAAM'
-
-
 __all__ = ['read_nc','process_nc','run_ncgen']
 
 

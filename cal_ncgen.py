@@ -146,9 +146,10 @@ def call(infile,args):
     import os.path
 
     # Create absolute paths for infile/s
-    abs_infile_ = [os.path.abspath(os.path.join(d,f)) \
+    # temporarily create a set to get rid of dups
+    abs_infile_ = list(set([os.path.abspath(os.path.join(d,f)) \
                    for f in infile for d in default_cdl_dir\
-                   if os.path.isfile(os.path.join(d,f))]
+                   if os.path.isfile(os.path.join(d,f))]))
 
     # abs_infile_ = []
     # for f_ in infile:

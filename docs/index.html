@@ -117,7 +117,7 @@
 <td><p>Jan 2018</p></td>
 </tr>
 <tr class="row-even"><td><p>Modified</p></td>
-<td><p>2019-11-06</p></td>
+<td><p>2019-11-22</p></td>
 </tr>
 </tbody>
 </table>
@@ -256,31 +256,31 @@
 <ul class="simple">
 <li><p>In a terminal clone the <code class="docutils literal notranslate"><span class="pre">cal-nc</span></code> repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it$ git clone git@github.com:FAAM-146/cal-nc.git
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@pc:~\git$</span> git clone git@github.com:FAAM-146/cal-nc.git
 </pre></div>
 </div>
 <p>or if you prefer <cite>https</cite>,</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it$ git clone https://github.com/FAAM-146/cal-nc.git
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@pc:~\git$</span> git clone https://github.com/FAAM-146/cal-nc.git
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Create a conda environment (after installing <a class="reference external" href="https://conda.io/en/latest/">conda</a> if necessary) using the environment file included in the repository;</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it$ <span class="nb">cd</span> cal-nc
-user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ conda env create -f calnc-environment.yml
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@pc:~\git$</span> <span class="nb">cd</span> cal-nc
+<span class="gp">user@pc:~\git\cal-nc$</span> conda env create -f calnc-environment.yml
 </pre></div>
 </div>
 <p>This shall create an environment called <code class="docutils literal notranslate"><span class="pre">cal-nc</span></code>.</p>
 <ul class="simple">
 <li><p>Activate the environment</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ conda activate cal-nc
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@pc:~\git\cal-nc$</span> conda activate cal-nc
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Classes, methods, and functions for the instrument processors are written in <code class="docutils literal notranslate"><span class="pre">cal_proc</span></code> while template instrument-specific cdl templates are in <code class="docutils literal notranslate"><span class="pre">cal_cdl</span></code>. The helper script <code class="docutils literal notranslate"><span class="pre">cal-ncgen.py</span></code> has been written to make the creation and maintenance of calibration netCDF files easier, full help exists so for examples of how to run it type</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>cal-nc<span class="o">)</span> user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ python cal_ncgen.py --help
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(cal-nc) user@pc:~\git\cal-nc$ python cal_ncgen.py --help</span>
 </pre></div>
 </div>
 <p>Files to test the code are in <code class="docutils literal notranslate"><span class="pre">testing</span></code>, see the readme in this directory for more information about running <code class="docutils literal notranslate"><span class="pre">cal_ncgen.py</span></code> with these files.</p>

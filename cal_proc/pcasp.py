@@ -547,9 +547,9 @@ class PCASP(Generic):
                 pass
 
         try:
-            self.append_dict(vars_d)
+            msg = self.append_dict(vars_d)
         except Exception as err:
-            print(err)
+            print('err: {}'.format(err))
             pdb.set_trace()
 
 

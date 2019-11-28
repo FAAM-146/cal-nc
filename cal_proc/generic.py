@@ -336,6 +336,7 @@ class Generic():
         if vals.ndim == self.ds[var].ndim - 1:
             # Assume that only a single element in the unlimited dimension
             # has been given in vals. Increase number of dimension to match var
+            # This assures (?) that 0 axis is the unlimited one...
             vals = np.expand_dims(vals[::],axis=0)
 
         assert vals.ndim == self.ds[var].ndim, \
@@ -344,7 +345,6 @@ class Generic():
         # Annoyingly have to split path and variable name
         vpath,vname = os.path.split(var)
 
-        i_found = False
         # Find unlimited dimension for this var
         for i,d_ in enumerate(self.ds[var].dimensions):
             try:
@@ -354,22 +354,29 @@ class Generic():
                 unlim_dim = self.ds.dimensions[d_].isunlimited()
 
             if unlim_dim:
-                i_found = True
                 break
 
+        try:
+            _ = unlim_dim
+        except NameError as err:
+            print(err)
+            print('Variable {} does not have unlimited dimension'.format(var))
+            return
+        
         # Create slice to write to the correct dimension
         # That is the last elements of the unlimited dimension
 
         # .. TODO::
-        #   Need to check that this works for adding more than one new value
+        #   Need to check that this works for adding more than one new value       
+        if self.ds[var].ndim == 1:
+            idx = slice(-1*len(vals),None)
+        else:
+            idx = [slice(None)] * self.ds[var].ndim
+            
+            # Don't use slice obj as I can't work out what is going on!
+            idx[0] = -1#slice(-1,None)
+            idx[1] = range(len(vals[0]))#slice(None,len(vals[0]))
 
-        idx = [slice(None)] * self.ds[var].ndim
-        idx[i] = -1
-
-        # Check appropriate number of elements at end of var are either
-        # masked or empty strings.
-        # Note that it is possible that legitimate values may be masked
-        # so also check for any non-finite numbers.
 
         if (self.ds[var].dtype in [str]) and \
            ((self.ds[var][idx] == '').all()):
@@ -377,10 +384,16 @@ class Generic():
             # Need to write each individual string seperately (?)
             for i,val in enumerate(vals[::-1]):
                 self.ds[var][-1*(i+1)] = val
+        
         elif any((self.ds[var][idx].mask.all(),
                   np.isfinite(self.ds[var][idx].base).all())):
             # Assume that all other types of variables are masked
-            self.ds[var][idx] = vals
+            try:
+                self.ds[var][idx] = vals[0]
+            except Exception as err:
+                print(err)
+                pdb.set_trace()
+        
         else:
             print('Insufficient empty space in {}!'.format(var))
 

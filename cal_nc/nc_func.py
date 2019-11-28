@@ -15,7 +15,7 @@ import pdb
 import cal_proc
 from cal_proc import *
 from .nc_conf import *
-
+from .utils import *
 
 __all__ = ['read_nc','process_nc','run_ncgen']
 
@@ -169,9 +169,12 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
             grps = []
             for i,s in enumerate(s_dicts):
                 try:
-                    p_files.append(s.pop('_parsefile'))
+                    p_file = s.pop('_parsefile')
                 except KeyError as err:
                     p_files.append(None)
+                else:
+                    # Attempt to find correct path
+                    p_files.append(filepath(p_file,os.path.dirname(anc)))
 
                 try:
                     grp = s.pop('_group')

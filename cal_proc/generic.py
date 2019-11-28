@@ -13,17 +13,6 @@ import netCDF4
 import pdb
 
 
-# Project information
-__title__ = 'FAAM Calibration netCDF - generic instrument processor'
-__description__ = 'Functions and class for all child instrument processors'
-__institution__ = 'FAAM - Facility for Airborne Atmospheric Measurements'
-__version__ = '0.1'
-__date__ = '2019 11 01'
-__author__ = 'Graeme Nott'
-__author_email__ = 'graeme.nott@faam.ac.uk'
-__copyright__ = '2019, FAAM'
-
-
 #__all__ = ['walk_dstress','append_time','append_var']
 
 
@@ -181,6 +170,19 @@ class Generic():
         return h3
 
 
+    def update_ver(self):
+        """
+        Include program version information as root attributes
+
+        Version information is determined from cal_proc.__init__. Any
+        existing version strings shall be overwritten.
+        """
+
+        from cal_proc import __version__
+
+        self.ds.software_version = __version__
+
+
     def update_hist(self,update=None):
         """
         Update the global history attribute.
@@ -194,7 +196,7 @@ class Generic():
         :type update: List
         """
 
-        t_ = datetime.datetime.now(pytz.utc).replace(microsecond=0).strftime('%Y%m%d')
+        t_ = datetime.datetime.now(pytz.utc).replace(microsecond=0).strftime('%Y%m%dT%H%M')
 
         if update is None:
             # With datetime v3.6 can use timespec='seconds' to drop ms
@@ -206,16 +208,25 @@ class Generic():
             # file. So nothing needs to be done here.
             update = ''
 
-        elif hasattr(update,'__iter__'):
+        elif hasattr(update,'__iter__') and type(update) not in [str]:
             # If is a list of strings then join
             update = ', '.join(update[:])
 
         # Change any shortcuts to today's date
         update = update.replace('<today>',t_).replace('<now>',t_)
 
-        hist_ = self.ds.history
-        del(self.ds.history)
-        self.ds.history = '{}, {}'.format(hist_,update)
+        try:
+            hist_ = self.ds.history
+        except AttributeError as err:
+            # username attribute does not exist so create it
+            self.ds.history = update
+        else:
+            # username attribute already exists to append to end of string
+            del(self.ds.history)
+            if hist_ in ['',None]:
+                self.ds.history = update
+            else:
+                self.ds.history = '{}, {}'.format(hist_,update)
 
 
     def update_user(self,update=None):
@@ -230,22 +241,41 @@ class Generic():
         :type update: List
         """
 
-        if update is None:
-            # May be able to automatically generate a username but
-            # ask user to be sure.
-            update = input('\nEnter username <email> [Enter for cdl]: ')
+        # Extract existing username from ds
+        try:
+            user_ = self.ds.username
+        except AttributeError as err:
+            # username attribute does not exist so create it
+            user_ = None
+            last_user_ = None
+        else:
+            last_user_ = user_.split(',')[-1].strip()
+        
+        pdb.set_trace()
 
-        elif update is 'NA':
-            # This assumes that all updates have been handed in the cdl
-            # file. So nothing needs to be done here
-            update = ''
+        if update in ['',None]:
+            # No username given so use last entry from nc if possible but
+            # confirm with user
+            if last_user_ in ['',None]:
+                while update in ['',None]:
+                    update = input("\nEnter 'username <email>': ").strip()
+            else:
+                update = input("\nEnter 'username <email>' [enter for {}]: ".format(last_user_)).strip()
+                if update == '':
+                    update = last_user_
+        # elif update is 'NA':
+        #     # This assumes that all updates have been handed in the cdl
+        #     # file. So nothing needs to be done here
+        #     update = ''
 
-        elif hasattr(update,'__iter__'):
+        elif hasattr(update,'__iter__') and type(update) not in [str]:
             # If is a list of strings then join
             update = ', '.join(update[:])
 
+        if user_ in ['',None]:
+            self.ds.username = update
         else:
-            user_ = self.ds.username
+            # username attribute already exists to append to end of string
             del(self.ds.username)
             self.ds.username = '{}, {}'.format(user_,update)
 

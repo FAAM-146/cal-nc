@@ -111,7 +111,11 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
 
         d['metadata']['cal file'] = os.path.abspath(cal_file)
 
-        f = open(cal_file, 'r')
+        try:
+            f = open(cal_file, 'r')
+        except FileNotFoundError as err:
+            print(err)
+            pdb.set_trace()
 
         # Read metadata at top of file
         line = f.readline()
@@ -170,7 +174,11 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
         d['data']['raw data'] = {}
         d['data']['Straight line fits'] = {}
 
-        f = open(cal_file, 'r') # originally 'rb' for some reason
+        try:
+            f = open(cal_file, 'r')
+        except FileNotFoundError as err:
+            print(err)
+            pdb.set_trace()
 
         # Read metadata at top of file
         # Read any empty/extra lines at top of file

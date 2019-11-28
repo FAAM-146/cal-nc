@@ -17,18 +17,6 @@ import cal_proc
 from cal_proc import *
 
 
-
-# Project information
-__title__ = 'FAAM Calibration netCDF - nc configuration parsing'
-__description__ = 'Functions for parsing of configuration files.'
-__institution__ = 'FAAM - Facility for Airborne Atmospheric Measurements'
-__version__ = '0.1'
-__date__ = '2019 10 31'
-__author__ = 'Graeme Nott'
-__author_email__ = 'graeme.nott@faam.ac.uk'
-__copyright__ = '2019, FAAM'
-
-
 __all__ = ['read_config','extract_specials']
 
 

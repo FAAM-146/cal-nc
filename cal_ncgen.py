@@ -234,6 +234,26 @@ def call(infile,args):
             updates[u_[0]].extend(u_[1:])
         else:
             updates[u_[0]] = u_[1:]
+    
+    # Add user and history attributes and make terms consistant
+    # eg program options --user=Fred and -u username Fred are equivalent
+    
+    ## TODO: Consolidate with specials in nc_conf.py
+    for u_,k_ in zip([args['user'],args['hist']],['username','history']):
+        try:
+            if u_ != updates[k_]:
+                # Conflict in argument. Get user to select.
+                print('\nConflict in argument {}'.format(k_))
+                print('[1]* {}'.format(u_))
+                print('[2]  {}'.format(updates[k_]))
+                sel = input('Select input [1/2]: ')
+                if sel != 2:
+                    updates[k_] = u_
+        except KeyError as err:
+            # Attribute not included in dic so put it in
+            updates[k_] = u_
+
+
 
     ### Process ########################################################
     proc_rtn, proc_err = process_nc(master_infile,

@@ -36,7 +36,9 @@ default_cdl_dir = ['.','cal_cdl']
 
 def filepath(f,paths=default_file_dir):
     """
-    Find path where file, f, exists. If does not exist then return f
+    Find path where file, f, exists. If does not exist then return f. Note
+    that if file exists in two locations then paths gives order of priority,
+    only a single file is returned.
 
     param f: String or filepath obj of file
     param paths: List of path strings to search. Default is default_file_dir
@@ -50,9 +52,13 @@ def filepath(f,paths=default_file_dir):
 
     for p_ in paths:
         
-        if os.path.isfile(os.path.abspath(os.path.join(p_,f))):
-            return os.path.abspath(os.path.join(p_,f))
-    
+        try:
+            if os.path.isfile(os.path.abspath(os.path.join(p_,f))):
+                return os.path.abspath(os.path.join(p_,f))
+        except TypeError as err:
+            print(err)
+            return f
+            
     return f
 
 

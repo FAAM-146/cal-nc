@@ -9,20 +9,32 @@ import pdb
 
 
 # Map cal file variable names to nc variables
-var_map = {'bin_cal/ADC_thres': lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
-                                                     d['data']['Lower Thresholds'])),
-           'bin_cal/x-section': lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundaries'],
-                                                     d['data']['Upper Cross Section Boundaries'])),
-           'bin_cal/x-section_err': lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundary Errors'].base,
-                                                         d['data']['Upper Cross Section Boundary Errors'].base)),
-           'bin_cal/x-section_width': lambda d: d['data']['Width of Cross Section Boundaries'],
-           'bin_cal/x-section_width_err': lambda d: d['data']['Width of Cross Section Boundary Errors'],
-           'bin_cal/dia_centre': lambda d: d['data']['Channel Centre'],
-           'bin_cal/dia_centre_err': lambda d: d['data']['Channel Centre Errors'],
-           'bin_cal/dia_width': lambda d: d['data']['Channel Widths'],
-           'bin_cal/dia_width_err': lambda d: d['data']['Channel Width Errors'],
-           'bin_cal/calibration_file': lambda d: d['metadata']['cal file'],
-           'bin_cal/source_file': lambda d: d['metadata']['input file']}
+var_map = {'bin_cal/ADC_thres':
+                lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
+                                        d['data']['Upper Thresholds'])),
+           'bin_cal/x-section':
+                lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundaries'],
+                                        d['data']['Upper Cross Section Boundaries'])),
+           'bin_cal/x-section_err': 
+                lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundary Errors'].base,
+                                        d['data']['Upper Cross Section Boundary Errors'].base)),
+           'bin_cal/x-section_width':
+                lambda d: d['data']['Width of Cross Section Boundaries'],
+           'bin_cal/x-section_width_err':
+                lambda d: d['data']['Width of Cross Section Boundary Errors'],
+           'bin_cal/dia_centre':
+                lambda d: d['data']['Channel Centre'],
+           'bin_cal/dia_centre_err':
+                lambda d: d['data']['Channel Centre Errors'],
+           'bin_cal/dia_width':
+                lambda d: d['data']['Channel Widths'],
+           'bin_cal/dia_width_err':
+                lambda d: d['data']['Channel Width Errors'],
+           'bin_cal/calibration_file':
+                lambda d: d['metadata']['cal file'],
+           'bin_cal/source_file':
+                lambda d: d['metadata']['input file']
+           }
 
 
 # -----------------------------------------------------------------------------
@@ -115,7 +127,7 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
             f = open(cal_file, 'r')
         except FileNotFoundError as err:
             print(err)
-            pdb.set_trace()
+            return None
 
         # Read metadata at top of file
         line = f.readline()
@@ -178,7 +190,7 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
             f = open(cal_file, 'r')
         except FileNotFoundError as err:
             print(err)
-            pdb.set_trace()
+            return None
 
         # Read metadata at top of file
         # Read any empty/extra lines at top of file
@@ -542,18 +554,25 @@ class PCASP(Generic):
         # That is, items explicitly given in config file have precedence over
         # items in var_map. This can be used to overwrite defaults in var_map
         # with an entry in the config file if required.
+        #print('Variables passed to update_bincal_from_file() in vars_d:')
+        #for k in vars_d.keys(): print(k)
+        #print()
         for k,v in ((k_,v_) for k_,v_ in var_map.items() if k_ not in vars_d):
-            #print('Add {} to self.ds'.format(k_))
             try:
                 vars_d[k] = v(caldata)
             except KeyError as err:
                 # Variable in var_map does not exist in file therefore skip
+                #pdb.set_trace()
+        #        print('{} not found in {}'.format(k,os.path.basename(calfile)))
                 pass
             except Exception as err:
                 print('  Failed. ',err)
                 pdb.set_trace()
                 pass
-
+            else:
+                pass
+        #        print('Add {} to self.ds'.format(k))
+        
         try:
             msg = self.append_dict(vars_d)
         except Exception as err:

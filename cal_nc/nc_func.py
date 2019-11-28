@@ -199,9 +199,7 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
                 master.update_bincal_from_file(p_,v_)
 
     # Add any updates
-
-    ### TODO: This needs sorting!
-
+    ### TODO: This needs sorting! Make more general
     for k_,update in updates.items():
         if k_.lower() == 'username':
             master.update_user(update)
@@ -209,7 +207,8 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
         elif k_.lower() == 'history':
             master.update_hist(update)
 
-
+    # Add any version information that is missing from nc
+    master.update_ver()
 
     # Close nc datasets
     for ds_ in [master_ds] + aux_ds:

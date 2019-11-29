@@ -4,14 +4,6 @@ cal\_nc package
 Submodules
 ----------
 
-cal\_nc.ds\_func module
------------------------
-
-.. automodule:: cal_nc.ds_func
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 cal\_nc.nc\_conf module
 -----------------------
 
@@ -24,6 +16,14 @@ cal\_nc.nc\_func module
 -----------------------
 
 .. automodule:: cal_nc.nc_func
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cal\_nc.utils module
+--------------------
+
+.. automodule:: cal_nc.utils
    :members:
    :undoc-members:
    :show-inheritance:

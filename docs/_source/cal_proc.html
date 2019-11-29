@@ -119,6 +119,14 @@ otime.</em>) – New time variables to append to otime.</p></li>
 <p>Minimal parent class for instrument-specific parsing and processing
 of calibration data suitable for writing to the calibration netCDF.</p>
 <dl class="method">
+<dt id="cal_proc.generic.Generic.update_ver">
+<code class="sig-name descname">update_ver</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.update_ver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.update_ver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Include program version information as root attributes</p>
+<p>Version information is determined from cal_proc.__init__. Any
+existing version strings shall be overwritten.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="cal_proc.generic.Generic.update_hist">
 <code class="sig-name descname">update_hist</code><span class="sig-paren">(</span><em class="sig-param">update=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.update_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.update_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the global history attribute.</p>

@@ -66,18 +66,17 @@
 <span class="kn">import</span> <span class="nn">cal_proc</span>
 <span class="kn">from</span> <span class="nn">cal_proc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">.nc_conf</span> <span class="k">import</span> <span class="o">*</span>
-
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;read_nc&#39;</span><span class="p">,</span><span class="s1">&#39;process_nc&#39;</span><span class="p">,</span><span class="s1">&#39;run_ncgen&#39;</span><span class="p">]</span>
 
 
-<span class="c1"># Directory where temporary files are stored</span>
+<span class="c1"># Directory where temporary files are stored by default</span>
 <span class="n">default_tmp_dir</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span>
 
 
 <div class="viewcode-block" id="read_nc"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_func.read_nc">[docs]</a><span class="k">def</span> <span class="nf">read_nc</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">aux</span><span class="o">=</span><span class="p">[]):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function for reading netCDF calibration files into DataSets</span>
+    <span class="sd">&quot;&quot;&quot;Function for reading netCDF calibration files into DataSets.</span>
 
 <span class="sd">    .. Note::</span>
 
@@ -86,12 +85,15 @@
 <span class="sd">        required whether or not the file was opened as read-only. Thus all</span>
 <span class="sd">        Datasets should be explicitly closed when they are finished with.</span>
 
-<span class="sd">    param master: &#39;master&#39; netCDF file that is opened for read/write</span>
-<span class="sd">    type: master: Filename string of filepath object</span>
-<span class="sd">    param aux: Any additional netCDF files that are to be added/concatenated with</span>
-<span class="sd">        master nc file. Auxillary nc files are opened as read only. Default is</span>
-<span class="sd">        [], ie no auxillary files.</span>
-<span class="sd">    returns: Dataset from master netCDF and list of any auxillary Datasets.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        master (:obj:`str` or :obj:`pathlib`): &#39;master&#39; netCDF filename that is</span>
+<span class="sd">            opened for read/write.</span>
+<span class="sd">        aux (:obj:`list`): List of any additional netCDF filenames that are to</span>
+<span class="sd">            be added/concatenated with master nc file. Auxillary nc files are</span>
+<span class="sd">            opened as read only. Default is [], ie no auxillary files.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of dataset from master netCDF and list of any auxillary Datasets.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Open master nc file for reading/writing</span>
@@ -108,39 +110,35 @@
     <span class="k">return</span> <span class="n">master_ds</span><span class="p">,</span> <span class="n">aux_ds</span></div>
 
 
-<div class="viewcode-block" id="process_nc"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_func.process_nc">[docs]</a><span class="k">def</span> <span class="nf">process_nc</span><span class="p">(</span><span class="n">master_nc</span><span class="p">,</span><span class="n">aux_nc</span><span class="o">=</span><span class="p">[],</span><span class="n">anc_files</span><span class="o">=</span><span class="p">[],</span>
-               <span class="n">out_nc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">instr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">updates</span><span class="o">=</span><span class="p">{}):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Open all netCDF files for processing.</span>
+<div class="viewcode-block" id="process_nc"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_func.process_nc">[docs]</a><span class="k">def</span> <span class="nf">process_nc</span><span class="p">(</span><span class="n">master_nc</span><span class="p">,</span> <span class="n">aux_nc</span><span class="o">=</span><span class="p">[],</span> <span class="n">anc_files</span><span class="o">=</span><span class="p">[],</span>
+               <span class="n">out_nc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">updates</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="sd">&quot;&quot;&quot;Processes all netCDF and auxillary files.</span>
 
 <span class="sd">    The master netCDF is copied to a temporary file which is opened for read/</span>
-<span class="sd">    write while any auxilary files are opened as read-only datasets. Modifications,</span>
-<span class="sd">    concatenations, etc are done on the temporary dataset and once complete</span>
-<span class="sd">    it is closed and moved to the output file which may be either the master</span>
-<span class="sd">    file or out_nc.</span>
+<span class="sd">    write while any auxilary files are opened as read-only datasets.</span>
+<span class="sd">    Modifications, concatenations, etc are done on the temporary dataset and</span>
+<span class="sd">    once complete it is closed and moved to the output file which may be either</span>
+<span class="sd">    the master file or `out_nc`.</span>
 
 <span class="sd">    Updates are applied to the master dataset *after* any concatenation etc.</span>
 
-<span class="sd">    param master_nc: &#39;master&#39; netCDF file.</span>
-<span class="sd">    type: master: Filename string of pathlib path object.</span>
-<span class="sd">    param aux_nc: Any additional netCDF files that are to be added/concatenated</span>
-<span class="sd">        with master nc file. Default is [], ie no auxillary files.</span>
-<span class="sd">    type aux_nc: list of filename string/s of pathlib path object/s.</span>
-<span class="sd">    param anc_files: List of ancillary files that are not netCDF and so need</span>
-<span class="sd">        to be parsed before being injested into the dataset. Default is [],</span>
-<span class="sd">        ie no ancillary files.</span>
-<span class="sd">    type anc_files: list of filename string/s of pathlib path object/s.</span>
-<span class="sd">    out_nc: filename of netCDF to be written. If None (default) or the same as</span>
-<span class="sd">        master_nc, master_nc is overwritten.</span>
-<span class="sd">    out_nc: Filename string of pathlib path object or None.</span>
-<span class="sd">    param updates: All updates to be applied to the final dataset.</span>
-<span class="sd">    type updates: Dictionary of updates with the keys being existing or new</span>
-<span class="sd">        groups, variables, or attributes of the dataset.</span>
-
-<span class="sd">    returns: Dataset from master netCDF and list of any auxillary Datasets.</span>
-
+<span class="sd">    Args:</span>
+<span class="sd">        master_nc (:obj:`str`): Filename string of &#39;master&#39; netCDF file.</span>
+<span class="sd">        aux_nc (:obj:`list`, optional): List of any additional filename/s of netCDF</span>
+<span class="sd">            files that are to be added/concatenated with master nc file. Default</span>
+<span class="sd">            is [], ie no auxillary files.</span>
+<span class="sd">        anc_files (:obj:`list`, optional): List of any ancillary files that are not</span>
+<span class="sd">            netCDF and so need to be parsed before being injested into the</span>
+<span class="sd">            dataset. Default is [], ie no ancillary files.</span>
+<span class="sd">        out_nc (:obj:`str`, optional): Filename string of netCDF to be written. If None</span>
+<span class="sd">            (default) or the same as `master_nc`, `master_nc` is overwritten.</span>
+<span class="sd">        instr (:obj:`str`, optional): Identifying string of instrument which determines</span>
+<span class="sd">            processor class. If `None` (default) then instrument is identified</span>
+<span class="sd">            from `master_nc`.</span>
+<span class="sd">        updates (:obj:`dict`, optional): All other updates to be applied to the final</span>
+<span class="sd">            dataset. Default is {}.</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
 
 
     <span class="c1"># Create a temporary copy of the master</span>
@@ -181,6 +179,9 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">[</span><span class="s1">&#39;help&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">master</span><span class="p">)</span>
+
+            <span class="c1"># TODO(gn): Change this to a Raise</span>
+            
             <span class="k">return</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="c1"># eg if args[&#39;update_arg&#39;] is None</span>
@@ -203,7 +204,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">master</span><span class="o">.</span><span class="n">append_dataset</span><span class="p">(</span><span class="n">aux_ds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
     <span class="c1"># Read in any ancillary files</span>
     <span class="k">for</span> <span class="n">anc</span> <span class="ow">in</span> <span class="n">anc_files</span><span class="p">:</span>
 
@@ -220,9 +220,12 @@
             <span class="n">grps</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">s_dicts</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">p_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_parsefile&#39;</span><span class="p">))</span>
+                    <span class="n">p_file</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_parsefile&#39;</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">p_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Attempt to find correct path</span>
+                    <span class="n">p_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">(</span><span class="n">p_file</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">anc</span><span class="p">)))</span>
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">grp</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_group&#39;</span><span class="p">)</span>
@@ -247,9 +250,7 @@
                 <span class="n">master</span><span class="o">.</span><span class="n">update_bincal_from_file</span><span class="p">(</span><span class="n">p_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span>
 
     <span class="c1"># Add any updates</span>
-
-    <span class="c1">### TODO: This needs sorting!</span>
-
+    <span class="c1">### TODO: This needs sorting! Make more general</span>
     <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">update</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">k_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;username&#39;</span><span class="p">:</span>
             <span class="n">master</span><span class="o">.</span><span class="n">update_user</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
@@ -257,7 +258,8 @@
         <span class="k">elif</span> <span class="n">k_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;history&#39;</span><span class="p">:</span>
             <span class="n">master</span><span class="o">.</span><span class="n">update_hist</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
 
-
+    <span class="c1"># Add any version information that is missing from nc</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">update_ver</span><span class="p">()</span>
 
     <span class="c1"># Close nc datasets</span>
     <span class="k">for</span> <span class="n">ds_</span> <span class="ow">in</span> <span class="p">[</span><span class="n">master_ds</span><span class="p">]</span> <span class="o">+</span> <span class="n">aux_ds</span><span class="p">:</span>
@@ -270,29 +272,25 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">tmp_nc</span><span class="p">,</span> <span class="n">out_nc</span><span class="p">)</span>
 
-
     <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&#39;</span></div>
 
 
 <div class="viewcode-block" id="run_ncgen"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_func.run_ncgen">[docs]</a><span class="k">def</span> <span class="nf">run_ncgen</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span><span class="n">fout</span><span class="p">,</span><span class="n">nc_fmt</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create netCDF file, fout, from input cdl, fin</span>
+    <span class="sd">&quot;&quot;&quot;Create netCDF file from input cdl by calling external program, `ncgen`.</span>
 
-<span class="sd">    :param fin: Filename of cdl file</span>
-<span class="sd">    :type fin: string</span>
-<span class="sd">    :param fout: Filename of output netCDF file</span>
-<span class="sd">    :type fin: string</span>
-<span class="sd">    :param nc_fmt: Integer specifying the format of the netCDF created,</span>
-<span class="sd">        default is 3 for netCDF-4. Options are;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fin (:obj:`str` or :obj:`pathlib`): Filename of cdl file.</span>
+<span class="sd">        fout (:obj:`str`): Filename of output netCDF file.</span>
+<span class="sd">        nc_fmt (:obj:`int`): Integer specifying the format of the netCDF</span>
+<span class="sd">            created, default is 3 for netCDF-4. Options are;</span>
 
-<span class="sd">        1 netcdf classic file format, netcdf-3 type model</span>
-<span class="sd">        2 netcdf 64 bit classic file format, netcdf-3 type model</span>
-<span class="sd">        3 netcdf-4 file format, netcdf-4 type model</span>
-<span class="sd">        4 netcdf-4 file format, netcdf-3 type model</span>
+<span class="sd">                1. netcdf classic file format, netcdf-3 type model</span>
+<span class="sd">                2. netcdf 64 bit classic file format, netcdf-3 type model</span>
+<span class="sd">                3. netcdf-4 file format, netcdf-4 type model</span>
+<span class="sd">                4. netcdf-4 file format, netcdf-3 type model</span>
 
-<span class="sd">        Note that using a netcdf-3 format will break group features.</span>
-<span class="sd">    :type nc_fmt: integer, 1-4</span>
-<span class="sd">    :returns: None</span>
+<span class="sd">            Note that using a netcdf-3 format will break group features and thus</span>
+<span class="sd">            the entire `cal-nc` structure.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">import</span> <span class="nn">subprocess</span>

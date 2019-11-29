@@ -42,9 +42,9 @@
   <ul>
 <li><a class="reference internal" href="#">cal_nc package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cal_nc.ds_func">cal_nc.ds_func module</a></li>
 <li><a class="reference internal" href="#module-cal_nc.nc_conf">cal_nc.nc_conf module</a></li>
 <li><a class="reference internal" href="#module-cal_nc.nc_func">cal_nc.nc_func module</a></li>
+<li><a class="reference internal" href="#module-cal_nc.utils">cal_nc.utils module</a></li>
 <li><a class="reference internal" href="#module-cal_nc">Module contents</a></li>
 </ul>
 </li>
@@ -85,54 +85,6 @@
 <h1>cal_nc package<a class="headerlink" href="#cal-nc-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-cal_nc.ds_func">
-<span id="cal-nc-ds-func-module"></span><h2>cal_nc.ds_func module<a class="headerlink" href="#module-cal_nc.ds_func" title="Permalink to this headline">¶</a></h2>
-<p>Functions for reading, writing, and manipulating netCDF datasets.</p>
-<dl class="function">
-<dt id="cal_nc.ds_func.combine_datasets">
-<code class="sig-prename descclassname">cal_nc.ds_func.</code><code class="sig-name descname">combine_datasets</code><span class="sig-paren">(</span><em class="sig-param">ds1</em>, <em class="sig-param">ds2</em>, <em class="sig-param">ds3=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/ds_func.html#combine_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.ds_func.combine_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combine attributes, dimensions, and variables from ds1 and ds2</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="cal_nc.ds_func.create_common_nc">
-<code class="sig-prename descclassname">cal_nc.ds_func.</code><code class="sig-name descname">create_common_nc</code><span class="sig-paren">(</span><em class="sig-param">nc1, nc2, fnc3, force_append=['username', 'history'], exclude=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/ds_func.html#create_common_nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.ds_func.create_common_nc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new netCDF with all of the items of the two input datasets</p>
-<p>netCDF inputs, nc1 and nc2, are used to create a new netCDF, nc3,
-that contains all of the attributes, groups, and variables of nc1 and
-nc2.</p>
-<p>Attributes shall be that of nc1 if it is the same in both nc1 and
-nc2 unless that attribute name is included in force_append. In this
-case it shall be treated as if the attributes are different. When the
-attribute value in nc1 and nc2 are different, the resultant attribute
-in nc3 shall be a comma-delineated combination of the individuals,
-that from nc1 preceeds that from nc2.</p>
-<p>Variables from nc2 are appended to the same variable in nc1. The
-variables are sorted by the unlimited dimension.</p>
-<p>Variables in only one of the input datasets shall be included unaltered
-in the resultant dataset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nc1</strong> (<em>File string</em><em> or </em><em>PosixPath</em><em> or </em><em>netCDF4.dataset Must be
-same type as nc2.</em>) – netCDF file or dataset.</p></li>
-<li><p><strong>nc2</strong> (<em>File string</em><em> or </em><em>PosixPath</em><em> or </em><em>netCDF4.dataset. Must be
-same type as nc1.</em>) – netCDF file or dataset.</p></li>
-<li><p><strong>fnc3</strong> (<em>File string</em><em> or </em><em>PosixPath for created nc file</em>) – Name of created netCDF file.</p></li>
-<li><p><strong>force_append</strong> (<em>List of attribute case-sensitive strings.</em>) – Any attribute strings that should always be
-appended, even if they are identical. Default is [‘username’].</p></li>
-<li><p><strong>exclude</strong> (<em>List of case-sensitive strings.</em>) – List of attribute or variable names (but not variable
-attributes) that are not to be included in nc3.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns nc3</dt>
-<dd class="field-even"><p>netCDF file or dataset with combined attributes, groups,
-and variables of nc1 and nc2.</p>
-</dd>
-</dl>
-</dd></dl>
-
 </div>
 <div class="section" id="module-cal_nc.nc_conf">
 <span id="cal-nc-nc-conf-module"></span><h2>cal_nc.nc_conf module<a class="headerlink" href="#module-cal_nc.nc_conf" title="Permalink to this headline">¶</a></h2>
@@ -197,7 +149,7 @@ specials_dict will be {}.</p>
 <dl class="function">
 <dt id="cal_nc.nc_func.read_nc">
 <code class="sig-prename descclassname">cal_nc.nc_func.</code><code class="sig-name descname">read_nc</code><span class="sig-paren">(</span><em class="sig-param">master</em>, <em class="sig-param">aux=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/nc_func.html#read_nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.nc_func.read_nc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function for reading netCDF calibration files into DataSets</p>
+<dd><p>Function for reading netCDF calibration files into DataSets.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>All nc files are left open so that the Datasets associated with each
@@ -205,73 +157,95 @@ file can be operated on/with in the rest of the program. This is
 required whether or not the file was opened as read-only. Thus all
 Datasets should be explicitly closed when they are finished with.</p>
 </div>
-<p>param master: ‘master’ netCDF file that is opened for read/write
-type: master: Filename string of filepath object
-param aux: Any additional netCDF files that are to be added/concatenated with</p>
-<blockquote>
-<div><p>master nc file. Auxillary nc files are opened as read only. Default is
-[], ie no auxillary files.</p>
-</div></blockquote>
-<p>returns: Dataset from master netCDF and list of any auxillary Datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>master</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – ‘master’ netCDF filename that is
+opened for read/write.</p></li>
+<li><p><strong>aux</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – List of any additional netCDF filenames that are to
+be added/concatenated with master nc file. Auxillary nc files are
+opened as read only. Default is [], ie no auxillary files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tuple of dataset from master netCDF and list of any auxillary Datasets.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="cal_nc.nc_func.process_nc">
 <code class="sig-prename descclassname">cal_nc.nc_func.</code><code class="sig-name descname">process_nc</code><span class="sig-paren">(</span><em class="sig-param">master_nc</em>, <em class="sig-param">aux_nc=[]</em>, <em class="sig-param">anc_files=[]</em>, <em class="sig-param">out_nc=None</em>, <em class="sig-param">instr=None</em>, <em class="sig-param">updates={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/nc_func.html#process_nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.nc_func.process_nc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Open all netCDF files for processing.</p>
+<dd><p>Processes all netCDF and auxillary files.</p>
 <p>The master netCDF is copied to a temporary file which is opened for read/
-write while any auxilary files are opened as read-only datasets. Modifications,
-concatenations, etc are done on the temporary dataset and once complete
-it is closed and moved to the output file which may be either the master
-file or out_nc.</p>
+write while any auxilary files are opened as read-only datasets.
+Modifications, concatenations, etc are done on the temporary dataset and
+once complete it is closed and moved to the output file which may be either
+the master file or <cite>out_nc</cite>.</p>
 <p>Updates are applied to the master dataset <em>after</em> any concatenation etc.</p>
-<p>param master_nc: ‘master’ netCDF file.
-type: master: Filename string of pathlib path object.
-param aux_nc: Any additional netCDF files that are to be added/concatenated</p>
-<blockquote>
-<div><p>with master nc file. Default is [], ie no auxillary files.</p>
-</div></blockquote>
-<p>type aux_nc: list of filename string/s of pathlib path object/s.
-param anc_files: List of ancillary files that are not netCDF and so need</p>
-<blockquote>
-<div><p>to be parsed before being injested into the dataset. Default is [],
-ie no ancillary files.</p>
-</div></blockquote>
-<p>type anc_files: list of filename string/s of pathlib path object/s.
-out_nc: filename of netCDF to be written. If None (default) or the same as</p>
-<blockquote>
-<div><p>master_nc, master_nc is overwritten.</p>
-</div></blockquote>
-<p>out_nc: Filename string of pathlib path object or None.
-param updates: All updates to be applied to the final dataset.
-type updates: Dictionary of updates with the keys being existing or new</p>
-<blockquote>
-<div><p>groups, variables, or attributes of the dataset.</p>
-</div></blockquote>
-<p>returns: Dataset from master netCDF and list of any auxillary Datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>master_nc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Filename string of ‘master’ netCDF file.</p></li>
+<li><p><strong>aux_nc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – List of any additional filename/s of netCDF
+files that are to be added/concatenated with master nc file. Default
+is [], ie no auxillary files.</p></li>
+<li><p><strong>anc_files</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – List of any ancillary files that are not
+netCDF and so need to be parsed before being injested into the
+dataset. Default is [], ie no ancillary files.</p></li>
+<li><p><strong>out_nc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>, optional) – Filename string of netCDF to be written. If None
+(default) or the same as <cite>master_nc</cite>, <cite>master_nc</cite> is overwritten.</p></li>
+<li><p><strong>instr</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>, optional) – Identifying string of instrument which determines
+processor class. If <cite>None</cite> (default) then instrument is identified
+from <cite>master_nc</cite>.</p></li>
+<li><p><strong>updates</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>, optional) – All other updates to be applied to the final
+dataset. Default is {}.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="cal_nc.nc_func.run_ncgen">
 <code class="sig-prename descclassname">cal_nc.nc_func.</code><code class="sig-name descname">run_ncgen</code><span class="sig-paren">(</span><em class="sig-param">fin</em>, <em class="sig-param">fout</em>, <em class="sig-param">nc_fmt=3</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/nc_func.html#run_ncgen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.nc_func.run_ncgen" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create netCDF file, fout, from input cdl, fin</p>
+<dd><p>Create netCDF file from input cdl by calling external program, <cite>ncgen</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fin</strong> (<em>string</em>) – Filename of cdl file</p></li>
-<li><p><strong>fout</strong> – Filename of output netCDF file</p></li>
-<li><p><strong>nc_fmt</strong> (<em>integer</em><em>, </em><em>1-4</em>) – <p>Integer specifying the format of the netCDF created,
-default is 3 for netCDF-4. Options are;</p>
-<p>1 netcdf classic file format, netcdf-3 type model
-2 netcdf 64 bit classic file format, netcdf-3 type model
-3 netcdf-4 file format, netcdf-4 type model
-4 netcdf-4 file format, netcdf-3 type model</p>
-<p>Note that using a netcdf-3 format will break group features.</p>
+<li><p><strong>fin</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Filename of cdl file.</p></li>
+<li><p><strong>fout</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Filename of output netCDF file.</p></li>
+<li><p><strong>nc_fmt</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – <p>Integer specifying the format of the netCDF
+created, default is 3 for netCDF-4. Options are;</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>netcdf classic file format, netcdf-3 type model</p></li>
+<li><p>netcdf 64 bit classic file format, netcdf-3 type model</p></li>
+<li><p>netcdf-4 file format, netcdf-4 type model</p></li>
+<li><p>netcdf-4 file format, netcdf-3 type model</p></li>
+</ol>
+</div></blockquote>
+<p>Note that using a netcdf-3 format will break group features and thus
+the entire <cite>cal-nc</cite> structure.</p>
 </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cal_nc.utils">
+<span id="cal-nc-utils-module"></span><h2>cal_nc.utils module<a class="headerlink" href="#module-cal_nc.utils" title="Permalink to this headline">¶</a></h2>
+<p>General utility functions. Primarily for file manipulation etc</p>
+<dl class="function">
+<dt id="cal_nc.utils.filepath">
+<code class="sig-prename descclassname">cal_nc.utils.</code><code class="sig-name descname">filepath</code><span class="sig-paren">(</span><em class="sig-param">f, paths=['.']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/utils.html#filepath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.utils.filepath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find path where file, f, exists. If does not exist then return f. Note
+that if file exists in two locations then paths gives order of priority,
+only a single file is returned.</p>
+<p>param f: String or filepath obj of file
+param paths: List of path strings to search. Default is default_file_dir</p>
+<dl class="simple">
+<dt>returns: If valid file is found then this is returned. If no valid path</dt><dd><p>is found then f is returned.</p>
 </dd>
 </dl>
 </dd></dl>

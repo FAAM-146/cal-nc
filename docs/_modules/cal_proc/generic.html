@@ -64,17 +64,6 @@
 <span class="kn">import</span> <span class="nn">pdb</span>
 
 
-<span class="c1"># Project information</span>
-<span class="n">__title__</span> <span class="o">=</span> <span class="s1">&#39;FAAM Calibration netCDF - generic instrument processor&#39;</span>
-<span class="n">__description__</span> <span class="o">=</span> <span class="s1">&#39;Functions and class for all child instrument processors&#39;</span>
-<span class="n">__institution__</span> <span class="o">=</span> <span class="s1">&#39;FAAM - Facility for Airborne Atmospheric Measurements&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1&#39;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s1">&#39;2019 11 01&#39;</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Graeme Nott&#39;</span>
-<span class="n">__author_email__</span> <span class="o">=</span> <span class="s1">&#39;graeme.nott@faam.ac.uk&#39;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;2019, FAAM&#39;</span>
-
-
 <span class="c1">#__all__ = [&#39;walk_dstress&#39;,&#39;append_time&#39;,&#39;append_var&#39;]</span>
 
 
@@ -232,6 +221,19 @@
         <span class="k">return</span> <span class="n">h3</span>
 
 
+<div class="viewcode-block" id="Generic.update_ver"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_ver">[docs]</a>    <span class="k">def</span> <span class="nf">update_ver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Include program version information as root attributes</span>
+
+<span class="sd">        Version information is determined from cal_proc.__init__. Any</span>
+<span class="sd">        existing version strings shall be overwritten.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">cal_proc</span> <span class="k">import</span> <span class="n">__version__</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">software_version</span> <span class="o">=</span> <span class="n">__version__</span></div>
+
+
 <div class="viewcode-block" id="Generic.update_hist"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_hist">[docs]</a>    <span class="k">def</span> <span class="nf">update_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the global history attribute.</span>
@@ -245,7 +247,7 @@
 <span class="sd">        :type update: List</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">t_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">t_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H%M&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">update</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># With datetime v3.6 can use timespec=&#39;seconds&#39; to drop ms</span>
@@ -257,16 +259,25 @@
             <span class="c1"># file. So nothing needs to be done here.</span>
             <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span><span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span><span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">update</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="c1"># If is a list of strings then join</span>
             <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">update</span><span class="p">[:])</span>
 
         <span class="c1"># Change any shortcuts to today&#39;s date</span>
         <span class="n">update</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;today&gt;&#39;</span><span class="p">,</span><span class="n">t_</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;now&gt;&#39;</span><span class="p">,</span><span class="n">t_</span><span class="p">)</span>
 
-        <span class="n">hist_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span>
-        <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist_</span><span class="p">,</span><span class="n">update</span><span class="p">)</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hist_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="c1"># username attribute does not exist so create it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">update</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># username attribute already exists to append to end of string</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hist_</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">update</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist_</span><span class="p">,</span><span class="n">update</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Generic.update_user"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_user">[docs]</a>    <span class="k">def</span> <span class="nf">update_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -281,22 +292,39 @@
 <span class="sd">        :type update: List</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">update</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># May be able to automatically generate a username but</span>
-            <span class="c1"># ask user to be sure.</span>
-            <span class="n">update</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Enter username &lt;email&gt; [Enter for cdl]: &#39;</span><span class="p">)</span>
+        <span class="c1"># Extract existing username from ds</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">user_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="c1"># username attribute does not exist so create it</span>
+            <span class="n">user_</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">last_user_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">last_user_</span> <span class="o">=</span> <span class="n">user_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">update</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">]:</span>
+            <span class="c1"># No username given so use last entry from nc if possible but</span>
+            <span class="c1"># confirm with user</span>
+            <span class="k">if</span> <span class="n">last_user_</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">]:</span>
+                <span class="k">while</span> <span class="n">update</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">]:</span>
+                    <span class="n">update</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter &#39;username &lt;email&gt;&#39;: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">update</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter &#39;username &lt;email&gt;&#39; [enter for </span><span class="si">{}</span><span class="s2">]: &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_user_</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">update</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">update</span> <span class="o">=</span> <span class="n">last_user_</span>
+        <span class="c1"># elif update is &#39;NA&#39;:</span>
+        <span class="c1">#     # This assumes that all updates have been handed in the cdl</span>
+        <span class="c1">#     # file. So nothing needs to be done here</span>
+        <span class="c1">#     update = &#39;&#39;</span>
 
-        <span class="k">elif</span> <span class="n">update</span> <span class="ow">is</span> <span class="s1">&#39;NA&#39;</span><span class="p">:</span>
-            <span class="c1"># This assumes that all updates have been handed in the cdl</span>
-            <span class="c1"># file. So nothing needs to be done here</span>
-            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span><span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span><span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">update</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="c1"># If is a list of strings then join</span>
             <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">update</span><span class="p">[:])</span>
 
+        <span class="k">if</span> <span class="n">user_</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">update</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">user_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span>
+            <span class="c1"># username attribute already exists to append to end of string</span>
             <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_</span><span class="p">,</span><span class="n">update</span><span class="p">)</span></div>
 
@@ -387,6 +415,7 @@
         <span class="k">if</span> <span class="n">vals</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># Assume that only a single element in the unlimited dimension</span>
             <span class="c1"># has been given in vals. Increase number of dimension to match var</span>
+            <span class="c1"># This assures (?) that 0 axis is the unlimited one...</span>
             <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vals</span><span class="p">[::],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="n">vals</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> \
@@ -395,7 +424,6 @@
         <span class="c1"># Annoyingly have to split path and variable name</span>
         <span class="n">vpath</span><span class="p">,</span><span class="n">vname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 
-        <span class="n">i_found</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># Find unlimited dimension for this var</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">d_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
@@ -405,22 +433,29 @@
                 <span class="n">unlim_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">d_</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">unlim_dim</span><span class="p">:</span>
-                <span class="n">i_found</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">break</span>
 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">unlim_dim</span>
+        <span class="k">except</span> <span class="ne">NameError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Variable </span><span class="si">{}</span><span class="s1"> does not have unlimited dimension&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
+            <span class="k">return</span>
+        
         <span class="c1"># Create slice to write to the correct dimension</span>
         <span class="c1"># That is the last elements of the unlimited dimension</span>
 
         <span class="c1"># .. TODO::</span>
-        <span class="c1">#   Need to check that this works for adding more than one new value</span>
+        <span class="c1">#   Need to check that this works for adding more than one new value       </span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+            
+            <span class="c1"># Don&#39;t use slice obj as I can&#39;t work out what is going on!</span>
+            <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="c1">#slice(-1,None)</span>
+            <span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="c1">#slice(None,len(vals[0]))</span>
 
-        <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
-        <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-        <span class="c1"># Check appropriate number of elements at end of var are either</span>
-        <span class="c1"># masked or empty strings.</span>
-        <span class="c1"># Note that it is possible that legitimate values may be masked</span>
-        <span class="c1"># so also check for any non-finite numbers.</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> \
            <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
@@ -428,10 +463,16 @@
             <span class="c1"># Need to write each individual string seperately (?)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vals</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">val</span>
+        
         <span class="k">elif</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span>
                   <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())):</span>
             <span class="c1"># Assume that all other types of variables are masked</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+        
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Insufficient empty space in </span><span class="si">{}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
 

@@ -285,6 +285,26 @@
             <span class="n">updates</span><span class="p">[</span><span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">updates</span><span class="p">[</span><span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    
+    <span class="c1"># Add user and history attributes and make terms consistant</span>
+    <span class="c1"># eg program options --user=Fred and -u username Fred are equivalent</span>
+    
+    <span class="c1">## TODO: Consolidate with specials in nc_conf.py</span>
+    <span class="k">for</span> <span class="n">u_</span><span class="p">,</span><span class="n">k_</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;hist&#39;</span><span class="p">]],[</span><span class="s1">&#39;username&#39;</span><span class="p">,</span><span class="s1">&#39;history&#39;</span><span class="p">]):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">u_</span> <span class="o">!=</span> <span class="n">updates</span><span class="p">[</span><span class="n">k_</span><span class="p">]:</span>
+                <span class="c1"># Conflict in argument. Get user to select.</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Conflict in argument </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k_</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[1]* </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[2]  </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">updates</span><span class="p">[</span><span class="n">k_</span><span class="p">]))</span>
+                <span class="n">sel</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Select input [1/2]: &#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sel</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">updates</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="c1"># Attribute not included in dic so put it in</span>
+            <span class="n">updates</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_</span>
+
+
 
     <span class="c1">### Process ########################################################</span>
     <span class="n">proc_rtn</span><span class="p">,</span> <span class="n">proc_err</span> <span class="o">=</span> <span class="n">process_nc</span><span class="p">(</span><span class="n">master_infile</span><span class="p">,</span>

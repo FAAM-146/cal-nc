@@ -4,17 +4,8 @@ r"""
 General utility functions. Primarily for file manipulation etc
 """
 
-
-# import datetime, pytz
-# import netCDF4
 import os.path
-# import shutil
-
 import pdb
-
-# import cal_proc
-# from cal_proc import *
-# from .nc_conf import *
 
 
 __all__ = ['default_file_dir',
@@ -35,16 +26,21 @@ default_cdl_dir = ['.','cal_cdl']
 
 
 def filepath(f,paths=default_file_dir):
-    """
-    Find path where file, f, exists. If does not exist then return f. Note
-    that if file exists in two locations then paths gives order of priority,
-    only a single file is returned.
+    """Finds path where file, f, exists from selection of paths.
 
-    param f: String or filepath obj of file
-    param paths: List of path strings to search. Default is default_file_dir
+    Single filename is given and the complete path for this file is found
+    from a list of possible locations. If does not exist then return f.
+    Note that if the file exists in two locations then the paths list carries
+    with it the order of priority, only a single file is returned.
 
-    returns: If valid file is found then this is returned. If no valid path
-        is found then f is returned.
+    Args:
+        f (:obj:`str` or :obj:`pathlib`): Complete or part filename.
+        paths (:obj:`list`): List of path strings to search. Default is
+        ``default_file_dir``.
+
+    Returns:
+        If valid file is found the complete path/filename is returned. If no
+        valid path is found then `f` is returned.
     """
 
     if isinstance(paths,(str)):
@@ -58,7 +54,7 @@ def filepath(f,paths=default_file_dir):
         except TypeError as err:
             print(err)
             return f
-            
+
     return f
 
 

@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-r"""
-Script for creating FAAM calibration netCDF files.
+r"""Script for creating FAAM calibration netCDF files.
 
 .. code-block:: console
 
@@ -90,7 +89,7 @@ the PCASP1 template cdl file as follows;
     $ python3 cal_ncgen.py PCASP1_cal.cdl -u parsefile PCASP1_CLARIFY_cals.cfg
       -o PCASP_faam_20170701_v001_r000_cal.nc
 
-Note that such a config file must have a recognisable format and the `.cfg.` or
+Note that such a config file must have a recognisable format and the `.cfg` or
 `.config` extension to ensure that the instrument parser is not invoked on the
 config file directly. The *special* options in each section that start with
 an ``_`` are not treated as netCDF attributes or variables but are used to
@@ -120,27 +119,26 @@ warnings.filterwarnings('error')
 
 
 def call(infile,args):
-    """
-    Convenience function for cal_ncgen
+    """Convenience function for cal_ncgen.py.
 
-    :param infile: One or more cdl files. If multiple files then concat,
-        if single cdl then ncgen to nc.
-    :type infile: list
-    :param args: Arguments for adding to cdl file
-    :type args: Dictionary
-    :returns: None
+    The main grunt work is actually done in ``nc_func.process_nc()``.
 
-    :How this function works::
-
-        * .. TODO::
-             concatenate multiple cdl input files
-        * If infile is cdl then create nc by calling ``ncgen``.
+    How this works:
+        
+        * Creates separate lists of `nc` and `cdl` files. Determines 'master'
+            file based on list order with `nc` files having priority over `cdl`.
+        * netCDF files are created for any `cdl` files by calling ``ncgen``.
           If no other arguments for nc then finish
-        * open nc file as ``root``
-        * determine instrument to operate on from nc or args['instr']
-        * Instantiate instrument class
-        * Write or append data to variables
-        * write nc
+        * Determine output filename
+        * If no changes to master `nc` file required then exit.
+        * Consolidate any arguments into an ``updates`` dictionary
+        * Pass to ``nc_func.process_nc()`` for creation of complete cal-nc file.
+
+    Args:
+        infile (:obj:`list`): List of one or more cdl filesnames. If multiple
+            files are given than these will be concatenated.
+        if single cdl then ncgen to nc.
+        args (:obj:`dict`): Arguments for adding to resultant nc file.
     """
 
     import os.path
@@ -150,12 +148,6 @@ def call(infile,args):
     abs_infile_ = list(set([os.path.abspath(os.path.join(d,f)) \
                    for f in infile for d in default_cdl_dir\
                    if os.path.isfile(os.path.join(d,f))]))
-
-    # abs_infile_ = []
-    # for f_ in infile:
-    #     for d_ in default_cdl_dir:
-    #         if os.path.isfile(os.path.join(d_,f_)):
-    #             abs_infile_.append(os.path.abspath(os.path.join(d_,f_)))
 
     if len(abs_infile_) != len(infile):
         print('Given input file not found:')
@@ -274,87 +266,6 @@ def call(infile,args):
         return
 
     return
-
-    # pdb.set_trace()
-
-    # # Create a instrument processor from the master nc file. This file remains
-    # # open until explicitly closed.
-    # master_ds, _ = read_nc(master_infile)
-
-    # # Create list of all additional nc files
-    # aux_nc = nc_infile[1:] + tmp_outfile
-
-    # # Obtain intrument from master or, if provided, from user arguments
-    # if args['instr'] is None:
-    #     try:
-    #         instr = master_ds.getncattr('instr')
-    #     except AttributeError:
-    #         print('No instrument name given in master file.')
-    #         print('Use --update instr instrument argument.')
-    #         return
-    # else:
-    #     # User-given arguement overrides instrument name in input files
-    #     instr = args['instr']
-
-    # # Obtain appropriate instrument processing class
-    # instr_class = cal_proc.proc_map(instr)
-
-    # try:
-    #     # Initialise the nc object
-    #     master = instr_class(master_ds)
-    # except Exception as err:
-    #     print('Instrument processing class not found: {}\n'.format(instr))
-    #     return
-
-    # # Print out instrument processor help if required
-    # try:
-    #     if 'help' in args['update_arg']:
-    #         print(master)
-    #         return
-    # except TypeError:
-    #     # eg if args['update_arg'] is None
-    #     pass
-
-
-    # pdb.set_trace()
-    # combine_datasets(master.ds,aux_ds[0],master.ds)
-
-
-    # # Want to apply history and user attributes for each update so make
-    # # sure are correct length.
-    # # The username is the same for all updates
-    # if args['user'] == None:
-    #     user = None
-    # else:
-    #     user = [' '.join(args['user'])] * modal_len
-
-    # if args['hist'] == None:
-    #     history = None
-    # else:
-    #     if len(args['hist']) > modal_len:
-    #         history = args['hist'][:modal_len]
-    #         discard_hist = args['hist'][modal_len:]
-    #     elif len(args['hist']) != modal_len:
-    #         history = [args['hist'][0]] * modal_len
-    #         discard_hist = args['hist'][1:]
-    #     else:
-    #         history = args['hist']
-    #         discard_hist = []
-
-    #     if discard_hist != []:
-    #         print('\nUpdate history argument is incorrect length, '
-    #               'discarding entries:')
-    #         print(' ','\n  '.join(discard_hist))
-    #         print()
-
-    # # Update the variables/attributes
-    # nc.update(updates)
-
-    # # Update the history and username attributes
-    # nc.update_hist(history)
-    # nc.update_user(user)
-
-# root closed
 
 
 # ----------------------------------------------------------------------

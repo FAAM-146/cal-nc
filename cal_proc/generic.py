@@ -251,8 +251,6 @@ class Generic():
         else:
             last_user_ = user_.split(',')[-1].strip()
         
-        pdb.set_trace()
-
         if update in ['',None]:
             # No username given so use last entry from nc if possible but
             # confirm with user

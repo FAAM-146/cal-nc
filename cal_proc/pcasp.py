@@ -38,32 +38,37 @@ var_map = {'bin_cal/ADC_thres':
 
 
 # -----------------------------------------------------------------------------
-def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
-    """
-    Function to read in csv files outputted from various calibration programs
+def read_cal_file(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
+    """Parses calibration files outputted from various calibration programs.
 
-    The output format is defined for different types of files.
-    Data is returned in a dictionary.
+    Currently reads in csv files from Phil's calibration programs along with
+    Angela's calibration program.
 
     .. NOTE::
-        This has been ripped straight from datafile_utils.py. Probably
+        This has been ripped straight from ``datafile_utils.py``. Probably
         can do this better.
 
-    :param cal_file: path and filename of calibration csv file to be read
-    :type cal_file: string
-    :param f_type: type of calibration file to read. One of;
-                    'pcasp_d': output of CDtoDConverter.exe
-                    'pcasp_cs': output of pcaspcal.exe
-                    'cdp_d': output of CDtoDConverter.exe
-                    'cdp_cs': output from ADs calibration program
-    :type f_type: string
-    :param reject_bins: List of bins that are not returned. Default is None
-    :type reject_bins: list of integers
-    :param invalid: Gives value of invalid values as used by input csv file.
-                    Default is -9999
-    :type invalid: string or number
+    Args:
+        cal_file (:obj:`str` or :obj:`pathlib`): Filename of calibration file to
+        be read.
+        f_type (:obj:`str`): Type of calibration file to read. One of;
 
-    :return d: dictionary of metadata and data masked arrays
+            'pcasp_d'
+                output of CDtoDConverter.exe
+            'pcasp_cs'
+                output of pcaspcal.exe
+            'cdp_d'
+                output of CDtoDConverter.exe
+            'cdp_cs'
+                output from ADs calibration program
+
+        reject_bins (:obj:`list`): List of integer bin numbers that are not
+            returned. Default is None.
+        invalid (:obj:`int` or :obj:`str`): Value of invalid values as used by
+            input file. Default is -9999.
+
+    Returns:
+        Dictionary of metadata and data masked arrays.
     """
 
     import csv, os.path
@@ -86,7 +91,7 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
     def read_row_with_heading(line=''):
         '''
         Read comma-delineated row that starts with a heading and return the
-        heading as a string and the row of data as an array
+        heading as a string and the row of data as an array.
         '''
 
         # Strip off white space and extra commas
@@ -425,9 +430,7 @@ def read_cal_file(cal_file,f_type='pcasp_d',reject_bins=None,invalid=-9999):
 
 
 class PCASP(Generic):
-    """
-    Class for parsing and processing of calibration data files for
-    instrument::
+    """Parses and processes calibration data files for instrument::
 
         PCASP: Passive Cavity Aerosol Spectrometer Probe
     """
@@ -436,61 +439,72 @@ class PCASP(Generic):
     def __init__(self,ds):
         """
 
-        :param ds: dataset from ingested cal_nc file
-        :type ds:  netCDF4.dataset
+        Args:
+            ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.
         """
+        
         Generic.__init__(self,ds)
-
-        # datafiles is included in kargs and is not none and is relevant to
-        # bin calibration
 
 
     def update(self,largs):
-        """
-        Method to make any change to the nc object
+        """Make any change to the pcasp object.
 
-        :param largs: List of lists of arbitrary arguments to apply to nc
+        Args:
+            largs (:obj:`list`): List of lists of arbitrary arguments to apply
+                to nc
 
-        The *largs* list is from
+        .. todo::
 
-        :Example:
+            This is actually not used and looks hella complicated. Change so
+            is more useful?
 
-        >>> cal_ncgen.py --update *option*
+        Examples:
+            
+            .. warning::
 
-        and may be one of the following types;
+                These usage examples are now out of date.
 
-        * A list [of lists] of cdl files of data to be written into the nc
-          object. This option is chosen based on extension ``.cdl``. If more than
-          one cdl file is offered then it must be given as a single entry. eg;
+            The ``largs`` list is from
 
-          :Example:
+            .. code-block:: console
 
-          >>> cal_ncgen.py -u PCASP_20170725.cdl PCASP_20171114.cdl
+            $ python cal_ncgen.py --update option
 
-        * A list [of lists] of PCASP diameter calibration files output from
-          ``cstodconverter``. This option is chosen based on filename ending
-          with ``d.csv``. If more than one calibration file is offered then it
-          must be given as a single entry. eg;
+            and may be one of the following types;
 
-          :Example:
+            * A list [of lists] of cdl files of data to be written into the nc
+              object. This option is chosen based on extension ``.cdl``. If more
+              than one cdl file is offered then it must be given as a single
+              entry. eg;
 
-          >>> cal_ncgen.py -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
+              .. code-block:: console
 
-        * A list nc attribute/value or variable/value pairs. For attributes
-          that are strings, the value is concatenated to the existing string
-          with a delimiting comma (non-char attributes will probably throw
-          an error). Variables will be appended to the end of the existing
-          variable numpy array. Note that variable attributes cannot be
-          appended to. The attribute/variable names must be given exactly as
-          in the existing nc file. Any containing group/s is given with
-          forward slashes, eg
+              $ python cal_ncgen.py -u PCASP_20170725.cdl PCASP_20171114.cdl
 
-          :Example:
+            * A list [of lists] of PCASP diameter calibration files output from
+              ``cstodconverter``. This option is chosen based on filename ending
+              with ``d.csv``. If more than one calibration file is offered then
+              it must be given as a single entry. eg;
 
-          >>> cal_ncgen.py -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071 2818.5, 2864.5
+              .. code-block:: console
 
-        Note that any spaces in filenames must be enclosed in quotes. All
-        files are assumed to the same type as the first filename in the list.
+              $ python cal_ncgen.py -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
+
+            * A list nc attribute/value or variable/value pairs. For attributes
+              that are strings, the value is concatenated to the existing string
+              with a delimiting comma (non-char attributes will probably throw
+              an error). Variables will be appended to the end of the existing
+              variable numpy array. Note that variable attributes cannot be
+              appended to. The attribute/variable names must be given exactly as
+              in the existing nc file. Any containing group/s is given with
+              forward slashes, eg
+
+              .. code-block:: console
+
+              $ python cal_ncgen.py -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071 2818.5, 2864.5
+
+            Note that any spaces in filenames must be enclosed in quotes. All
+            files are assumed to the same type as the first filename in the list.
 
         """
 
@@ -520,34 +534,34 @@ class PCASP(Generic):
 
 
 
-    def update_bincal_from_file(self,calfile,vars_d):
-        """
-        Append bin calibration data in datafile to that already in nc
+    def update_bincal_from_file(self,cal_file,vars_d):
+        """Appends bin calibration data in calibration file to that in nc file.
 
-        :param calfile: PCASP calibration csv file. Is recognised as
-            ending in 'cs' or 'd' so user needs to provide some quality
-            assurance on the input files
-        :type calfile: Path/filename strings or pathlib obj
-        :param vars_d: Additional variables associated with those contained
-            within the datafile. At the very least this should contain any
-            associated coordinate variables, eg time.
-        :type vars_d: Dictionary of variable name and value pairs.
+        Args:
+            cal_file (:obj:`str` or :obj:`pathlib`): Filename of calibration
+                PCASP calibration csv file to be read. Is recognised as 
+                ending in 'cs' or 'd' so user needs to provide some quality
+                assurance on the input files.
+            vars_d(:obj:`dict`): Dictionary of any additional variables
+                associated with those contained within the datafile. At the very
+                least this should contain any associated coordinate variables,
+                eg `time`.
         """
 
-        if (calfile == None) and (os.path.isfile(calfile) == False):
+        if (cal_file == None) and (os.path.isfile(cal_file) == False):
             # Nothing to do
             return
 
         caldata = None
-        if all((os.path.splitext(calfile)[0].endswith('cs'),
-               os.path.splitext(calfile)[1].lower() == '.csv')):
-            caldata = read_cal_file(calfile,f_type='pcasp_cs')
-        elif all((os.path.splitext(calfile)[0].endswith('d'),
-                 os.path.splitext(calfile)[1].lower() == '.csv')):
-            caldata = read_cal_file(calfile,f_type='pcasp_d')
+        if all((os.path.splitext(cal_file)[0].endswith('cs'),
+               os.path.splitext(cal_file)[1].lower() == '.csv')):
+            caldata = read_cal_file(cal_file,f_type='pcasp_cs')
+        elif all((os.path.splitext(cal_file)[0].endswith('d'),
+                 os.path.splitext(cal_file)[1].lower() == '.csv')):
+            caldata = read_cal_file(cal_file,f_type='pcasp_d')
 
         if caldata == None:
-            # Error in the calfile
+            # Error in the cal_file
             return
 
         # Add var_map data to vars. However do not overwrite any items in var
@@ -563,7 +577,7 @@ class PCASP(Generic):
             except KeyError as err:
                 # Variable in var_map does not exist in file therefore skip
                 #pdb.set_trace()
-        #        print('{} not found in {}'.format(k,os.path.basename(calfile)))
+        #        print('{} not found in {}'.format(k,os.path.basename(cal_file)))
                 pass
             except Exception as err:
                 print('  Failed. ',err)
@@ -578,33 +592,4 @@ class PCASP(Generic):
         except Exception as err:
             print('err: {}'.format(err))
             pdb.set_trace()
-
-
-        # try:
-        #     # Note hard-coding of bin_cal group :-/
-        #     self._add_coord('/bin_cal/time',vars.pop('time'))
-        # except KeyError as err:
-        #     # Must have 'time' variable update
-        #     return
-        # except Exception as err:
-        #     # Unknown error
-        #     pdb.set_trace()
-
-        # for k_,v_ in var_map.items():
-        #     #print('Add {} to self.ds'.format(k_))
-        #     try:
-        #         self._add_var(k_,v_(caldata))
-        #     except KeyError as err:
-        #         # Variable in var_map does not exist in file therefore skip
-        #         pdb.set_trace()
-        #     except IndexError as err:
-        #         # Variable in var_map does not exist in dataset. Skip these
-        #         # variables, if they are created they may become mismatched
-        #         # wrt the cal time and other variables.
-        #     #    print('  Failed: Variable does not already exist in dataset')
-        #         pass
-        #     except Exception as err:
-        #         print('  Failed. ',err)
-        #         pdb.set_trace()
-        #         pass
 

@@ -307,7 +307,7 @@
 <div class="section" id="testing-calibration-netcdf">
 <h1>Testing Calibration netCDF<a class="headerlink" href="#testing-calibration-netcdf" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">/testing</span></code> directory includes some files to test the code and any scripts that you write.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>cal-nc<span class="o">)</span> user@pc:~<span class="se">\g</span>it<span class="se">\c</span>al-nc$ python cal_ncgen.py fred.nc bob.cdl testing/PCASP1_cal_test-1.cdl testing/PCASP1_cal_test-2.cdl --update parsefile testing/PCASP1_testcals.cfg -u comment <span class="s2">&quot;testing stuff&quot;</span> -o testing/PCASP1_test.nc
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(cal-nc) user@pc:~\git\cal-nc$ python cal_ncgen.py fred.nc bob.cdl testing/PCASP1_cal_test-1.cdl testing/PCASP1_cal_test-2.cdl --update parsefile testing/PCASP1_testcals.cfg -u comment &quot;testing stuff&quot; -o testing/PCASP1_test.nc</span>
 </pre></div>
 </div>
 <p>This command does the following;</p>
@@ -321,8 +321,8 @@
 </ul>
 <p>Have a go…</p>
 <blockquote>
-<div><div class="admonition note">
-<p class="admonition-title">Note</p>
+<div><div class="admonition-todo admonition" id="id5">
+<p class="admonition-title">Todo</p>
 <p>This should be in a sphinx-readable file and README.rst pointed to the resultant file.</p>
 </div>
 </div></blockquote>
@@ -342,7 +342,7 @@
 <h2>Resultant <cite>cal-nc</cite><a class="headerlink" href="#resultant-cal-nc" title="Permalink to this headline">¶</a></h2>
 <p>This results in the cal-nc file;</p>
 <blockquote>
-<div><p><a class="reference external" href="../testing/PCASP_faam_20191107_v001_r000_cal.nc">PCASP_faam_20191107_v001_r000_cal.nc</a></p>
+<div><p><a class="reference external" href="https://github.com/FAAM-146/cal-nc/blob/master/testing/PCASP_faam_20191107_v001_r000_cal.nc">PCASP_faam_20191107_v001_r000_cal.nc</a></p>
 </div></blockquote>
 <p>Reading this netCDF file with</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ncdump PCASP_faam_20191107_v001_r000_cal.nc &gt; PCASP_faam_20191107_v001_r000_cal.cdl</span>
@@ -350,7 +350,7 @@
 </div>
 <p>results in the <cite>cdl</cite> file;</p>
 <blockquote>
-<div><p><a class="reference external" href="../testing/PCASP_faam_20191107_v001_r000_cal.cdl">PCASP_faam_20191107_v001_r000_cal.cdl</a></p>
+<div><p><a class="reference external" href="https://github.com/FAAM-146/cal-nc/blob/master/testing/PCASP_faam_20191107_v001_r000_cal.cdl">PCASP_faam_20191107_v001_r000_cal.cdl</a></p>
 </div></blockquote>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netcdf</span> \<span class="mi">20191107</span><span class="n">_P2_cal</span> <span class="p">{</span>
 

@@ -17,12 +17,12 @@ import pdb
 
 
 def walk_dstree(ds):
-    """
-    Recursive Dataset group generator
+    """Recursive Dataset group generator.
 
-    from: http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2
+    from: `http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2`_
 
-    param ds: Dataset object
+    Args:
+        ds (:obj:`netCDF4.Dataset`): Dataset
     """
     values = ds.groups.values()
     yield values
@@ -32,19 +32,23 @@ def walk_dstree(ds):
 
 
 def append_time(otime,ntime,concat_axis=0):
-    """
-    Method to append time variable/s to existing time coordinate
+    """Appends time variable/s to existing time coordinate.
 
-    :param otime: Original Dataset time coordinate. As is coordinate is 1d
-    :type otime: netCDF4 variable
-    :param ntime: New time variables to append to otime.
-    :type ntime: May either be a netCDF4 variable or a simple iterable of
-        values. The values may be datetime objects. If the values are
-        strings some attempt to convert them will be done. If they are numbers
-        then it is assumed that units, calendar are compatible with those in
-        otime.
+    Note that increasing the size of the ``time`` coordinate also increases the
+    size of all of the dependent variables.
 
-    :returns: a netCDF4 variable with the same units and calendar as otime
+    Args:
+        otime (:obj:`netCDF4.Variable`): Original Dataset time coordinate. As
+            is coordinate dimensionality is 1d.
+        ntime (:obj:`netCDF4.Variable` or `iterable`): New time variables to
+            append to `otime`. May either be a netCDF4 variable or a simple
+            iterable of values. These values may be datetime objects. If the
+            values are strings some attempt to convert them will be done. If
+            they are numbers then it is assumed that units and calendar are
+            compatible with those in `otime`.
+
+    Returns:
+        A netCDF4 variable with the same units and calendar as `otime`.
     """
 
     import datetime
@@ -124,21 +128,26 @@ def append_time(otime,ntime,concat_axis=0):
 
 
 class Generic():
-    """
-    Minimal parent class for instrument-specific parsing and processing
-    of calibration data suitable for writing to the calibration netCDF.
+    """Parent class for general instrument parsing and processing.
+
+    Generic forms the basis for all specific instrument processor classes.
     """
 
     def __init__(self,ds):
         """
 
-        :param ds: dataset from ingested cal_nc file
+        Args:
+            ds (:obj:`netCDF4.Dataset`): Dataset from ingested cal_nc file
+
+        .. note::
+
+            I don't thin that this is actually true anymore...
+            
             Note that cal_nc file as been read using r+. Thus variables (?)
             and attributes cannot be appended to. Values must be read to
             a python variable, the nc key deleted, then rewritten with
             appropriate modfications.
-        :type ds:  netCDF4.dataset
-        :returns ds:
+
         """
         self.ds = ds
 
@@ -148,6 +157,11 @@ class Generic():
         Help, specifically with regards to structure of update() method if
         it exists. If update() does not exist then use docstr of processor
         class __init__()
+        
+        .. todo::
+
+            This needs to be updated
+
         """
 
         # To print name of instance use: type(self).__name__
@@ -171,11 +185,10 @@ class Generic():
 
 
     def update_ver(self):
-        """
-        Include program version information as root attributes
+        """Includes program version information as root attribute.
 
-        Version information is determined from cal_proc.__init__. Any
-        existing version strings shall be overwritten.
+        Version information is determined from ``cal_proc.__init__()``.
+        Any existing version strings shall be overwritten.
         """
 
         from cal_proc import __version__
@@ -184,24 +197,24 @@ class Generic():
 
 
     def update_hist(self,update=None):
-        """
-        Update the global history attribute.
+        """Updates the global history attribute.
 
         The history nc attribute is a single string of comma-delineated text.
 
-        :param update: Update for history string. If None (default) then
-            auto-generate string based on today's date. If given then append
-            update/s to history attribute string. Any ``<now>`` or ``<today>``
-            strings are changed to today's date.
-        :type update: List
+        Args:
+            update (:obj:`str` or :obj:`list`): Update for history string.
+            If None (default) then auto-generate string based on today's
+            datetime. If given then append update/s to history attribute string.
+            Any ``<now>`` or ``<today>`` strings are changed to today's
+            datetime.
         """
 
+        # With datetime v3.6 can use timespec='seconds' to drop ms
+        # Timezone aware timestamp is generated by default. 
         t_ = datetime.datetime.now(pytz.utc).replace(microsecond=0).strftime('%Y%m%dT%H%M')
 
         if update is None:
-            # With datetime v3.6 can use timespec='seconds' to drop ms
-            # Timezone aware timestamp is generated by default.
-            update = '{} Auto update'.format(t_)
+           update = '{} Auto update'.format(t_)
 
         elif update is 'NA':
             # This assumes that all updates have been handled in the cdl
@@ -230,15 +243,16 @@ class Generic():
 
 
     def update_user(self,update=None):
-        """
-        Update the global username attribute.
+        """Updates the global username attribute.
 
         The username nc attribute is a single string of comma-delineated text.
-
-        :param update: Update for username string. If None (default) then
-            ask user, usually given as 'username <user@email>'. If given
-            then append username/s to existing attribute string.
-        :type update: List
+        
+        Args:
+            update (:obj:`str` or :obj:`list`): Update for username string.
+            If None (default) then auto-generate string based on previous
+            entries in netCDF and ask user. String usually given as 
+            `username <user@email>`. Append username/s to existing attribute
+            string.
         """
 
         # Extract existing username from ds
@@ -279,12 +293,15 @@ class Generic():
 
 
     def change_val(self,var,old_val,new_val):
-        """
-        Method to change a single variable/attribute value.
+        """Changes a single variable/attribute value.
 
         The variable or attribute name must be given along with the old
         value, ``old_val``, that is to be change to ``new_val``. If ``old_val``
         is not found then nothing is done.
+
+        .. todo::
+
+            Not implemented
 
         """
 
@@ -292,20 +309,20 @@ class Generic():
 
 
     def _add_coord(self,coord,vals):
-        """
-        Method to add extra values to end of an unlimited coordinate
+        """Adds extra values to end of an unlimited coordinate.
 
         If a coordinate is increased in size then all of the variables that
         depend on that coordinate are increased to the same size along the
-        unlimited dimension. This internal method is called along with
-        _add_var().
+        unlimited dimension. This internal method should usually be followed by
+        ``_add_var()``.
 
-        :param coord: string of path/name of coordinate variable. This can be found with
-            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``
-        :type var: String
-        :param vals: Iterable of values to append to the end of var. Types must
-            match the dtype of the variable
-        :type vals: List or array
+        Args:
+            coord (:obj:`str`): string of path/name of coordinate variable. This
+                can be found with
+                ``os.path.join(self.ds[coord].group().path,self.ds[coord].name)``
+            vals (`iterable`): Iterable of values to append to the end of 
+                ``self.ds[coord]``. Type must match the dtype of the coordinate
+                variable.
         """
 
         # Ensure that is unlimited coordinate
@@ -339,8 +356,7 @@ class Generic():
 
 
     def _add_var(self,var,vals):
-        """
-        Method to add extra values to end of an already extended variable
+        """Adds extra values to end of an already extended variable.
 
         If a coordinate is increased in size then all of the variables that
         depend on that coordinate are increased to the same size along the
@@ -351,13 +367,14 @@ class Generic():
         number of values is > number of new elements at the end of the
         array then it is assumed that there is an error and no action is taken.
 
-        :param var: string of path/name of variable. This can be found with
-            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``
-        :type var: String
-        :param vals: Iterable of values to append to the end of var. Types must
-            match the dtype of the variable
-        :type vals: List or array
+        Args:
+            var (:obj:`str`): string of path/name of variable. This
+                can be found with
+                ``os.path.join(self.ds[var].group().path,self.ds[var].name)``
+            vals (`iterable`): Iterable of values to append to the end of 
+            ``self.ds[var]``. Type must match the dtype of the variable.
         """
+
         # Ensure vals is an array and preserve any masking
         vals = np.ma.atleast_1d(vals)
 
@@ -430,6 +447,10 @@ class Generic():
         """
         Method to append to an existing netCDF4 variable and associated coord
 
+        .. todo::
+
+            Redundant/not currently used.
+
         The extra coordinate values are appended to the coordinate of vname
         in self. This automatically creates the same number of masked entries
         in all of the variables that depend on that coordinate.
@@ -444,7 +465,9 @@ class Generic():
             be the same length as coord_vals in the unlimited dimension.
         :type var_vals: List or array
 
-        NOTE: This is a bit complicated/not sensible. It is possible/probable
+        .. note::
+
+            This is a bit complicated/not sensible. It is possible/probable
             to add a variable (along with the coord) then append to a different
             variable that uses the same coordinate which then writes the same
             coordinate values into the coordinate again.
@@ -469,28 +492,22 @@ class Generic():
 
 
     def append_dict(self,var_d):
-        """
-        Append multiple variables with a single coordinate
+        """Appends multiple variables with a single coordinate.
 
         Multiple variable values that use the same coordinate can be appended
         to existing dataset variables in one go. Variables that do not already
         exist in the dataset are ignored. Use add instead...
 
-        Add variable attributes as well?
+        Args
+            var_d (:obj:`dict`): Dictionary of multiple variable values to be
+                appended. Dictionary keys are the variable path+name strings
+                and the dictionary values are either a netCDF variable or a
+                sub-dictionary of values and attributes
 
-        :param var_d: Dictionary of multiple variable values to be appended
-            arranged so that the dictionary keys are the variable path+names
-            and the dictionary values are either a netCDF variable or a
-            sub-dictionary of values and attributes
-        :type var_d: dictionary
-
-        Several options for inputs:
-
-        .. TODO::
+        .. todo::
 
             Currently does not accept netCDF4 variable values.
             Currently only accepts iterable of data.
-
 
         .. codeblock:: python
 
@@ -533,11 +550,6 @@ class Generic():
             if err == -1:
                 return -1
 
-        # Check lengths of variables
-        # pdb.set_trace()
-        # var_len = [len(v_) for v_ in var_d.values()]
-
-
         for k_,v_ in var_d.items():
             try:
                 self._add_var(k_,v_)
@@ -550,29 +562,28 @@ class Generic():
     def append_dataset(self,ds,
                        force_append=['username','history'],
                        exclude=[]):
-        """
-        Add groups, attributes, dimensions, and variables from ds.
+        """Adds groups, attributes, dimensions, and variables from ds.
 
-        Attributes of *self* shall take priority over those of the same name
-        in ds, such attribute values of ds shall be ignored. The exception is
-        if the attribute key is included in ``force_append``. In this case the
-        resultant attribute shall be a comma-delineated combination of the
-        individual attributes with that from ds being appended to that of
-        *self*.
+        Attributes of ``self.ds`` shall take priority over those of the same
+        name in `ds`, such attribute values of `ds` shall be ignored. The
+        exception is if the attribute key is included in ``force_append``. In
+        this case the resultant attribute shall be a comma-delineated
+        combination string of the individual attributes with that from ``ds``
+        being appended to that of ``self.ds``.
 
-        Variables from ds are appended to the same variable in *self*. The
+        Variables from ``ds`` are appended to the same variable in ``self``. The
         variables are sorted by the unlimited dimension. Variables only in
-        ds shall be added to *self*.
+        ds shall be added to ``self``.
 
-        If any groups, attributes, or variables in ds that are not to be
-        added or appended can be specified as a list with ``exclude``.
+        Any groups, attributes, or variables in ``ds`` that are not to be
+        added or appended can be specified as a list with `exclude`.
 
-        :param ds: netCDF dataset.
-        :type ds: dataset
-        :param force_append: Any attribute strings that should always be
-            appended to, even if they are identical. Default is
-            ['username','history'].
-        :type force_append: List of root or group attributes strings.
+        Args:
+            ds (:obj:`netCDF4.Dataset`) netCDF Dataset to add into ``self.ds``
+            force_append (:obj:`list`): List of any root or group attribute
+            strings that should always be appended to, even if they are
+            identical. Default is ['username','history']. Group attribule
+            strings must include full path.
         :param exclude: List of attribute or variable names (but not variable
             attributes) that are not to be added or appended.
         :type exclude: List of identifying strings.

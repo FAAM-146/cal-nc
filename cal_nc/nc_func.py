@@ -20,13 +20,12 @@ from .utils import *
 __all__ = ['read_nc','process_nc','run_ncgen']
 
 
-# Directory where temporary files are stored
+# Directory where temporary files are stored by default
 default_tmp_dir = './tmp'
 
 
 def read_nc(master,aux=[]):
-    """
-    Function for reading netCDF calibration files into DataSets
+    """Function for reading netCDF calibration files into DataSets.
 
     .. Note::
 
@@ -35,12 +34,15 @@ def read_nc(master,aux=[]):
         required whether or not the file was opened as read-only. Thus all
         Datasets should be explicitly closed when they are finished with.
 
-    param master: 'master' netCDF file that is opened for read/write
-    type: master: Filename string of filepath object
-    param aux: Any additional netCDF files that are to be added/concatenated with
-        master nc file. Auxillary nc files are opened as read only. Default is
-        [], ie no auxillary files.
-    returns: Dataset from master netCDF and list of any auxillary Datasets.
+    Args:
+        master (:obj:`str` or :obj:`pathlib`): 'master' netCDF filename that is
+            opened for read/write.
+        aux (:obj:`list`): List of any additional netCDF filenames that are to
+            be added/concatenated with master nc file. Auxillary nc files are
+            opened as read only. Default is [], ie no auxillary files.
+    
+    Returns:
+        Tuple of dataset from master netCDF and list of any auxillary Datasets.
     """
 
     # Open master nc file for reading/writing
@@ -57,39 +59,35 @@ def read_nc(master,aux=[]):
     return master_ds, aux_ds
 
 
-def process_nc(master_nc,aux_nc=[],anc_files=[],
-               out_nc=None,instr=None,updates={}):
-    """
-    Open all netCDF files for processing.
+def process_nc(master_nc, aux_nc=[], anc_files=[],
+               out_nc=None, instr=None, updates={}):
+    """Processes all netCDF and auxillary files.
 
     The master netCDF is copied to a temporary file which is opened for read/
-    write while any auxilary files are opened as read-only datasets. Modifications,
-    concatenations, etc are done on the temporary dataset and once complete
-    it is closed and moved to the output file which may be either the master
-    file or out_nc.
+    write while any auxilary files are opened as read-only datasets.
+    Modifications, concatenations, etc are done on the temporary dataset and
+    once complete it is closed and moved to the output file which may be either
+    the master file or `out_nc`.
 
     Updates are applied to the master dataset *after* any concatenation etc.
 
-    param master_nc: 'master' netCDF file.
-    type: master: Filename string of pathlib path object.
-    param aux_nc: Any additional netCDF files that are to be added/concatenated
-        with master nc file. Default is [], ie no auxillary files.
-    type aux_nc: list of filename string/s of pathlib path object/s.
-    param anc_files: List of ancillary files that are not netCDF and so need
-        to be parsed before being injested into the dataset. Default is [],
-        ie no ancillary files.
-    type anc_files: list of filename string/s of pathlib path object/s.
-    out_nc: filename of netCDF to be written. If None (default) or the same as
-        master_nc, master_nc is overwritten.
-    out_nc: Filename string of pathlib path object or None.
-    param updates: All updates to be applied to the final dataset.
-    type updates: Dictionary of updates with the keys being existing or new
-        groups, variables, or attributes of the dataset.
-
-    returns: Dataset from master netCDF and list of any auxillary Datasets.
-
+    Args:
+        master_nc (:obj:`str`): Filename string of 'master' netCDF file.
+        aux_nc (:obj:`list`, optional): List of any additional filename/s of netCDF
+            files that are to be added/concatenated with master nc file. Default
+            is [], ie no auxillary files.
+        anc_files (:obj:`list`, optional): List of any ancillary files that are not
+            netCDF and so need to be parsed before being injested into the
+            dataset. Default is [], ie no ancillary files.
+        out_nc (:obj:`str`, optional): Filename string of netCDF to be written. If None
+            (default) or the same as `master_nc`, `master_nc` is overwritten.
+        instr (:obj:`str`, optional): Identifying string of instrument which determines
+            processor class. If `None` (default) then instrument is identified
+            from `master_nc`.
+        updates (:obj:`dict`, optional): All other updates to be applied to the final
+            dataset. Default is {}.
+    
     """
-
 
 
     # Create a temporary copy of the master
@@ -130,6 +128,9 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
     try:
         if ['help'] in updates.values():
             print(master)
+
+            # TODO(gn): Change this to a Raise
+            
             return 1, ''
     except TypeError:
         # eg if args['update_arg'] is None
@@ -152,7 +153,6 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
         else:
             master.append_dataset(aux_ds[-1])
 
-    pdb.set_trace()
     # Read in any ancillary files
     for anc in anc_files:
 
@@ -221,29 +221,25 @@ def process_nc(master_nc,aux_nc=[],anc_files=[],
     else:
         shutil.move(tmp_nc, out_nc)
 
-
     return 0, ''
 
 
 def run_ncgen(fin,fout,nc_fmt=3):
-    """
-    Create netCDF file, fout, from input cdl, fin
+    """Create netCDF file from input cdl by calling external program, `ncgen`.
 
-    :param fin: Filename of cdl file
-    :type fin: string
-    :param fout: Filename of output netCDF file
-    :type fin: string
-    :param nc_fmt: Integer specifying the format of the netCDF created,
-        default is 3 for netCDF-4. Options are;
+    Args:
+        fin (:obj:`str` or :obj:`pathlib`): Filename of cdl file.
+        fout (:obj:`str`): Filename of output netCDF file.
+        nc_fmt (:obj:`int`): Integer specifying the format of the netCDF
+            created, default is 3 for netCDF-4. Options are;
 
-        1 netcdf classic file format, netcdf-3 type model
-        2 netcdf 64 bit classic file format, netcdf-3 type model
-        3 netcdf-4 file format, netcdf-4 type model
-        4 netcdf-4 file format, netcdf-3 type model
+                1. netcdf classic file format, netcdf-3 type model
+                2. netcdf 64 bit classic file format, netcdf-3 type model
+                3. netcdf-4 file format, netcdf-4 type model
+                4. netcdf-4 file format, netcdf-3 type model
 
-        Note that using a netcdf-3 format will break group features.
-    :type nc_fmt: integer, 1-4
-    :returns: None
+            Note that using a netcdf-3 format will break group features and thus
+            the entire `cal-nc` structure.
     """
 
     import subprocess

@@ -19,7 +19,7 @@ Resultant `cal-nc`
 
 This results in the cal-nc file;
 
-	`PCASP_faam_20191107_v001_r000_cal.nc <../testing/PCASP_faam_20191107_v001_r000_cal.nc>`_
+	`PCASP_faam_20191107_v001_r000_cal.nc <https://github.com/FAAM-146/cal-nc/blob/master/testing/PCASP_faam_20191107_v001_r000_cal.nc>`_
 
 Reading this netCDF file with
 
@@ -29,8 +29,9 @@ Reading this netCDF file with
 
 results in the `cdl` file;
 
-	`PCASP_faam_20191107_v001_r000_cal.cdl <../testing/PCASP_faam_20191107_v001_r000_cal.cdl>`_
+	`PCASP_faam_20191107_v001_r000_cal.cdl <https://github.com/FAAM-146/cal-nc/blob/master/testing/PCASP_faam_20191107_v001_r000_cal.cdl>`_
 
 
 .. literalinclude:: ../testing/PCASP_faam_20191107_v001_r000_cal.cdl
 	:tab-width: 2
+

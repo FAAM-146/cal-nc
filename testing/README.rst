@@ -3,7 +3,7 @@ Testing Calibration netCDF
 
 The ``/testing`` directory includes some files to test the code and any scripts that you write.
 
-.. code-block:: bash
+.. code-block:: console
 
     (cal-nc) user@pc:~\git\cal-nc$ python cal_ncgen.py fred.nc bob.cdl testing/PCASP1_cal_test-1.cdl testing/PCASP1_cal_test-2.cdl --update parsefile testing/PCASP1_testcals.cfg -u comment "testing stuff" -o testing/PCASP1_test.nc
 
@@ -21,7 +21,7 @@ This command does the following;
 Have a go...
 
 
-    .. note::
+    .. todo::
 
         This should be in a sphinx-readable file and README.rst pointed to the resultant file.
 

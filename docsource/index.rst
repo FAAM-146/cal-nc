@@ -44,7 +44,8 @@ Functions and Modules
 
 
 .. include:: ../README.rst
-
+.. include:: ../testing/README.rst
+.. include:: ../testing/example.rst
 
 
 

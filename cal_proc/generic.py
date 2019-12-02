@@ -16,7 +16,7 @@ import pdb
 def walk_dstree(ds):
     """Recursive Dataset group generator.
 
-    from: `http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2`_
+    from: http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2
 
     Args:
         ds (:obj:`netCDF4.Dataset`): Dataset
@@ -138,7 +138,7 @@ class Generic():
 
         .. note::
 
-            I don't thin that this is actually true anymore...
+            I don't think that this is actually true anymore...
             
             Note that cal_nc file as been read using r+. Thus variables (?)
             and attributes cannot be appended to. Values must be read to
@@ -200,10 +200,10 @@ class Generic():
 
         Args:
             update (:obj:`str` or :obj:`list`): Update for history string.
-            If None (default) then auto-generate string based on today's
-            datetime. If given then append update/s to history attribute string.
-            Any ``<now>`` or ``<today>`` strings are changed to today's
-            datetime.
+                If None (default) then auto-generate string based on today's
+                datetime. If given then append update/s to history attribute
+                string. Any ``<now>`` or ``<today>`` strings are changed to
+                today's datetime.
         """
 
         # With datetime v3.6 can use timespec='seconds' to drop ms
@@ -246,10 +246,10 @@ class Generic():
         
         Args:
             update (:obj:`str` or :obj:`list`): Update for username string.
-            If None (default) then auto-generate string based on previous
-            entries in netCDF and ask user. String usually given as 
-            `username <user@email>`. Append username/s to existing attribute
-            string.
+                If None (default) then auto-generate string based on previous
+                entries in netCDF and ask user. String usually given as 
+                `username <user@email>`. Append username/s to existing attribute
+                string.
         """
 
         # Extract existing username from ds

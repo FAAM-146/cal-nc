@@ -6,9 +6,9 @@ from .generic import *
 
 
 class WCM2000(Generic):
-    """Parses and processes calibration data files for instrument::
+    """Parses and processes calibration data files for instrument: WCM2000
 
-        WCM2000: SEA WCM-2000 total water probe
+        **WCM2000:** SEA WCM-2000 total water probe
     """
 
     def __init__(self,ds):
@@ -55,54 +55,54 @@ class WCM2000(Generic):
         Example:
             If the netCDF4 object ``self`` has only the following variables::
 
-            float32 time(time)
-                standard_name: time
-                long_name: time of calibration
+                float32 time(time)
+                    standard_name: time
+                    long_name: time of calibration
 
-                time = 569., 669.;
+                    time = 569., 669.;
 
-            group /TWC:
-                float32 r100(time)
-                    long_name: TWC element resistance at 100deg C
-                    units: milliohm
+                group /TWC:
+                    float32 r100(time)
+                        long_name: TWC element resistance at 100deg C
+                        units: milliohm
 
-                float32 dtdr(time)
-                    long_name: Change in TWC element resistance with temperature
-                    units: deg C / milliohm
+                    float32 dtdr(time)
+                        long_name: Change in TWC element resistance with temperature
+                        units: deg C / milliohm
 
-                r100 = 31.4473, 31.3362;
-                dtdr = 33.9276, 33.8165;
+                    r100 = 31.4473, 31.3362;
+                    dtdr = 33.9276, 33.8165;
 
 
             Then the following call,
 
-            ..code-block:: python
+            .. code-block:: python
 
-            self.update({'time': 769,
-                         'TWC/r100', {'data': 31.2251,
-                                      'comment': 'Added comment'},
-                         'TWC/dtdr', 33.7064})
+                self.update({'time': 769,
+                             'TWC/r100', {'data': 31.2251,
+                                          'comment': 'Added comment'},
+                             'TWC/dtdr', 33.7064})
 
             Shall result in the following nc structure::
 
-            float32 time(time)
-                standard_name: time
-                long_name: time of calibration
+                float32 time(time)
+                    standard_name: time
+                    long_name: time of calibration
 
-                time = [569., 669. 769.];
+                    time = [569., 669. 769.];
 
-            group /TWC:
-                float32 r100(time)
-                    long_name: 'TWC element resistance at 100deg C'
-                    units: 'milliohm'
-                    comment: 'Added comment'
+                group /TWC:
+                    float32 r100(time)
+                        long_name: 'TWC element resistance at 100deg C'
+                        units: 'milliohm'
+                        comment: 'Added comment'
 
-                float32 dtdr(time)
-                    long_name: 'Change in TWC element resistance with temperature'
-                    units: 'deg C / milliohm'
+                    float32 dtdr(time)
+                        long_name: 'Change in TWC element resistance with temperature'
+                        units: 'deg C / milliohm'
 
-                r100 = [31.4473, 31.3362, 31.2251];
-                dtdr = [33.9276, 33.8165, 33.7064];
+                    r100 = [31.4473, 31.3362, 31.2251];
+                    dtdr = [33.9276, 33.8165, 33.7064];
 
             Attribute and variables names may be given as strings, as in the
             example above or as the netCDF4 object variables. Efforts are made

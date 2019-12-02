@@ -1,43 +1,43 @@
 """
 File containing all primary instrument temperature instrument processor
 classes.
+
+.. todo::
+    
+    This needs significant work
+
 """
 
 from .generic import Generic
 
 class NDIT(Generic):
-    """
-    Class for parsing and processing of calibration data files for
-    instruments::
+    """Parses and processes calibration data files for instrument::
 
         NDIT: Non-deiced temperature probe
     """
 
     def __init__(self,ds):
         """
-
-        :param ds: dataset from ingested cal_nc file
-        :type ds:  netCDF4.dataset
+        
+        Args:
+            ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.
         """
         Generic.__init__(self,ds)
 
 
-    def update(self,largs):
-        """
-        Method to determine any other additional changes to the nc obj
+    def update(self,dvars):
+        """Updates attributes and variables of ndit nc object.
 
-        :param kargs: dictionary of optional arguments
-        :type kargs: dictionary
+        Args:
+            dvars (:obj:`dict`): 
         """
-        if largs is None:
+        if dvars is None:
             return
 
         pass
 
 class DIT(Generic):
-    """
-    Class for parsing and processing of calibration data files for
-    instruments::
+    """Parses and processes calibration data files for instrument::
 
         DIT: Deiced temperature probe
     """
@@ -45,19 +45,19 @@ class DIT(Generic):
     def __init__(self,ds):
         """
 
-        :param ds: dataset from ingested cal_nc file
-        :type ds:  netCDF4.dataset
+        Args:
+            ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.
         """
         Generic.__init__(self,ds)
 
-    def update(self,largs):
-        """
-        Method to determine any other additional changes to the nc obj
 
-        :param kargs: dictionary of optional arguments
-        :type kargs: dictionary
+    def update(self,dvars):
+        """Updates attributes and variables of ndit nc object.
+
+        Args:
+            dvars (:obj:`dict`): 
         """
-        if largs is None:
+        if dvars is None:
             return
 
         pass

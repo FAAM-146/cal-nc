@@ -506,14 +506,14 @@ class Generic():
             Currently does not accept netCDF4 variable values.
             Currently only accepts iterable of data.
 
-        .. codeblock:: python
+        .. code-block:: python
 
-        var_d = {coord: netCDF4.Variable,
-                 var1:  [1,2,3,4,5],
-                 var2:  {'_data': [1,2,3,4,5],
-                         'var2_attr1': 'var2 attribute 1',
-                         'var2_attr1': 'var2 attribute 1', ...}
-                 var3:  'Fred'}
+            var_d = {coord: netCDF4.Variable,
+                     var1:  [1,2,3,4,5],
+                     var2:  {'_data': [1,2,3,4,5],
+                             'var2_attr1': 'var2 attribute 1',
+                             'var2_attr1': 'var2 attribute 1', ...}
+                     var3:  'Fred'}
 
         Note that all variables should be the same length if they are
         list-like. Any variables not the same length as the maximum length

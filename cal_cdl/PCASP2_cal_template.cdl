@@ -50,97 +50,97 @@ group: bin_cal {
     // Define group coordinate variables
     variables:
         float time(time);
-            time:standard_name = "time";
-            time:long_name = "time of calibration";
-            time:timezone = "UTC";
-            time:units = "days since 1970-01-01 00:00:00";
-            time:strftime_format = "days since %Y-%m-%d %Z";
+        time:standard_name = "time";
+        time:long_name = "time of calibration";
+        time:timezone = "UTC";
+        time:units = "days since 1970-01-01 00:00:00";
+        time:strftime_format = "days since %Y-%m-%d %Z";
 
-        int bin(bin);
-            bin:long_name = "bin number";
-            bin:comment = "The PCASP has 30 bins however the first has a somewhat undefined lower boundary and should therefore be discarded.";
+    int bin(bin);
+        bin:long_name = "bin number";
+        bin:comment = "The PCASP has 30 bins however the first has a somewhat undefined lower boundary and should therefore be discarded.";
 
     // Define group variables
         string applies_to(time);
-            applies_to:long_name = "Each calibration applies to these measurements";
-            applies_to:comment = "String of applicable flight numbers for calibration";
+        applies_to:long_name = "Each calibration applies to these measurements";
+        applies_to:comment = "String of applicable flight numbers for calibration";
 
         string descr(time);
-            descr:long_name = "Description of calibration";
-            descr:comment = "Campaign name/s for which these calibrations apply";
+        descr:long_name = "Description of calibration";
+        descr:comment = "Campaign name/s for which these calibrations apply";
 
         string traceability(time);
-            traceability:long_name = "Traceability trail for each calibration";
-            traceability:comment = "Unique lot numbers for each calibration PSL. These can be traced to the original NIST-traceable certificates.";
+        traceability:long_name = "Traceability trail for each calibration";
+        traceability:comment = "Unique lot numbers for each calibration PSL. These can be traced to the original NIST-traceable certificates.";
 
         int cal_flag(time);
-            cal_flag:long_name = "Flag denoting quality of calibration";
-            cal_flag:valid_range = 0, 3;
-            cal_flag:flag_values = 0, 1, 2, 3;
-            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
-            cal_flag:_FillValue = 3;
+        cal_flag:long_name = "Flag denoting quality of calibration";
+        cal_flag:valid_range = 0, 3;
+        cal_flag:flag_values = 0, 1, 2, 3;
+        cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+        cal_flag:_FillValue = 3;
 
         int ADC_thres(time,bin,bin_bounds);
-            ADC_thres:long_name = "Lower and upper ADC thresholds for each bin";
-            ADC_thres:comment = "Coverage of each bin in terms of the digitized peak photovoltage. This variable has been included primarily for error checking as the same values should be in the standard data files.";
-            ADC_thres:valid_range = 0, 1288;
-            ADC_thres:_FillValue = NaN;
+        ADC_thres:long_name = "Lower and upper ADC thresholds for each bin";
+        ADC_thres:comment = "Coverage of each bin in terms of the digitized peak photovoltage. This variable has been included primarily for error checking as the same values should be in the standard data files.";
+        ADC_thres:valid_range = 0, 1288;
+        ADC_thres:_FillValue = NaN;
 
         float x-section(time,bin,bin_bounds);
-            x-section:long_name = "Scattering cross-section boundaries for each bin";
-            x-section:comment = "Lower boundary of first bin is undefined.";
-            x-section:units = "m**2";
-            x-section:ancillary_variables = "x-section_err";
-            x-section:_FillValue = -9999;
+        x-section:long_name = "Scattering cross-section boundaries for each bin";
+        x-section:comment = "Lower boundary of first bin is undefined.";
+        x-section:units = "m**2";
+        x-section:ancillary_variables = "x-section_err";
+        x-section:_FillValue = -9999;
 
         float x-section_err(time,bin,bin_bounds);
-            x-section_err:long_name = "Uncertainty of scattering cross section boundaries for each bin";
-            x-section_err:comment = "Straight-line fits for scattering cross-section versus ADC voltage are calculated along with sensitivities to the uncertainty in these data. See section 2.2.3 of Rosenberg et al. (2012) for details.";
-            x-section_err:_FillValue = -9999;
+        x-section_err:long_name = "Uncertainty of scattering cross section boundaries for each bin";
+        x-section_err:comment = "Straight-line fits for scattering cross-section versus ADC voltage are calculated along with sensitivities to the uncertainty in these data. See section 2.2.3 of Rosenberg et al. (2012) for details.";
+        x-section_err:_FillValue = -9999;
 
         float x-section_width(time,bin);
-            x-section_width:long_name = "Width of each bin in terms of scattering cross section";
-            x-section:units = "m**2";
-            x-section:ancillary_variables = "x-section_width_err";
-            x-section:_FillValue = -9999;
+        x-section_width:long_name = "Width of each bin in terms of scattering cross section";
+        x-section:units = "m**2";
+        x-section:ancillary_variables = "x-section_width_err";
+        x-section:_FillValue = -9999;
 
         float x-section_width_err(time,bin);
-            x-section_width_err:long_name = "Uncertainty of scattering cross section boundaries for each bin";
-            x-section_width_err:comment = "";
-            x-section_width_err:flag_values = 0, 1;
-            x-section_width_err:flag_meanings = "Independent_uncertainties 
-                                                 Dependent_uncertainties";
-            x-section_width_err:_FillValue = -9999;
+        x-section_width_err:long_name = "Uncertainty of scattering cross section boundaries for each bin";
+        x-section_width_err:comment = "";
+        x-section_width_err:flag_values = 0, 1;
+        x-section_width_err:flag_meanings = "Independent_uncertainties 
+                                             Dependent_uncertainties";
+        x-section_width_err:_FillValue = -9999;
 
         float dia_centre(time,bin);
-            dia_centre:long_name = "Centre diameter associated with each bin number for given particle material properties";
-            dia_centre:comment = "This is the weighted average of each of the regions of the scattering curve which include the range of scattering cross-sections in each bin with the uncertainty of these boundaries included. This is discussed in sections 4.1 and 4.2 of Rosenberg et al. (2012).";
-            dia_centre:refractive_index = "1.59+0i";
-            dia_centre:shape = "spherical";
-            dia_centre:units = "um";
-            dia_centre:ancillary_variables = "dia_centre_err dia_width";
-            dia_centre:_FillValue = -9999;
+        dia_centre:long_name = "Centre diameter associated with each bin number for given particle material properties";
+        dia_centre:comment = "This is the weighted average of each of the regions of the scattering curve which include the range of scattering cross-sections in each bin with the uncertainty of these boundaries included. This is discussed in sections 4.1 and 4.2 of Rosenberg et al. (2012).";
+        dia_centre:refractive_index = "1.59+0i";
+        dia_centre:shape = "spherical";
+        dia_centre:units = "um";
+        dia_centre:ancillary_variables = "dia_centre_err dia_width";
+        dia_centre:_FillValue = -9999;
 
         float dia_centre_err(time,bin);
-            dia_centre_err:long_name = "Uncertainty of bin centre diameter";
-            dia_centre_err:comment = "See sections 4.1 and 4.2 of Rosenberg et al. (2012). for details.";
-            dia_centre_err:units = "um";
-            dia_centre_err:_FillValue = -9999;
+        dia_centre_err:long_name = "Uncertainty of bin centre diameter";
+        dia_centre_err:comment = "See sections 4.1 and 4.2 of Rosenberg et al. (2012). for details.";
+        dia_centre_err:units = "um";
+        dia_centre_err:_FillValue = -9999;
 
         float dia_width(time,bin);
-            dia_width:long_name = "Diameter width associated with each bin number for given particle material properties";
-            dia_width:comment = "This is the sum of all regions of the scattering curve which include the range of scattering cross-sections in each bin with the uncertainty of these boundaries included. This is discussed in sections 4.1 and 4.2 of Rosenberg et al. (2012).";
-            dia_width:refractive_index = "1.59+0i";
-            dia_width:shape = "spherical";
-            dia_width:units = "um";
-            dia_width:ancillary_variables = "dia_width_err";
-            dia_width:_FillValue = -9999;
+        dia_width:long_name = "Diameter width associated with each bin number for given particle material properties";
+        dia_width:comment = "This is the sum of all regions of the scattering curve which include the range of scattering cross-sections in each bin with the uncertainty of these boundaries included. This is discussed in sections 4.1 and 4.2 of Rosenberg et al. (2012).";
+        dia_width:refractive_index = "1.59+0i";
+        dia_width:shape = "spherical";
+        dia_width:units = "um";
+        dia_width:ancillary_variables = "dia_width_err";
+        dia_width:_FillValue = -9999;
 
         float dia_width_err(time,bin);
-            dia_width_err:long_name = "Uncertainty of bin width";
-            dia_width_err:comment = "See sections 4.1 and 4.2 of Rosenberg et al. (2012). for details.";
-            dia_width_err:units = "um";
-            dia_width_err:_FillValue = -9999;
+        dia_width_err:long_name = "Uncertainty of bin width";
+        dia_width_err:comment = "See sections 4.1 and 4.2 of Rosenberg et al. (2012). for details.";
+        dia_width_err:units = "um";
+        dia_width_err:_FillValue = -9999;
 
 
     data:
@@ -167,14 +167,14 @@ group: flow_cal {
     :comment = "Gilibrator 2 small cell (to 250cc/m) connected to outlet of PCASP1. Small CV needle valve used to throttle inlet flow with inline Alicat flowmeter used to measure T & P of inlet air";
     :references = "http://www.faam.ac.uk/index.php/science-instruments/aerosol/304-pcasp";
     
+    dimensions:
+        time = UNLIMITED ;
+        max_flows = 64;    // Maximum number of different flows in a calibration
+
+    // Define group coordinate variable
     // The units of time may be one of days ('d'), hours ('hr', 'h'),
     // minutes ('min'), or seconds ('sec', 's') and the most appropriate unit
     // for the frequency of calibration should be used.
-    dimensions:
-        time = UNLIMITED ;
-        max_flows = 1024;    // Maximum number of different flows in a calibration
-
-    // Define group coordinate variable
     variables:
         float time(time);
         time:standard_name = "time";
@@ -185,41 +185,41 @@ group: flow_cal {
 
     // Define group variables
         string applies_to(time);
-            applies_to:long_name = "Each calibration applies to these measurements";
-            applies_to:comments = "String of applicable flight numbers for calibration";
+        applies_to:long_name = "Each calibration applies to these measurements";
+        applies_to:comments = "String of applicable flight numbers for calibration";
 
         string descr(time);
-            descr:long_name = "Description of calibration";
-            descr:comment = "Campaign name/s for which these calibrations apply";
+        descr:long_name = "Description of calibration";
+        descr:comment = "Campaign name/s for which these calibrations apply";
 
         string traceability(time);
-            traceability:long_name = "Traceability trail for each calibration";
-            traceability:comment = "Calibration of low flow cell s/n 1702010-L";
+        traceability:long_name = "Traceability trail for each calibration";
+        traceability:comment = "Calibration of low flow cell s/n 1702010-L";
 
         int cal_flag(time);
-            cal_flag:long_name = "Flag denoting quality of calibration";
-            cal_flag:valid_range = 0, 3;
-            cal_flag:flag_values = 0, 1, 2, 3;
-            cal_flag:flag_meanings = "good questionable poor missing_or_bad";
-            cal_flag:_FillValue = 3;
+        cal_flag:long_name = "Flag denoting quality of calibration";
+        cal_flag:valid_range = 0, 3;
+        cal_flag:flag_values = 0, 1, 2, 3;
+        cal_flag:flag_meanings = "good questionable poor missing_or_bad";
+        cal_flag:_FillValue = 3;
 
         float flows_reported(time,max_flows);
-            flows_reported:long_name = "Array of flow rates reported by PCASP for each value in flows_actual";
-            flows_reported:comment = "The number of different flows included in each calibration will differ depending on operator and circumstance. The maximum possible flows is given by the dimension max_flows. The variable is padded by the _FillValue. It is the users obligation to check that the number of flows_reported for each time is the same as flows_actual for that time.";
-            flows_reported:units = "cc/s";
-            //flows_reported:valid_min = -0.1;
-            flows_reported:_FillValue = NaN;
+        flows_reported:long_name = "Array of flow rates reported by PCASP for each value in flows_actual";
+        flows_reported:comment = "The number of different flows included in each calibration will differ depending on operator and circumstance. The maximum possible flows is given by the dimension max_flows. The variable is padded by the _FillValue. It is the users obligation to check that the number of flows_reported for each time is the same as flows_actual for that time.";
+        flows_reported:units = "cc/s";
+        //flows_reported:valid_min = -0.1;
+        flows_reported:_FillValue = NaN;
 
         float flows_actual(time,max_flows);
-            flows_actual:long_name = "Array of actual flow rates for each value in flows_reported";
-            flows_actual:comment = "The number of different flows included in each calibration will differ depending on operator and circumstance. The maximum possible flows is given by the dimension max_flows. The variable is padded by the _FillValue. It is the users obligation to check that the number of flows_actual for each time is the same as flows_reported for that time.";
-            flows_actual:units = "cc/s";
-            //flows_actual:valid_min = -0.1;
-            flows_actual:_FillValue = NaN;
+        flows_actual:long_name = "Array of actual flow rates for each value in flows_reported";
+        flows_actual:comment = "The number of different flows included in each calibration will differ depending on operator and circumstance. The maximum possible flows is given by the dimension max_flows. The variable is padded by the _FillValue. It is the users obligation to check that the number of flows_actual for each time is the same as flows_reported for that time.";
+        flows_actual:units = "cc/s";
+        //flows_actual:valid_min = -0.1;
+        flows_actual:_FillValue = NaN;
 
         string flow_fit(time);
-            flow_fit:long_name = "Calibration equation of sample flow.";
-            flow_fit:comment = "String of equation used to convert reported flow to calibrated flow rate. This will involve a fit to the data given for the same time stamp in the flows variable. A string is used for flexibility but may be changed to polynomial values in the future if appropriate.";
+        flow_fit:long_name = "Calibration equation of sample flow.";
+        flow_fit:comment = "String of equation used to convert reported flow to calibrated flow rate. This will involve a fit to the data given for the same time stamp in the flows variable. A string is used for flexibility but may be changed to polynomial values in the future if appropriate.";
         flow_fit:_FillValue = "";
     
 

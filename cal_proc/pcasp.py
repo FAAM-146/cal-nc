@@ -470,7 +470,7 @@ class PCASP(Generic):
 
             .. code-block:: console
 
-            $ python cal_ncgen.py --update option
+                $ python cal_ncgen.py --update option
 
             and may be one of the following types;
 
@@ -481,7 +481,7 @@ class PCASP(Generic):
 
               .. code-block:: console
 
-              $ python cal_ncgen.py -u PCASP_20170725.cdl PCASP_20171114.cdl
+                $ python cal_ncgen.py -u PCASP_20170725.cdl PCASP_20171114.cdl
 
             * A list [of lists] of PCASP diameter calibration files output from
               ``cstodconverter``. This option is chosen based on filename ending
@@ -490,7 +490,7 @@ class PCASP(Generic):
 
               .. code-block:: console
 
-              $ python cal_ncgen.py -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
+                $ python cal_ncgen.py -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
 
             * A list nc attribute/value or variable/value pairs. For attributes
               that are strings, the value is concatenated to the existing string
@@ -503,7 +503,7 @@ class PCASP(Generic):
 
               .. code-block:: console
 
-              $ python cal_ncgen.py -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071 2818.5, 2864.5
+                $ python cal_ncgen.py -u bin_cal/time 2769 2874 -u bin_cal/applies_to C027-C055 C057-C071 2818.5, 2864.5
 
             Note that any spaces in filenames must be enclosed in quotes. All
             files are assumed to the same type as the first filename in the list.

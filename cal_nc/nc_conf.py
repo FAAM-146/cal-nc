@@ -29,19 +29,22 @@ default_special_str = ['_group',
                        '_parsefile']
 
 
-def read_config(cfg_file,destr=False):
-    """
-    Function to read in configuration file and put entries in dictionary.
+def read_config(cfg_file, de_str=True):
+    """Read in configuration file and return entries in dictionary.
+    
     ConfigParser options used are;
-        allow_no_value=True
+        
+        * allow_no_value=True
 
-    Input args:
-        cfg_file:   configuration path/filename with the required format
-        destr:      Boolean, if True then convert strings to other types
+    Args:
+        cfg_file (:obj:`str` or :obj:`pathlib`): Configuration path/filename
+            with the required format.
+        de_str (:obj:`bool`): If True [default] then attempt to de-string string
+            entries.
 
     Returns:
-        cfg_dict:   dictionary with sub-dictionaries for each section
-                    returns None if cfg_file cannot be found
+        Dictionary with sub-dictionaries for each section or None if
+            ``cfg_file`` cannot be found.
     """
 
     # Manual configuration converters
@@ -120,7 +123,7 @@ def read_config(cfg_file,destr=False):
     cfg.read(cfg_file)
     cfg_dict = {}
     for l in cfg.sections():
-        cfg_dict[l] = _ConfigSectionMap(l)
+        cfg_dict[l] = _ConfigSectionMap(l,not(de_str))
 
     if cfg_dict == {}:
         print('\ncfg_dict is empty but ' +\
@@ -133,23 +136,25 @@ def read_config(cfg_file,destr=False):
 
 
 def extract_specials(cfg_dict,specials = [],overwrite=False):
-    """
-    Extract special configuration keys and return
+    """Extracts special configuration keys from dictionary and returns them.
 
-    :param cfg_dict: Configuration dictionary
-    :type cfg_dict: dictionary
-    :param specials: list of special strings to extract if they are present.
-        Default is default_special_str. Any special strings given are appended
-        to default_special_str rather than replacing it if overwrite is False.
-    :type specials: list
-    :params overwrite: If False [default] then any specials given in kwargs
-        are appended to default_special_str. If True then only those strings
-        included in specials are searched for.
-    :type overwrite: boolean
-    :returns: Dictionary of specials with keys of the special strings and
-        input cfg_dict with special items removed. If no specials found then
-        specials_dict will be {}.
+    Args:
+        cfg_dict (:obj:`dict`): Configuration dictionary
+        specials (:obj:`list`): list of special strings to extract if they are
+            present in ``cfg_dict``. Default is ``default_special_str``. Any
+            special strings given are appended to ``default_special_str`` rather
+            than replacing it as long as ``overwrite`` is False.
+        overwrite (:obj:`bool`): If False [default] then any strings given in
+            ``specials`` are appended to ``default_special_str``. If True then
+            only those strings included in ``specials`` are searched for.
+
+    Returns:
+        Tuple of two dictionaries. Dictionary of specials found in ``cfg_dict``
+            with keys of the special strings. Dictionary of ``cfg_dict`` with
+            special items removed. If no specials found then ``specials_dict``
+            will be {}.
     """
+    
     #pdb.set_trace()
     if type(specials) in [str]:
         specials = [specials]

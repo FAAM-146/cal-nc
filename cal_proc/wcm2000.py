@@ -6,9 +6,7 @@ from .generic import *
 
 
 class WCM2000(Generic):
-    """
-    Class for parsing and processing of calibration data files for
-    instrument::
+    """Parses and processes calibration data files for instrument::
 
         WCM2000: SEA WCM-2000 total water probe
     """
@@ -16,15 +14,14 @@ class WCM2000(Generic):
     def __init__(self,ds):
         """
 
-        :param ds: dataset from ingested cal_nc file
-        :type ds:  netCDF4.dataset
+        Args:
+            ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.
         """
         Generic.__init__(self,ds)
 
 
     def _add__str__(self):
-        """
-        Additional string describing this class and associated methods.
+        """Additional string describing this class and associated methods.
 
         This is used in addition to __str__ in the parent Generic() class
         when required. Generic.__str__ includes the docstr of this class
@@ -32,32 +29,31 @@ class WCM2000(Generic):
         other method docstrs or general text that may help with the usage of
         this class then they can be returned by this method.
 
-        :returns: String
         """
 
         return ''
 
 
     def update(self,dvars,verbose=False):
-        """
-        Method to update attributes and variables of wcm2000 nc object
+        """Updates attributes and variables of wcm2000 nc object.
 
-        :param dvars: Dictionary of attribute/variable key and value
-            pairs. The dict keys are the attribute/variable name,
-            including group paths relative to the root. Each dict either
-            contains a scalar or iterable data value or, if applied to a
-            variable (but not an attribute), a sub-dict that must
-            include at least the key *'data'*. Other keys in the sub-dicts
-            are attributes associated with that variable. The data value
-            is a scalar or iterable to append to that attribute/variable.
-            If a variable is given that does not already exist then it is
-            ignored.
-        :type dvars: dictionary
-        :param verbose: If True then print info to stdout for each update.
-            Default is False.
-        :type verbose: boolean
+        Args:
+            dvars (:obj:`dict`): Dictionary of attribute/variable key and value
+                pairs. The dict keys are the attribute/variable name,
+                including group paths relative to the root. Each dict either
+                contains a scalar or iterable data value or, if applied to a
+                variable (but not an attribute), a sub-dict that must
+                include at least the key *'data'*. Other keys in the sub-dicts
+                are attributes associated with that variable. The data value
+                is a scalar or iterable to append to that attribute/variable.
+                If a variable is given that does not already exist then it is
+                ignored.
+            verbose (:obj:`bool`): If True then print info to stdout for each
+                update. Default is False.
 
-        If the netCDF4 object ``self`` has only the following variables::
+
+        Example:
+            If the netCDF4 object ``self`` has only the following variables::
 
             float32 time(time)
                 standard_name: time
@@ -78,16 +74,16 @@ class WCM2000(Generic):
                 dtdr = 33.9276, 33.8165;
 
 
-        Then the following call,
+            Then the following call,
 
-        . .code-block:: python
+            ..code-block:: python
 
             self.update({'time': 769,
                          'TWC/r100', {'data': 31.2251,
                                       'comment': 'Added comment'},
                          'TWC/dtdr', 33.7064})
 
-        Shall result in the following nc structure::
+            Shall result in the following nc structure::
 
             float32 time(time)
                 standard_name: time
@@ -108,10 +104,10 @@ class WCM2000(Generic):
                 r100 = [31.4473, 31.3362, 31.2251];
                 dtdr = [33.9276, 33.8165, 33.7064];
 
-        Attribute and variables names may be given as strings, as in the example
-        above or as the netCDF4 object variables. Efforts are made to coerse
-        given variable data into the correct type, if this is impossible the
-        update shall be ignored.
+            Attribute and variables names may be given as strings, as in the
+            example above or as the netCDF4 object variables. Efforts are made
+            to coerse given variable data into the correct type, if this is
+            impossible the update shall be ignored.
         """
 
         if dvars is None:

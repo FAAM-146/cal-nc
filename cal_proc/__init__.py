@@ -27,16 +27,18 @@ __all__ = ['generic',
 
 # ----------------------------------------------------------------------
 def proc_map(instr):
-    """
-    Map raw instrument nickname string to the appropriate processing class.
+    """Maps raw instrument nickname string to the appropriate processing class.
 
     Function to map instrument nickname string to the appropriate
     instrument processing class. This string may be given as a global
     nc attribute or with the ``--instr=instr`` option of cal_ncgen.
 
-    :param instr: Unique instrument identifying string, case-insensitive
-    :type instr: string
-    :returns k: Class object relating to instrument or None if no match
+    Args:
+        instr (:obj:`str`): Unique instrument identification string,
+            case-insensitive.
+
+    Returns:
+        Class object relating to instrument or None if no match.
     """
 
     # Map of instrument names to processing classes

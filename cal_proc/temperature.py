@@ -11,9 +11,9 @@ classes.
 from .generic import Generic
 
 class NDIT(Generic):
-    """Parses and processes calibration data files for instrument::
+    """Parses and processes calibration data files for instrument: NDIT
 
-        NDIT: Non-deiced temperature probe
+        **NDIT:** Non-deiced temperature probe
     """
 
     def __init__(self,ds):
@@ -37,9 +37,9 @@ class NDIT(Generic):
         pass
 
 class DIT(Generic):
-    """Parses and processes calibration data files for instrument::
+    """Parses and processes calibration data files for instrument: DIT
 
-        DIT: Deiced temperature probe
+        **DIT:** Deiced temperature probe
     """
 
     def __init__(self,ds):

@@ -13,9 +13,6 @@ import netCDF4
 import pdb
 
 
-#__all__ = ['walk_dstress','append_time','append_var']
-
-
 def walk_dstree(ds):
     """Recursive Dataset group generator.
 
@@ -581,27 +578,29 @@ class Generic():
         Args:
             ds (:obj:`netCDF4.Dataset`) netCDF Dataset to add into ``self.ds``
             force_append (:obj:`list`): List of any root or group attribute
-            strings that should always be appended to, even if they are
-            identical. Default is ['username','history']. Group attribule
-            strings must include full path.
-        :param exclude: List of attribute or variable names (but not variable
-            attributes) that are not to be added or appended.
-        :type exclude: List of identifying strings.
+                strings that should always be appended to, even if they are
+                identical. Default is ['username','history']. Group attribule
+                strings must include full path.
+            exclude (:obj:`list`): List of attribute or variable name strings
+                (but not variable attributes) that are not to be added or
+                appended to.
 
         """
 
 
         def append_group(mgrp,ngrp):
-            """
-            Update master ds group with values from new ds group
+            """Updates master ds group with values from new ds group.
 
             Either input may be a dataset, in which case the root group is
             operated on, or a group/subgroup within the dataset. This function
             does not walk down through any subsequent groups.
 
-            param mgrp: Master dataset object which may be root or a group
-            param ngrp: Dataset object the contents of which shall be added or
-                appended to those in the master dataset object.
+            Args:
+                mgrp (:obj:`netCDF4.Dataset`): Master dataset object which may
+                    be root or a group.
+                ngrp (:obj:`netCDF4.Dataset`): Dataset object the contents of
+                    which shall be added or appended to those in the master
+                    dataset object.
             """
 
             # Add any new attributes, ignore any conflicts, string append any others

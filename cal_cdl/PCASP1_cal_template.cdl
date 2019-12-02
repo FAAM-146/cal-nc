@@ -15,7 +15,6 @@ netcdf PCASP1_cal_template {
     
     // Universal global file attributes. Do not modify.
     :Conventions = "CF-1.6";
-    :NCO = "4.1.3";
     :_Format = "netCDF-4";
     :institution = "FAAM. Facility for Airborne Atmospheric Measurements";
     :address = "Building 146, Cranfield University, Cranfield MK43 0AL UK";

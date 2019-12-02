@@ -45,6 +45,7 @@ def read_cal_file(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
     Angela's calibration program.
 
     .. NOTE::
+
         This has been ripped straight from ``datafile_utils.py``. Probably
         can do this better.
 
@@ -430,9 +431,10 @@ def read_cal_file(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
 
 
 class PCASP(Generic):
-    """Parses and processes calibration data files for instrument::
+    """Parses and processes calibration data files for instrument: PCASP.
 
-        PCASP: Passive Cavity Aerosol Spectrometer Probe
+        **PCASP:** Passive Cavity Aerosol Spectrometer Probe
+
     """
 
 

@@ -80,19 +80,22 @@
                        <span class="s1">&#39;_parsefile&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">,</span><span class="n">destr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function to read in configuration file and put entries in dictionary.</span>
+<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">,</span> <span class="n">de_str</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read in configuration file and return entries in dictionary.</span>
+<span class="sd">    </span>
 <span class="sd">    ConfigParser options used are;</span>
-<span class="sd">        allow_no_value=True</span>
+<span class="sd">        </span>
+<span class="sd">        * allow_no_value=True</span>
 
-<span class="sd">    Input args:</span>
-<span class="sd">        cfg_file:   configuration path/filename with the required format</span>
-<span class="sd">        destr:      Boolean, if True then convert strings to other types</span>
+<span class="sd">    Args:</span>
+<span class="sd">        cfg_file (:obj:`str` or :obj:`pathlib`): Configuration path/filename</span>
+<span class="sd">            with the required format.</span>
+<span class="sd">        de_str (:obj:`bool`): If True [default] then attempt to de-string string</span>
+<span class="sd">            entries.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        cfg_dict:   dictionary with sub-dictionaries for each section</span>
-<span class="sd">                    returns None if cfg_file cannot be found</span>
+<span class="sd">        Dictionary with sub-dictionaries for each section or None if</span>
+<span class="sd">            ``cfg_file`` cannot be found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Manual configuration converters</span>
@@ -171,7 +174,7 @@
     <span class="n">cfg</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
     <span class="n">cfg_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">sections</span><span class="p">():</span>
-        <span class="n">cfg_dict</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ConfigSectionMap</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="n">cfg_dict</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ConfigSectionMap</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="ow">not</span><span class="p">(</span><span class="n">de_str</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">cfg_dict</span> <span class="o">==</span> <span class="p">{}:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">cfg_dict is empty but &#39;</span> <span class="o">+</span>\
@@ -184,23 +187,25 @@
 
 
 <div class="viewcode-block" id="extract_specials"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.extract_specials">[docs]</a><span class="k">def</span> <span class="nf">extract_specials</span><span class="p">(</span><span class="n">cfg_dict</span><span class="p">,</span><span class="n">specials</span> <span class="o">=</span> <span class="p">[],</span><span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract special configuration keys and return</span>
+    <span class="sd">&quot;&quot;&quot;Extracts special configuration keys from dictionary and returns them.</span>
 
-<span class="sd">    :param cfg_dict: Configuration dictionary</span>
-<span class="sd">    :type cfg_dict: dictionary</span>
-<span class="sd">    :param specials: list of special strings to extract if they are present.</span>
-<span class="sd">        Default is default_special_str. Any special strings given are appended</span>
-<span class="sd">        to default_special_str rather than replacing it if overwrite is False.</span>
-<span class="sd">    :type specials: list</span>
-<span class="sd">    :params overwrite: If False [default] then any specials given in kwargs</span>
-<span class="sd">        are appended to default_special_str. If True then only those strings</span>
-<span class="sd">        included in specials are searched for.</span>
-<span class="sd">    :type overwrite: boolean</span>
-<span class="sd">    :returns: Dictionary of specials with keys of the special strings and</span>
-<span class="sd">        input cfg_dict with special items removed. If no specials found then</span>
-<span class="sd">        specials_dict will be {}.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        cfg_dict (:obj:`dict`): Configuration dictionary</span>
+<span class="sd">        specials (:obj:`list`): list of special strings to extract if they are</span>
+<span class="sd">            present in ``cfg_dict``. Default is ``default_special_str``. Any</span>
+<span class="sd">            special strings given are appended to ``default_special_str`` rather</span>
+<span class="sd">            than replacing it as long as ``overwrite`` is False.</span>
+<span class="sd">        overwrite (:obj:`bool`): If False [default] then any strings given in</span>
+<span class="sd">            ``specials`` are appended to ``default_special_str``. If True then</span>
+<span class="sd">            only those strings included in ``specials`` are searched for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of two dictionaries. Dictionary of specials found in ``cfg_dict``</span>
+<span class="sd">            with keys of the special strings. Dictionary of ``cfg_dict`` with</span>
+<span class="sd">            special items removed. If no specials found then ``specials_dict``</span>
+<span class="sd">            will be {}.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="c1">#pdb.set_trace()</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">specials</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="n">specials</span> <span class="o">=</span> <span class="p">[</span><span class="n">specials</span><span class="p">]</span>

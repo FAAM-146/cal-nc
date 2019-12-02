@@ -55,17 +55,8 @@
 <span class="sd">General utility functions. Primarily for file manipulation etc</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-
-<span class="c1"># import datetime, pytz</span>
-<span class="c1"># import netCDF4</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
-<span class="c1"># import shutil</span>
-
 <span class="kn">import</span> <span class="nn">pdb</span>
-
-<span class="c1"># import cal_proc</span>
-<span class="c1"># from cal_proc import *</span>
-<span class="c1"># from .nc_conf import *</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default_file_dir&#39;</span><span class="p">,</span>
@@ -86,16 +77,21 @@
 
 
 <div class="viewcode-block" id="filepath"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.utils.filepath">[docs]</a><span class="k">def</span> <span class="nf">filepath</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">paths</span><span class="o">=</span><span class="n">default_file_dir</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Find path where file, f, exists. If does not exist then return f. Note</span>
-<span class="sd">    that if file exists in two locations then paths gives order of priority,</span>
-<span class="sd">    only a single file is returned.</span>
+    <span class="sd">&quot;&quot;&quot;Finds path where file, f, exists from selection of paths.</span>
 
-<span class="sd">    param f: String or filepath obj of file</span>
-<span class="sd">    param paths: List of path strings to search. Default is default_file_dir</span>
+<span class="sd">    Single filename is given and the complete path for this file is found</span>
+<span class="sd">    from a list of possible locations. If does not exist then return f.</span>
+<span class="sd">    Note that if the file exists in two locations then the paths list carries</span>
+<span class="sd">    with it the order of priority, only a single file is returned.</span>
 
-<span class="sd">    returns: If valid file is found then this is returned. If no valid path</span>
-<span class="sd">        is found then f is returned.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        f (:obj:`str` or :obj:`pathlib`): Complete or part filename.</span>
+<span class="sd">        paths (:obj:`list`): List of path strings to search. Default is</span>
+<span class="sd">        ``default_file_dir``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        If valid file is found the complete path/filename is returned. If no</span>
+<span class="sd">        valid path is found then `f` is returned.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,(</span><span class="nb">str</span><span class="p">)):</span>
@@ -109,7 +105,7 @@
         <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">f</span>
-            
+
     <span class="k">return</span> <span class="n">f</span></div>
 
 

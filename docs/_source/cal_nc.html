@@ -91,27 +91,29 @@
 <p>Functions for parsing of configuration files.</p>
 <dl class="function">
 <dt id="cal_nc.nc_conf.read_config">
-<code class="sig-prename descclassname">cal_nc.nc_conf.</code><code class="sig-name descname">read_config</code><span class="sig-paren">(</span><em class="sig-param">cfg_file</em>, <em class="sig-param">destr=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/nc_conf.html#read_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.nc_conf.read_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to read in configuration file and put entries in dictionary.
-ConfigParser options used are;</p>
+<code class="sig-prename descclassname">cal_nc.nc_conf.</code><code class="sig-name descname">read_config</code><span class="sig-paren">(</span><em class="sig-param">cfg_file</em>, <em class="sig-param">de_str=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/nc_conf.html#read_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.nc_conf.read_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in configuration file and return entries in dictionary.</p>
+<p>ConfigParser options used are;</p>
 <blockquote>
-<div><p>allow_no_value=True</p>
+<div><ul class="simple">
+<li><p>allow_no_value=True</p></li>
+</ul>
 </div></blockquote>
-<dl class="simple">
-<dt>Input args:</dt><dd><p>cfg_file:   configuration path/filename with the required format
-destr:      Boolean, if True then convert strings to other types</p>
-</dd>
-</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>dictionary with sub-dictionaries for each section</dt><dd><p>returns None if cfg_file cannot be found</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Configuration path/filename
+with the required format.</p></li>
+<li><p><strong>de_str</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If True [default] then attempt to de-string string
+entries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dictionary with sub-dictionaries for each section or None if</dt><dd><p><code class="docutils literal notranslate"><span class="pre">cfg_file</span></code> cannot be found.</p>
 </dd>
 </dl>
 </p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>cfg_dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -119,25 +121,28 @@ destr:      Boolean, if True then convert strings to other types</p>
 <dl class="function">
 <dt id="cal_nc.nc_conf.extract_specials">
 <code class="sig-prename descclassname">cal_nc.nc_conf.</code><code class="sig-name descname">extract_specials</code><span class="sig-paren">(</span><em class="sig-param">cfg_dict</em>, <em class="sig-param">specials=[]</em>, <em class="sig-param">overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/nc_conf.html#extract_specials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.nc_conf.extract_specials" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract special configuration keys and return</p>
+<dd><p>Extracts special configuration keys from dictionary and returns them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cfg_dict</strong> (<em>dictionary</em>) – Configuration dictionary</p></li>
-<li><p><strong>specials</strong> (<em>list</em>) – list of special strings to extract if they are present.
-Default is default_special_str. Any special strings given are appended
-to default_special_str rather than replacing it if overwrite is False.</p></li>
+<li><p><strong>cfg_dict</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Configuration dictionary</p></li>
+<li><p><strong>specials</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – list of special strings to extract if they are
+present in <code class="docutils literal notranslate"><span class="pre">cfg_dict</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">default_special_str</span></code>. Any
+special strings given are appended to <code class="docutils literal notranslate"><span class="pre">default_special_str</span></code> rather
+than replacing it as long as <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> is False.</p></li>
+<li><p><strong>overwrite</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If False [default] then any strings given in
+<code class="docutils literal notranslate"><span class="pre">specials</span></code> are appended to <code class="docutils literal notranslate"><span class="pre">default_special_str</span></code>. If True then
+only those strings included in <code class="docutils literal notranslate"><span class="pre">specials</span></code> are searched for.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Params overwrite</dt>
-<dd class="field-even"><p>If False [default] then any specials given in kwargs
-are appended to default_special_str. If True then only those strings
-included in specials are searched for.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Tuple of two dictionaries. Dictionary of specials found in <code class="docutils literal notranslate"><span class="pre">cfg_dict</span></code></dt><dd><p>with keys of the special strings. Dictionary of <code class="docutils literal notranslate"><span class="pre">cfg_dict</span></code> with
+special items removed. If no specials found then <code class="docutils literal notranslate"><span class="pre">specials_dict</span></code>
+will be {}.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Dictionary of specials with keys of the special strings and
-input cfg_dict with special items removed. If no specials found then
-specials_dict will be {}.</p>
+</dl>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -239,13 +244,22 @@ the entire <cite>cal-nc</cite> structure.</p>
 <dl class="function">
 <dt id="cal_nc.utils.filepath">
 <code class="sig-prename descclassname">cal_nc.utils.</code><code class="sig-name descname">filepath</code><span class="sig-paren">(</span><em class="sig-param">f, paths=['.']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/utils.html#filepath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.utils.filepath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find path where file, f, exists. If does not exist then return f. Note
-that if file exists in two locations then paths gives order of priority,
-only a single file is returned.</p>
-<p>param f: String or filepath obj of file
-param paths: List of path strings to search. Default is default_file_dir</p>
-<dl class="simple">
-<dt>returns: If valid file is found then this is returned. If no valid path</dt><dd><p>is found then f is returned.</p>
+<dd><p>Finds path where file, f, exists from selection of paths.</p>
+<p>Single filename is given and the complete path for this file is found
+from a list of possible locations. If does not exist then return f.
+Note that if the file exists in two locations then the paths list carries
+with it the order of priority, only a single file is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Complete or part filename.</p></li>
+<li><p><strong>paths</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – List of path strings to search. Default is</p></li>
+<li><p><strong>default_file_dir.</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If valid file is found the complete path/filename is returned. If no
+valid path is found then <cite>f</cite> is returned.</p>
 </dd>
 </dl>
 </dd></dl>

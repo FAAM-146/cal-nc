@@ -64,16 +64,13 @@
 <span class="kn">import</span> <span class="nn">pdb</span>
 
 
-<span class="c1">#__all__ = [&#39;walk_dstress&#39;,&#39;append_time&#39;,&#39;append_var&#39;]</span>
-
-
 <div class="viewcode-block" id="walk_dstree"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.walk_dstree">[docs]</a><span class="k">def</span> <span class="nf">walk_dstree</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Recursive Dataset group generator</span>
+    <span class="sd">&quot;&quot;&quot;Recursive Dataset group generator.</span>
 
 <span class="sd">    from: http://unidata.github.io/netcdf4-python/netCDF4/index.html#section2</span>
 
-<span class="sd">    param ds: Dataset object</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ds (:obj:`netCDF4.Dataset`): Dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
     <span class="k">yield</span> <span class="n">values</span>
@@ -83,19 +80,23 @@
 
 
 <div class="viewcode-block" id="append_time"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.append_time">[docs]</a><span class="k">def</span> <span class="nf">append_time</span><span class="p">(</span><span class="n">otime</span><span class="p">,</span><span class="n">ntime</span><span class="p">,</span><span class="n">concat_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Method to append time variable/s to existing time coordinate</span>
+    <span class="sd">&quot;&quot;&quot;Appends time variable/s to existing time coordinate.</span>
 
-<span class="sd">    :param otime: Original Dataset time coordinate. As is coordinate is 1d</span>
-<span class="sd">    :type otime: netCDF4 variable</span>
-<span class="sd">    :param ntime: New time variables to append to otime.</span>
-<span class="sd">    :type ntime: May either be a netCDF4 variable or a simple iterable of</span>
-<span class="sd">        values. The values may be datetime objects. If the values are</span>
-<span class="sd">        strings some attempt to convert them will be done. If they are numbers</span>
-<span class="sd">        then it is assumed that units, calendar are compatible with those in</span>
-<span class="sd">        otime.</span>
+<span class="sd">    Note that increasing the size of the ``time`` coordinate also increases the</span>
+<span class="sd">    size of all of the dependent variables.</span>
 
-<span class="sd">    :returns: a netCDF4 variable with the same units and calendar as otime</span>
+<span class="sd">    Args:</span>
+<span class="sd">        otime (:obj:`netCDF4.Variable`): Original Dataset time coordinate. As</span>
+<span class="sd">            is coordinate dimensionality is 1d.</span>
+<span class="sd">        ntime (:obj:`netCDF4.Variable` or `iterable`): New time variables to</span>
+<span class="sd">            append to `otime`. May either be a netCDF4 variable or a simple</span>
+<span class="sd">            iterable of values. These values may be datetime objects. If the</span>
+<span class="sd">            values are strings some attempt to convert them will be done. If</span>
+<span class="sd">            they are numbers then it is assumed that units and calendar are</span>
+<span class="sd">            compatible with those in `otime`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A netCDF4 variable with the same units and calendar as `otime`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">import</span> <span class="nn">datetime</span>
@@ -175,21 +176,26 @@
 
 
 <div class="viewcode-block" id="Generic"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic">[docs]</a><span class="k">class</span> <span class="nc">Generic</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Minimal parent class for instrument-specific parsing and processing</span>
-<span class="sd">    of calibration data suitable for writing to the calibration netCDF.</span>
+    <span class="sd">&quot;&quot;&quot;Parent class for general instrument parsing and processing.</span>
+
+<span class="sd">    Generic forms the basis for all specific instrument processor classes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :param ds: dataset from ingested cal_nc file</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ds (:obj:`netCDF4.Dataset`): Dataset from ingested cal_nc file</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            I don&#39;t think that this is actually true anymore...</span>
+<span class="sd">            </span>
 <span class="sd">            Note that cal_nc file as been read using r+. Thus variables (?)</span>
 <span class="sd">            and attributes cannot be appended to. Values must be read to</span>
 <span class="sd">            a python variable, the nc key deleted, then rewritten with</span>
 <span class="sd">            appropriate modfications.</span>
-<span class="sd">        :type ds:  netCDF4.dataset</span>
-<span class="sd">        :returns ds:</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span>
 
@@ -199,6 +205,11 @@
 <span class="sd">        Help, specifically with regards to structure of update() method if</span>
 <span class="sd">        it exists. If update() does not exist then use docstr of processor</span>
 <span class="sd">        class __init__()</span>
+<span class="sd">        </span>
+<span class="sd">        .. todo::</span>
+
+<span class="sd">            This needs to be updated</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># To print name of instance use: type(self).__name__</span>
@@ -222,11 +233,10 @@
 
 
 <div class="viewcode-block" id="Generic.update_ver"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_ver">[docs]</a>    <span class="k">def</span> <span class="nf">update_ver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Include program version information as root attributes</span>
+        <span class="sd">&quot;&quot;&quot;Includes program version information as root attribute.</span>
 
-<span class="sd">        Version information is determined from cal_proc.__init__. Any</span>
-<span class="sd">        existing version strings shall be overwritten.</span>
+<span class="sd">        Version information is determined from ``cal_proc.__init__()``.</span>
+<span class="sd">        Any existing version strings shall be overwritten.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span> <span class="nn">cal_proc</span> <span class="k">import</span> <span class="n">__version__</span>
@@ -235,24 +245,24 @@
 
 
 <div class="viewcode-block" id="Generic.update_hist"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_hist">[docs]</a>    <span class="k">def</span> <span class="nf">update_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update the global history attribute.</span>
+        <span class="sd">&quot;&quot;&quot;Updates the global history attribute.</span>
 
 <span class="sd">        The history nc attribute is a single string of comma-delineated text.</span>
 
-<span class="sd">        :param update: Update for history string. If None (default) then</span>
-<span class="sd">            auto-generate string based on today&#39;s date. If given then append</span>
-<span class="sd">            update/s to history attribute string. Any ``&lt;now&gt;`` or ``&lt;today&gt;``</span>
-<span class="sd">            strings are changed to today&#39;s date.</span>
-<span class="sd">        :type update: List</span>
+<span class="sd">        Args:</span>
+<span class="sd">            update (:obj:`str` or :obj:`list`): Update for history string.</span>
+<span class="sd">                If None (default) then auto-generate string based on today&#39;s</span>
+<span class="sd">                datetime. If given then append update/s to history attribute</span>
+<span class="sd">                string. Any ``&lt;now&gt;`` or ``&lt;today&gt;`` strings are changed to</span>
+<span class="sd">                today&#39;s datetime.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># With datetime v3.6 can use timespec=&#39;seconds&#39; to drop ms</span>
+        <span class="c1"># Timezone aware timestamp is generated by default. </span>
         <span class="n">t_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H%M&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">update</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># With datetime v3.6 can use timespec=&#39;seconds&#39; to drop ms</span>
-            <span class="c1"># Timezone aware timestamp is generated by default.</span>
-            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> Auto update&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t_</span><span class="p">)</span>
+           <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> Auto update&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t_</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">update</span> <span class="ow">is</span> <span class="s1">&#39;NA&#39;</span><span class="p">:</span>
             <span class="c1"># This assumes that all updates have been handled in the cdl</span>
@@ -281,15 +291,16 @@
 
 
 <div class="viewcode-block" id="Generic.update_user"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_user">[docs]</a>    <span class="k">def</span> <span class="nf">update_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update the global username attribute.</span>
+        <span class="sd">&quot;&quot;&quot;Updates the global username attribute.</span>
 
 <span class="sd">        The username nc attribute is a single string of comma-delineated text.</span>
-
-<span class="sd">        :param update: Update for username string. If None (default) then</span>
-<span class="sd">            ask user, usually given as &#39;username &lt;user@email&gt;&#39;. If given</span>
-<span class="sd">            then append username/s to existing attribute string.</span>
-<span class="sd">        :type update: List</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            update (:obj:`str` or :obj:`list`): Update for username string.</span>
+<span class="sd">                If None (default) then auto-generate string based on previous</span>
+<span class="sd">                entries in netCDF and ask user. String usually given as </span>
+<span class="sd">                `username &lt;user@email&gt;`. Append username/s to existing attribute</span>
+<span class="sd">                string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Extract existing username from ds</span>
@@ -330,12 +341,15 @@
 
 
 <div class="viewcode-block" id="Generic.change_val"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.change_val">[docs]</a>    <span class="k">def</span> <span class="nf">change_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">old_val</span><span class="p">,</span><span class="n">new_val</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to change a single variable/attribute value.</span>
+        <span class="sd">&quot;&quot;&quot;Changes a single variable/attribute value.</span>
 
 <span class="sd">        The variable or attribute name must be given along with the old</span>
 <span class="sd">        value, ``old_val``, that is to be change to ``new_val``. If ``old_val``</span>
 <span class="sd">        is not found then nothing is done.</span>
+
+<span class="sd">        .. todo::</span>
+
+<span class="sd">            Not implemented</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -343,20 +357,20 @@
 
 
     <span class="k">def</span> <span class="nf">_add_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">coord</span><span class="p">,</span><span class="n">vals</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to add extra values to end of an unlimited coordinate</span>
+        <span class="sd">&quot;&quot;&quot;Adds extra values to end of an unlimited coordinate.</span>
 
 <span class="sd">        If a coordinate is increased in size then all of the variables that</span>
 <span class="sd">        depend on that coordinate are increased to the same size along the</span>
-<span class="sd">        unlimited dimension. This internal method is called along with</span>
-<span class="sd">        _add_var().</span>
+<span class="sd">        unlimited dimension. This internal method should usually be followed by</span>
+<span class="sd">        ``_add_var()``.</span>
 
-<span class="sd">        :param coord: string of path/name of coordinate variable. This can be found with</span>
-<span class="sd">            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``</span>
-<span class="sd">        :type var: String</span>
-<span class="sd">        :param vals: Iterable of values to append to the end of var. Types must</span>
-<span class="sd">            match the dtype of the variable</span>
-<span class="sd">        :type vals: List or array</span>
+<span class="sd">        Args:</span>
+<span class="sd">            coord (:obj:`str`): string of path/name of coordinate variable. This</span>
+<span class="sd">                can be found with</span>
+<span class="sd">                ``os.path.join(self.ds[coord].group().path,self.ds[coord].name)``</span>
+<span class="sd">            vals (`iterable`): Iterable of values to append to the end of </span>
+<span class="sd">                ``self.ds[coord]``. Type must match the dtype of the coordinate</span>
+<span class="sd">                variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Ensure that is unlimited coordinate</span>
@@ -390,8 +404,7 @@
 
 
     <span class="k">def</span> <span class="nf">_add_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">vals</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to add extra values to end of an already extended variable</span>
+        <span class="sd">&quot;&quot;&quot;Adds extra values to end of an already extended variable.</span>
 
 <span class="sd">        If a coordinate is increased in size then all of the variables that</span>
 <span class="sd">        depend on that coordinate are increased to the same size along the</span>
@@ -402,13 +415,14 @@
 <span class="sd">        number of values is &gt; number of new elements at the end of the</span>
 <span class="sd">        array then it is assumed that there is an error and no action is taken.</span>
 
-<span class="sd">        :param var: string of path/name of variable. This can be found with</span>
-<span class="sd">            ``os.path.join(self.ds[var].group().path,self.ds[var].name)``</span>
-<span class="sd">        :type var: String</span>
-<span class="sd">        :param vals: Iterable of values to append to the end of var. Types must</span>
-<span class="sd">            match the dtype of the variable</span>
-<span class="sd">        :type vals: List or array</span>
+<span class="sd">        Args:</span>
+<span class="sd">            var (:obj:`str`): string of path/name of variable. This</span>
+<span class="sd">                can be found with</span>
+<span class="sd">                ``os.path.join(self.ds[var].group().path,self.ds[var].name)``</span>
+<span class="sd">            vals (`iterable`): Iterable of values to append to the end of </span>
+<span class="sd">            ``self.ds[var]``. Type must match the dtype of the variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># Ensure vals is an array and preserve any masking</span>
         <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
 
@@ -481,6 +495,10 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to append to an existing netCDF4 variable and associated coord</span>
 
+<span class="sd">        .. todo::</span>
+
+<span class="sd">            Redundant/not currently used.</span>
+
 <span class="sd">        The extra coordinate values are appended to the coordinate of vname</span>
 <span class="sd">        in self. This automatically creates the same number of masked entries</span>
 <span class="sd">        in all of the variables that depend on that coordinate.</span>
@@ -495,7 +513,9 @@
 <span class="sd">            be the same length as coord_vals in the unlimited dimension.</span>
 <span class="sd">        :type var_vals: List or array</span>
 
-<span class="sd">        NOTE: This is a bit complicated/not sensible. It is possible/probable</span>
+<span class="sd">        .. note::</span>
+
+<span class="sd">            This is a bit complicated/not sensible. It is possible/probable</span>
 <span class="sd">            to add a variable (along with the coord) then append to a different</span>
 <span class="sd">            variable that uses the same coordinate which then writes the same</span>
 <span class="sd">            coordinate values into the coordinate again.</span>
@@ -520,37 +540,31 @@
 
 
 <div class="viewcode-block" id="Generic.append_dict"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.append_dict">[docs]</a>    <span class="k">def</span> <span class="nf">append_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var_d</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Append multiple variables with a single coordinate</span>
+        <span class="sd">&quot;&quot;&quot;Appends multiple variables with a single coordinate.</span>
 
 <span class="sd">        Multiple variable values that use the same coordinate can be appended</span>
 <span class="sd">        to existing dataset variables in one go. Variables that do not already</span>
 <span class="sd">        exist in the dataset are ignored. Use add instead...</span>
 
-<span class="sd">        Add variable attributes as well?</span>
+<span class="sd">        Args</span>
+<span class="sd">            var_d (:obj:`dict`): Dictionary of multiple variable values to be</span>
+<span class="sd">                appended. Dictionary keys are the variable path+name strings</span>
+<span class="sd">                and the dictionary values are either a netCDF variable or a</span>
+<span class="sd">                sub-dictionary of values and attributes</span>
 
-<span class="sd">        :param var_d: Dictionary of multiple variable values to be appended</span>
-<span class="sd">            arranged so that the dictionary keys are the variable path+names</span>
-<span class="sd">            and the dictionary values are either a netCDF variable or a</span>
-<span class="sd">            sub-dictionary of values and attributes</span>
-<span class="sd">        :type var_d: dictionary</span>
-
-<span class="sd">        Several options for inputs:</span>
-
-<span class="sd">        .. TODO::</span>
+<span class="sd">        .. todo::</span>
 
 <span class="sd">            Currently does not accept netCDF4 variable values.</span>
 <span class="sd">            Currently only accepts iterable of data.</span>
 
+<span class="sd">        .. code-block:: python</span>
 
-<span class="sd">        .. codeblock:: python</span>
-
-<span class="sd">        var_d = {coord: netCDF4.Variable,</span>
-<span class="sd">                 var1:  [1,2,3,4,5],</span>
-<span class="sd">                 var2:  {&#39;_data&#39;: [1,2,3,4,5],</span>
-<span class="sd">                         &#39;var2_attr1&#39;: &#39;var2 attribute 1&#39;,</span>
-<span class="sd">                         &#39;var2_attr1&#39;: &#39;var2 attribute 1&#39;, ...}</span>
-<span class="sd">                 var3:  &#39;Fred&#39;}</span>
+<span class="sd">            var_d = {coord: netCDF4.Variable,</span>
+<span class="sd">                     var1:  [1,2,3,4,5],</span>
+<span class="sd">                     var2:  {&#39;_data&#39;: [1,2,3,4,5],</span>
+<span class="sd">                             &#39;var2_attr1&#39;: &#39;var2 attribute 1&#39;,</span>
+<span class="sd">                             &#39;var2_attr1&#39;: &#39;var2 attribute 1&#39;, ...}</span>
+<span class="sd">                     var3:  &#39;Fred&#39;}</span>
 
 <span class="sd">        Note that all variables should be the same length if they are</span>
 <span class="sd">        list-like. Any variables not the same length as the maximum length</span>
@@ -584,11 +598,6 @@
             <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
-        <span class="c1"># Check lengths of variables</span>
-        <span class="c1"># pdb.set_trace()</span>
-        <span class="c1"># var_len = [len(v_) for v_ in var_d.values()]</span>
-
-
         <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="n">var_d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_add_var</span><span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span>
@@ -601,47 +610,48 @@
 <div class="viewcode-block" id="Generic.append_dataset"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.append_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">append_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">,</span>
                        <span class="n">force_append</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">,</span><span class="s1">&#39;history&#39;</span><span class="p">],</span>
                        <span class="n">exclude</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add groups, attributes, dimensions, and variables from ds.</span>
+        <span class="sd">&quot;&quot;&quot;Adds groups, attributes, dimensions, and variables from ds.</span>
 
-<span class="sd">        Attributes of *self* shall take priority over those of the same name</span>
-<span class="sd">        in ds, such attribute values of ds shall be ignored. The exception is</span>
-<span class="sd">        if the attribute key is included in ``force_append``. In this case the</span>
-<span class="sd">        resultant attribute shall be a comma-delineated combination of the</span>
-<span class="sd">        individual attributes with that from ds being appended to that of</span>
-<span class="sd">        *self*.</span>
+<span class="sd">        Attributes of ``self.ds`` shall take priority over those of the same</span>
+<span class="sd">        name in `ds`, such attribute values of `ds` shall be ignored. The</span>
+<span class="sd">        exception is if the attribute key is included in ``force_append``. In</span>
+<span class="sd">        this case the resultant attribute shall be a comma-delineated</span>
+<span class="sd">        combination string of the individual attributes with that from ``ds``</span>
+<span class="sd">        being appended to that of ``self.ds``.</span>
 
-<span class="sd">        Variables from ds are appended to the same variable in *self*. The</span>
+<span class="sd">        Variables from ``ds`` are appended to the same variable in ``self``. The</span>
 <span class="sd">        variables are sorted by the unlimited dimension. Variables only in</span>
-<span class="sd">        ds shall be added to *self*.</span>
+<span class="sd">        ds shall be added to ``self``.</span>
 
-<span class="sd">        If any groups, attributes, or variables in ds that are not to be</span>
-<span class="sd">        added or appended can be specified as a list with ``exclude``.</span>
+<span class="sd">        Any groups, attributes, or variables in ``ds`` that are not to be</span>
+<span class="sd">        added or appended can be specified as a list with `exclude`.</span>
 
-<span class="sd">        :param ds: netCDF dataset.</span>
-<span class="sd">        :type ds: dataset</span>
-<span class="sd">        :param force_append: Any attribute strings that should always be</span>
-<span class="sd">            appended to, even if they are identical. Default is</span>
-<span class="sd">            [&#39;username&#39;,&#39;history&#39;].</span>
-<span class="sd">        :type force_append: List of root or group attributes strings.</span>
-<span class="sd">        :param exclude: List of attribute or variable names (but not variable</span>
-<span class="sd">            attributes) that are not to be added or appended.</span>
-<span class="sd">        :type exclude: List of identifying strings.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ds (:obj:`netCDF4.Dataset`) netCDF Dataset to add into ``self.ds``</span>
+<span class="sd">            force_append (:obj:`list`): List of any root or group attribute</span>
+<span class="sd">                strings that should always be appended to, even if they are</span>
+<span class="sd">                identical. Default is [&#39;username&#39;,&#39;history&#39;]. Group attribule</span>
+<span class="sd">                strings must include full path.</span>
+<span class="sd">            exclude (:obj:`list`): List of attribute or variable name strings</span>
+<span class="sd">                (but not variable attributes) that are not to be added or</span>
+<span class="sd">                appended to.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
 
         <span class="k">def</span> <span class="nf">append_group</span><span class="p">(</span><span class="n">mgrp</span><span class="p">,</span><span class="n">ngrp</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Update master ds group with values from new ds group</span>
+            <span class="sd">&quot;&quot;&quot;Updates master ds group with values from new ds group.</span>
 
 <span class="sd">            Either input may be a dataset, in which case the root group is</span>
 <span class="sd">            operated on, or a group/subgroup within the dataset. This function</span>
 <span class="sd">            does not walk down through any subsequent groups.</span>
 
-<span class="sd">            param mgrp: Master dataset object which may be root or a group</span>
-<span class="sd">            param ngrp: Dataset object the contents of which shall be added or</span>
-<span class="sd">                appended to those in the master dataset object.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mgrp (:obj:`netCDF4.Dataset`): Master dataset object which may</span>
+<span class="sd">                    be root or a group.</span>
+<span class="sd">                ngrp (:obj:`netCDF4.Dataset`): Dataset object the contents of</span>
+<span class="sd">                    which shall be added or appended to those in the master</span>
+<span class="sd">                    dataset object.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
 
             <span class="c1"># Add any new attributes, ignore any conflicts, string append any others</span>

@@ -57,25 +57,22 @@
 
 
 <div class="viewcode-block" id="WCM2000"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.wcm2000.WCM2000">[docs]</a><span class="k">class</span> <span class="nc">WCM2000</span><span class="p">(</span><span class="n">Generic</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class for parsing and processing of calibration data files for</span>
-<span class="sd">    instrument::</span>
+    <span class="sd">&quot;&quot;&quot;Parses and processes calibration data files for instrument: WCM2000</span>
 
-<span class="sd">        WCM2000: SEA WCM-2000 total water probe</span>
+<span class="sd">        **WCM2000:** SEA WCM-2000 total water probe</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :param ds: dataset from ingested cal_nc file</span>
-<span class="sd">        :type ds:  netCDF4.dataset</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Generic</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">_add__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Additional string describing this class and associated methods.</span>
+        <span class="sd">&quot;&quot;&quot;Additional string describing this class and associated methods.</span>
 
 <span class="sd">        This is used in addition to __str__ in the parent Generic() class</span>
 <span class="sd">        when required. Generic.__str__ includes the docstr of this class</span>
@@ -83,86 +80,85 @@
 <span class="sd">        other method docstrs or general text that may help with the usage of</span>
 <span class="sd">        this class then they can be returned by this method.</span>
 
-<span class="sd">        :returns: String</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
 
 
 <div class="viewcode-block" id="WCM2000.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.wcm2000.WCM2000.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dvars</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to update attributes and variables of wcm2000 nc object</span>
+        <span class="sd">&quot;&quot;&quot;Updates attributes and variables of wcm2000 nc object.</span>
 
-<span class="sd">        :param dvars: Dictionary of attribute/variable key and value</span>
-<span class="sd">            pairs. The dict keys are the attribute/variable name,</span>
-<span class="sd">            including group paths relative to the root. Each dict either</span>
-<span class="sd">            contains a scalar or iterable data value or, if applied to a</span>
-<span class="sd">            variable (but not an attribute), a sub-dict that must</span>
-<span class="sd">            include at least the key *&#39;data&#39;*. Other keys in the sub-dicts</span>
-<span class="sd">            are attributes associated with that variable. The data value</span>
-<span class="sd">            is a scalar or iterable to append to that attribute/variable.</span>
-<span class="sd">            If a variable is given that does not already exist then it is</span>
-<span class="sd">            ignored.</span>
-<span class="sd">        :type dvars: dictionary</span>
-<span class="sd">        :param verbose: If True then print info to stdout for each update.</span>
-<span class="sd">            Default is False.</span>
-<span class="sd">        :type verbose: boolean</span>
-
-<span class="sd">        If the netCDF4 object ``self`` has only the following variables::</span>
-
-<span class="sd">            float32 time(time)</span>
-<span class="sd">                standard_name: time</span>
-<span class="sd">                long_name: time of calibration</span>
-
-<span class="sd">                time = 569., 669.;</span>
-
-<span class="sd">            group /TWC:</span>
-<span class="sd">                float32 r100(time)</span>
-<span class="sd">                    long_name: TWC element resistance at 100deg C</span>
-<span class="sd">                    units: milliohm</span>
-
-<span class="sd">                float32 dtdr(time)</span>
-<span class="sd">                    long_name: Change in TWC element resistance with temperature</span>
-<span class="sd">                    units: deg C / milliohm</span>
-
-<span class="sd">                r100 = 31.4473, 31.3362;</span>
-<span class="sd">                dtdr = 33.9276, 33.8165;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dvars (:obj:`dict`): Dictionary of attribute/variable key and value</span>
+<span class="sd">                pairs. The dict keys are the attribute/variable name,</span>
+<span class="sd">                including group paths relative to the root. Each dict either</span>
+<span class="sd">                contains a scalar or iterable data value or, if applied to a</span>
+<span class="sd">                variable (but not an attribute), a sub-dict that must</span>
+<span class="sd">                include at least the key *&#39;data&#39;*. Other keys in the sub-dicts</span>
+<span class="sd">                are attributes associated with that variable. The data value</span>
+<span class="sd">                is a scalar or iterable to append to that attribute/variable.</span>
+<span class="sd">                If a variable is given that does not already exist then it is</span>
+<span class="sd">                ignored.</span>
+<span class="sd">            verbose (:obj:`bool`): If True then print info to stdout for each</span>
+<span class="sd">                update. Default is False.</span>
 
 
-<span class="sd">        Then the following call,</span>
+<span class="sd">        Example:</span>
+<span class="sd">            If the netCDF4 object ``self`` has only the following variables::</span>
 
-<span class="sd">        . .code-block:: python</span>
+<span class="sd">                float32 time(time)</span>
+<span class="sd">                    standard_name: time</span>
+<span class="sd">                    long_name: time of calibration</span>
 
-<span class="sd">            self.update({&#39;time&#39;: 769,</span>
-<span class="sd">                         &#39;TWC/r100&#39;, {&#39;data&#39;: 31.2251,</span>
-<span class="sd">                                      &#39;comment&#39;: &#39;Added comment&#39;},</span>
-<span class="sd">                         &#39;TWC/dtdr&#39;, 33.7064})</span>
+<span class="sd">                    time = 569., 669.;</span>
 
-<span class="sd">        Shall result in the following nc structure::</span>
+<span class="sd">                group /TWC:</span>
+<span class="sd">                    float32 r100(time)</span>
+<span class="sd">                        long_name: TWC element resistance at 100deg C</span>
+<span class="sd">                        units: milliohm</span>
 
-<span class="sd">            float32 time(time)</span>
-<span class="sd">                standard_name: time</span>
-<span class="sd">                long_name: time of calibration</span>
+<span class="sd">                    float32 dtdr(time)</span>
+<span class="sd">                        long_name: Change in TWC element resistance with temperature</span>
+<span class="sd">                        units: deg C / milliohm</span>
 
-<span class="sd">                time = [569., 669. 769.];</span>
+<span class="sd">                    r100 = 31.4473, 31.3362;</span>
+<span class="sd">                    dtdr = 33.9276, 33.8165;</span>
 
-<span class="sd">            group /TWC:</span>
-<span class="sd">                float32 r100(time)</span>
-<span class="sd">                    long_name: &#39;TWC element resistance at 100deg C&#39;</span>
-<span class="sd">                    units: &#39;milliohm&#39;</span>
-<span class="sd">                    comment: &#39;Added comment&#39;</span>
 
-<span class="sd">                float32 dtdr(time)</span>
-<span class="sd">                    long_name: &#39;Change in TWC element resistance with temperature&#39;</span>
-<span class="sd">                    units: &#39;deg C / milliohm&#39;</span>
+<span class="sd">            Then the following call,</span>
 
-<span class="sd">                r100 = [31.4473, 31.3362, 31.2251];</span>
-<span class="sd">                dtdr = [33.9276, 33.8165, 33.7064];</span>
+<span class="sd">            .. code-block:: python</span>
 
-<span class="sd">        Attribute and variables names may be given as strings, as in the example</span>
-<span class="sd">        above or as the netCDF4 object variables. Efforts are made to coerse</span>
-<span class="sd">        given variable data into the correct type, if this is impossible the</span>
-<span class="sd">        update shall be ignored.</span>
+<span class="sd">                self.update({&#39;time&#39;: 769,</span>
+<span class="sd">                             &#39;TWC/r100&#39;, {&#39;data&#39;: 31.2251,</span>
+<span class="sd">                                          &#39;comment&#39;: &#39;Added comment&#39;},</span>
+<span class="sd">                             &#39;TWC/dtdr&#39;, 33.7064})</span>
+
+<span class="sd">            Shall result in the following nc structure::</span>
+
+<span class="sd">                float32 time(time)</span>
+<span class="sd">                    standard_name: time</span>
+<span class="sd">                    long_name: time of calibration</span>
+
+<span class="sd">                    time = [569., 669. 769.];</span>
+
+<span class="sd">                group /TWC:</span>
+<span class="sd">                    float32 r100(time)</span>
+<span class="sd">                        long_name: &#39;TWC element resistance at 100deg C&#39;</span>
+<span class="sd">                        units: &#39;milliohm&#39;</span>
+<span class="sd">                        comment: &#39;Added comment&#39;</span>
+
+<span class="sd">                    float32 dtdr(time)</span>
+<span class="sd">                        long_name: &#39;Change in TWC element resistance with temperature&#39;</span>
+<span class="sd">                        units: &#39;deg C / milliohm&#39;</span>
+
+<span class="sd">                    r100 = [31.4473, 31.3362, 31.2251];</span>
+<span class="sd">                    dtdr = [33.9276, 33.8165, 33.7064];</span>
+
+<span class="sd">            Attribute and variables names may be given as strings, as in the</span>
+<span class="sd">            example above or as the netCDF4 object variables. Efforts are made</span>
+<span class="sd">            to coerse given variable data into the correct type, if this is</span>
+<span class="sd">            impossible the update shall be ignored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">dvars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

@@ -52,63 +52,63 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">File containing all primary instrument temperature instrument processor</span>
 <span class="sd">classes.</span>
+
+<span class="sd">.. todo::</span>
+<span class="sd">    </span>
+<span class="sd">    This needs significant work</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.generic</span> <span class="k">import</span> <span class="n">Generic</span>
 
 <div class="viewcode-block" id="NDIT"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.temperature.NDIT">[docs]</a><span class="k">class</span> <span class="nc">NDIT</span><span class="p">(</span><span class="n">Generic</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class for parsing and processing of calibration data files for</span>
-<span class="sd">    instruments::</span>
+    <span class="sd">&quot;&quot;&quot;Parses and processes calibration data files for instrument: NDIT</span>
 
-<span class="sd">        NDIT: Non-deiced temperature probe</span>
+<span class="sd">        **NDIT:** Non-deiced temperature probe</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param ds: dataset from ingested cal_nc file</span>
-<span class="sd">        :type ds:  netCDF4.dataset</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Generic</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="NDIT.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.temperature.NDIT.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">largs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to determine any other additional changes to the nc obj</span>
+<div class="viewcode-block" id="NDIT.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.temperature.NDIT.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dvars</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates attributes and variables of ndit nc object.</span>
 
-<span class="sd">        :param kargs: dictionary of optional arguments</span>
-<span class="sd">        :type kargs: dictionary</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dvars (:obj:`dict`): </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">largs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dvars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="k">pass</span></div></div>
 
 <div class="viewcode-block" id="DIT"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.temperature.DIT">[docs]</a><span class="k">class</span> <span class="nc">DIT</span><span class="p">(</span><span class="n">Generic</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class for parsing and processing of calibration data files for</span>
-<span class="sd">    instruments::</span>
+    <span class="sd">&quot;&quot;&quot;Parses and processes calibration data files for instrument: DIT</span>
 
-<span class="sd">        DIT: Deiced temperature probe</span>
+<span class="sd">        **DIT:** Deiced temperature probe</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :param ds: dataset from ingested cal_nc file</span>
-<span class="sd">        :type ds:  netCDF4.dataset</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Generic</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DIT.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.temperature.DIT.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">largs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to determine any other additional changes to the nc obj</span>
 
-<span class="sd">        :param kargs: dictionary of optional arguments</span>
-<span class="sd">        :type kargs: dictionary</span>
+<div class="viewcode-block" id="DIT.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.temperature.DIT.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dvars</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates attributes and variables of ndit nc object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dvars (:obj:`dict`): </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">largs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dvars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="k">pass</span></div></div>

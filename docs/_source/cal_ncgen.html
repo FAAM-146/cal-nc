@@ -143,7 +143,7 @@ the PCASP1 template cdl file as follows;</p>
 <span class="go">  -o PCASP_faam_20170701_v001_r000_cal.nc</span>
 </pre></div>
 </div>
-<p>Note that such a config file must have a recognisable format and the <cite>.cfg.</cite> or
+<p>Note that such a config file must have a recognisable format and the <cite>.cfg</cite> or
 <cite>.config</cite> extension to ensure that the instrument parser is not invoked on the
 config file directly. The <em>special</em> options in each section that start with
 an <code class="docutils literal notranslate"><span class="pre">_</span></code> are not treated as netCDF attributes or variables but are used to
@@ -151,32 +151,31 @@ assist in the processing of the options.</p>
 <dl class="function">
 <dt id="cal_ncgen.call">
 <code class="sig-prename descclassname">cal_ncgen.</code><code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param">infile</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_ncgen.html#call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_ncgen.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convenience function for cal_ncgen</p>
-<dl class="field-list">
+<dd><p>Convenience function for cal_ncgen.py.</p>
+<p>The main grunt work is actually done in <code class="docutils literal notranslate"><span class="pre">nc_func.process_nc()</span></code>.</p>
+<p>How this works:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>Creates separate lists of <cite>nc</cite> and <cite>cdl</cite> files. Determines ‘master’</dt><dd><p>file based on list order with <cite>nc</cite> files having priority over <cite>cdl</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><p>netCDF files are created for any <cite>cdl</cite> files by calling <code class="docutils literal notranslate"><span class="pre">ncgen</span></code>.
+If no other arguments for nc then finish</p></li>
+<li><p>Determine output filename</p></li>
+<li><p>If no changes to master <cite>nc</cite> file required then exit.</p></li>
+<li><p>Consolidate any arguments into an <code class="docutils literal notranslate"><span class="pre">updates</span></code> dictionary</p></li>
+<li><p>Pass to <code class="docutils literal notranslate"><span class="pre">nc_func.process_nc()</span></code> for creation of complete cal-nc file.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>infile</strong> (<em>list</em>) – One or more cdl files. If multiple files then concat,
-if single cdl then ncgen to nc.</p></li>
-<li><p><strong>args</strong> (<em>Dictionary</em>) – Arguments for adding to cdl file</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">How this function works:</dt>
-<dd class="field-odd"><ul>
-<li><div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>concatenate multiple cdl input files</p>
-</div>
-</li>
-<li><p>If infile is cdl then create nc by calling <code class="docutils literal notranslate"><span class="pre">ncgen</span></code>.
-If no other arguments for nc then finish</p></li>
-<li><p>open nc file as <code class="docutils literal notranslate"><span class="pre">root</span></code></p></li>
-<li><p>determine instrument to operate on from nc or args[‘instr’]</p></li>
-<li><p>Instantiate instrument class</p></li>
-<li><p>Write or append data to variables</p></li>
-<li><p>write nc</p></li>
+<li><p><strong>infile</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – List of one or more cdl filesnames. If multiple
+files are given than these will be concatenated.</p></li>
+<li><p><strong>single cdl then ncgen to nc.</strong> (<em>if</em>) – </p></li>
+<li><p><strong>args</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Arguments for adding to resultant nc file.</p></li>
 </ul>
 </dd>
 </dl>

@@ -51,8 +51,7 @@
   <h1>Source code for cal_ncgen</h1><div class="highlight"><pre>
 <span></span><span class="ch">#! /usr/bin/env python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Script for creating FAAM calibration netCDF files.</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Script for creating FAAM calibration netCDF files.</span>
 
 <span class="sd">.. code-block:: console</span>
 
@@ -141,7 +140,7 @@
 <span class="sd">    $ python3 cal_ncgen.py PCASP1_cal.cdl -u parsefile PCASP1_CLARIFY_cals.cfg</span>
 <span class="sd">      -o PCASP_faam_20170701_v001_r000_cal.nc</span>
 
-<span class="sd">Note that such a config file must have a recognisable format and the `.cfg.` or</span>
+<span class="sd">Note that such a config file must have a recognisable format and the `.cfg` or</span>
 <span class="sd">`.config` extension to ensure that the instrument parser is not invoked on the</span>
 <span class="sd">config file directly. The *special* options in each section that start with</span>
 <span class="sd">an ``_`` are not treated as netCDF attributes or variables but are used to</span>
@@ -171,27 +170,26 @@
 
 
 <div class="viewcode-block" id="call"><a class="viewcode-back" href="../_source/cal_ncgen.html#cal_ncgen.call">[docs]</a><span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span><span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convenience function for cal_ncgen</span>
+    <span class="sd">&quot;&quot;&quot;Convenience function for cal_ncgen.py.</span>
 
-<span class="sd">    :param infile: One or more cdl files. If multiple files then concat,</span>
-<span class="sd">        if single cdl then ncgen to nc.</span>
-<span class="sd">    :type infile: list</span>
-<span class="sd">    :param args: Arguments for adding to cdl file</span>
-<span class="sd">    :type args: Dictionary</span>
-<span class="sd">    :returns: None</span>
+<span class="sd">    The main grunt work is actually done in ``nc_func.process_nc()``.</span>
 
-<span class="sd">    :How this function works::</span>
-
-<span class="sd">        * .. TODO::</span>
-<span class="sd">             concatenate multiple cdl input files</span>
-<span class="sd">        * If infile is cdl then create nc by calling ``ncgen``.</span>
+<span class="sd">    How this works:</span>
+<span class="sd">        </span>
+<span class="sd">        * Creates separate lists of `nc` and `cdl` files. Determines &#39;master&#39;</span>
+<span class="sd">            file based on list order with `nc` files having priority over `cdl`.</span>
+<span class="sd">        * netCDF files are created for any `cdl` files by calling ``ncgen``.</span>
 <span class="sd">          If no other arguments for nc then finish</span>
-<span class="sd">        * open nc file as ``root``</span>
-<span class="sd">        * determine instrument to operate on from nc or args[&#39;instr&#39;]</span>
-<span class="sd">        * Instantiate instrument class</span>
-<span class="sd">        * Write or append data to variables</span>
-<span class="sd">        * write nc</span>
+<span class="sd">        * Determine output filename</span>
+<span class="sd">        * If no changes to master `nc` file required then exit.</span>
+<span class="sd">        * Consolidate any arguments into an ``updates`` dictionary</span>
+<span class="sd">        * Pass to ``nc_func.process_nc()`` for creation of complete cal-nc file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        infile (:obj:`list`): List of one or more cdl filesnames. If multiple</span>
+<span class="sd">            files are given than these will be concatenated.</span>
+<span class="sd">        if single cdl then ncgen to nc.</span>
+<span class="sd">        args (:obj:`dict`): Arguments for adding to resultant nc file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">import</span> <span class="nn">os.path</span>
@@ -201,12 +199,6 @@
     <span class="n">abs_infile_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">f</span><span class="p">))</span> \
                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">infile</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">default_cdl_dir</span>\
                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">f</span><span class="p">))]))</span>
-
-    <span class="c1"># abs_infile_ = []</span>
-    <span class="c1"># for f_ in infile:</span>
-    <span class="c1">#     for d_ in default_cdl_dir:</span>
-    <span class="c1">#         if os.path.isfile(os.path.join(d_,f_)):</span>
-    <span class="c1">#             abs_infile_.append(os.path.abspath(os.path.join(d_,f_)))</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">abs_infile_</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Given input file not found:&#39;</span><span class="p">)</span>
@@ -325,87 +317,6 @@
         <span class="k">return</span>
 
     <span class="k">return</span></div>
-
-    <span class="c1"># pdb.set_trace()</span>
-
-    <span class="c1"># # Create a instrument processor from the master nc file. This file remains</span>
-    <span class="c1"># # open until explicitly closed.</span>
-    <span class="c1"># master_ds, _ = read_nc(master_infile)</span>
-
-    <span class="c1"># # Create list of all additional nc files</span>
-    <span class="c1"># aux_nc = nc_infile[1:] + tmp_outfile</span>
-
-    <span class="c1"># # Obtain intrument from master or, if provided, from user arguments</span>
-    <span class="c1"># if args[&#39;instr&#39;] is None:</span>
-    <span class="c1">#     try:</span>
-    <span class="c1">#         instr = master_ds.getncattr(&#39;instr&#39;)</span>
-    <span class="c1">#     except AttributeError:</span>
-    <span class="c1">#         print(&#39;No instrument name given in master file.&#39;)</span>
-    <span class="c1">#         print(&#39;Use --update instr instrument argument.&#39;)</span>
-    <span class="c1">#         return</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#     # User-given arguement overrides instrument name in input files</span>
-    <span class="c1">#     instr = args[&#39;instr&#39;]</span>
-
-    <span class="c1"># # Obtain appropriate instrument processing class</span>
-    <span class="c1"># instr_class = cal_proc.proc_map(instr)</span>
-
-    <span class="c1"># try:</span>
-    <span class="c1">#     # Initialise the nc object</span>
-    <span class="c1">#     master = instr_class(master_ds)</span>
-    <span class="c1"># except Exception as err:</span>
-    <span class="c1">#     print(&#39;Instrument processing class not found: {}\n&#39;.format(instr))</span>
-    <span class="c1">#     return</span>
-
-    <span class="c1"># # Print out instrument processor help if required</span>
-    <span class="c1"># try:</span>
-    <span class="c1">#     if &#39;help&#39; in args[&#39;update_arg&#39;]:</span>
-    <span class="c1">#         print(master)</span>
-    <span class="c1">#         return</span>
-    <span class="c1"># except TypeError:</span>
-    <span class="c1">#     # eg if args[&#39;update_arg&#39;] is None</span>
-    <span class="c1">#     pass</span>
-
-
-    <span class="c1"># pdb.set_trace()</span>
-    <span class="c1"># combine_datasets(master.ds,aux_ds[0],master.ds)</span>
-
-
-    <span class="c1"># # Want to apply history and user attributes for each update so make</span>
-    <span class="c1"># # sure are correct length.</span>
-    <span class="c1"># # The username is the same for all updates</span>
-    <span class="c1"># if args[&#39;user&#39;] == None:</span>
-    <span class="c1">#     user = None</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#     user = [&#39; &#39;.join(args[&#39;user&#39;])] * modal_len</span>
-
-    <span class="c1"># if args[&#39;hist&#39;] == None:</span>
-    <span class="c1">#     history = None</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#     if len(args[&#39;hist&#39;]) &gt; modal_len:</span>
-    <span class="c1">#         history = args[&#39;hist&#39;][:modal_len]</span>
-    <span class="c1">#         discard_hist = args[&#39;hist&#39;][modal_len:]</span>
-    <span class="c1">#     elif len(args[&#39;hist&#39;]) != modal_len:</span>
-    <span class="c1">#         history = [args[&#39;hist&#39;][0]] * modal_len</span>
-    <span class="c1">#         discard_hist = args[&#39;hist&#39;][1:]</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         history = args[&#39;hist&#39;]</span>
-    <span class="c1">#         discard_hist = []</span>
-
-    <span class="c1">#     if discard_hist != []:</span>
-    <span class="c1">#         print(&#39;\nUpdate history argument is incorrect length, &#39;</span>
-    <span class="c1">#               &#39;discarding entries:&#39;)</span>
-    <span class="c1">#         print(&#39; &#39;,&#39;\n  &#39;.join(discard_hist))</span>
-    <span class="c1">#         print()</span>
-
-    <span class="c1"># # Update the variables/attributes</span>
-    <span class="c1"># nc.update(updates)</span>
-
-    <span class="c1"># # Update the history and username attributes</span>
-    <span class="c1"># nc.update_hist(history)</span>
-    <span class="c1"># nc.update_user(user)</span>
-
-<span class="c1"># root closed</span>
 
 
 <span class="c1"># ----------------------------------------------------------------------</span>

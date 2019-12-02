@@ -6,11 +6,11 @@ The following command was used to create a `cal-nc` file for PCASP-2 using pre-A
 
 .. code-block:: console
 
-	(cal-nc) user@pc:~/git/cal-nc$ python cal_ncgen.py '/home/graeme/tmp/P2_cal/20191107_P2_cal.cdl'
+	(cal-nc) user@pc:~/git/cal-nc$ python cal_ncgen.py PCASP2_cal_template.cdl'
 		-u parsefile '/home/graeme/tmp/P2_cal/20191107_P2_cal.cfg'
-		-u parsefile '/home/graeme/tmp/P2_cal/PCASP2_flowcal.cfg'
+		-u parsefile '/home/graeme/tmp/P2_cal/20180508PCASP2_flowcal.cfg'
 		--user="Graeme Nott <graeme.nott@faam.ac.uk>"
-		--hist="20191129T0957 Initial creation"
+		--hist="<now> Initial creation"
 		-o PCASP_faam_20191107_v001_r000_cal.nc
 
 

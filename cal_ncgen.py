@@ -124,7 +124,7 @@ def call(infile,args):
     The main grunt work is actually done in ``nc_func.process_nc()``.
 
     How this works:
-        
+
         * Creates separate lists of `nc` and `cdl` files. Determines 'master'
             file based on list order with `nc` files having priority over `cdl`.
         * netCDF files are created for any `cdl` files by calling ``ncgen``.
@@ -226,10 +226,10 @@ def call(infile,args):
             updates[u_[0]].extend(u_[1:])
         else:
             updates[u_[0]] = u_[1:]
-    
+
     # Add user and history attributes and make terms consistant
     # eg program options --user=Fred and -u username Fred are equivalent
-    
+
     ## TODO: Consolidate with specials in nc_conf.py
     for u_,k_ in zip([args['user'],args['hist']],['username','history']):
         try:
@@ -255,6 +255,7 @@ def call(infile,args):
                                     updates=updates)
 
 
+    pdb.set_trace()
 
     # Delete any temporary files
     for file in tmpfile:

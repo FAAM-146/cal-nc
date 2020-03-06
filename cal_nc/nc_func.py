@@ -40,7 +40,7 @@ def read_nc(master,aux=[]):
         aux (:obj:`list`): List of any additional netCDF filenames that are to
             be added/concatenated with master nc file. Auxillary nc files are
             opened as read only. Default is [], ie no auxillary files.
-    
+
     Returns:
         Tuple of dataset from master netCDF and list of any auxillary Datasets.
     """
@@ -86,9 +86,10 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             from `master_nc`.
         updates (:obj:`dict`, optional): All other updates to be applied to the final
             dataset. Default is {}.
-    
+
     """
 
+    pdb.set_trace()
 
     # Create a temporary copy of the master
     # Note that all 'master' operations are done on this temporary copy
@@ -130,7 +131,7 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             print(master)
 
             # TODO(gn): Change this to a Raise
-            
+
             return 1, ''
     except TypeError:
         # eg if args['update_arg'] is None
@@ -188,11 +189,17 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
                 # 'Correct' variable names to include group path
                 var_dicts.append({os.path.join(grp,k_):v_ for (k_,v_) in v_dicts[i].items()})
 
+
+        #### Create dictionary of updates for each anc
+        #### need group information
+
         else:
+            pdb.set_trace()
             var_dicts = []
             p_files = [anc]
 
         for p_,v_ in zip(p_files,var_dicts):
+            # The zip obj will be as short as the shortest input, ie empty if var_dicts==[]
             if p_ == None:
                 master.append_dict(v_)
             else:
@@ -200,6 +207,16 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
 
     # Add any updates
     ### TODO: This needs sorting! Make more general
+
+    # try:
+    #     master.update_user(updates.pop('username'))
+    # except KeyError as err:
+    #     pass
+    # try:
+    #     master.update_hist(updates.pop('history'))
+    # except KeyError as err:
+    #     pass
+
     for k_,update in updates.items():
         if k_.lower() == 'username':
             master.update_user(update)

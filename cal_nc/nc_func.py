@@ -89,8 +89,6 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
 
     """
 
-    pdb.set_trace()
-
     # Create a temporary copy of the master
     # Note that all 'master' operations are done on this temporary copy
     tmp_nc = '{}_tmp.nc'.format(os.path.splitext(master_nc)[0])
@@ -155,9 +153,13 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             master.append_dataset(aux_ds[-1])
 
     # Read in any ancillary files
-    for anc in anc_files:
+    for i,anc in enumerate(anc_files):
 
         if os.path.splitext(anc)[-1].lower() in ['.cfg','.config']:
+            # Read in any configuration files.
+            # Currently this code assumes that all information is included
+            # within the config file.
+
             cfg_dict = read_config(anc)
 
             # Separate file to parse and associated variables
@@ -189,13 +191,21 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
                 # 'Correct' variable names to include group path
                 var_dicts.append({os.path.join(grp,k_):v_ for (k_,v_) in v_dicts[i].items()})
 
-
-        #### Create dictionary of updates for each anc
-        #### need group information
-
         else:
-            pdb.set_trace()
-            var_dicts = []
+            # If ancillary files are not config's then need to be parsed
+            # directly.
+            # Any attributes that are included in updates are associated with
+            # the ancillary file. Thus if there are more than one anc file
+            # then there should be the same number of identicaly update
+            # parameters (unless they are to be broadcast to all updates.
+
+            # Create a dictionary of variables/attributes associated with
+            # the ancillary file, anc.
+            # This comprehension pseudo broadcasts the last value if not enough
+            # have been given in updates.
+            # Note that if too many attributes have been given (compared to
+            # the number of anc files) then these shall be lost!
+            var_dicts = [{k_:(v_[i] if len(v_)>=i else v_[-1]) for (k_,v_) in updates.items()}]
             p_files = [anc]
 
         for p_,v_ in zip(p_files,var_dicts):
@@ -205,24 +215,35 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             else:
                 master.update_bincal_from_file(p_,v_)
 
-    # Add any updates
-    ### TODO: This needs sorting! Make more general
+    # Append any updates that are attributes rather than variables.
+    # Attributes are skipped in cal_proc.generic.append_dict()
 
-    # try:
-    #     master.update_user(updates.pop('username'))
-    # except KeyError as err:
-    #     pass
-    # try:
-    #     master.update_hist(updates.pop('history'))
-    # except KeyError as err:
-    #     pass
+    # Every update must include a username and a history that are appended
+    # to the root attributes 'username' and 'history'. If these are not
+    # given then creation is dealt with in cal_proc.generic()
 
-    for k_,update in updates.items():
-        if k_.lower() == 'username':
-            master.update_user(update)
+    try:
+        update_by = updates.pop('username')
+    except KeyError as err:
+        update_by = None
+    master.update_user(update_by)
 
-        elif k_.lower() == 'history':
-            master.update_hist(update)
+    try:
+        update_when = updates.pop('history')
+    except KeyError as err:
+        update_when = None
+    master.update_hist(update_when)
+
+    for attr,update in updates.items():
+        grp_, attr_ = os.path.split(attr)
+        if grp_ == '' and attr not in master.ds.ncattrs():
+            # Update not a root attribute so skip
+            continue
+        elif attr_ not in master.ds[grp_].ncattrs():
+            # Update not a group attribute so skip
+            continue
+
+        master.update_attr(attr,update)
 
     # Add any version information that is missing from nc
     master.update_ver()

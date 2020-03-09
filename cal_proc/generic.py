@@ -111,7 +111,7 @@ def append_time(otime,ntime,concat_axis=0):
                 else:
                     break
 
-            print('t_fmt = ',t_fmt)
+            #print('t_fmt = ',t_fmt)
             ndatetime = [datetime.datetime.strptime(n_,t_fmt) for n_ in ntime]
 
         else:
@@ -190,6 +190,7 @@ class Generic():
 
         from cal_proc import __version__
 
+        self.software_version = __version__
         self.ds.software_version = __version__
 
 
@@ -287,6 +288,64 @@ class Generic():
             # username attribute already exists to append to end of string
             del(self.ds.username)
             self.ds.username = '{}, {}'.format(user_,update)
+
+
+    def update_attr(self,attr,update=None):
+        """Updates an attribute by appending update.
+
+        Root and group attributes are generally strings and should not be
+        changed. However they may be appended to, it is common to create a
+        comma-delineated string. If attr does not exist then it is not
+        created by this method. If a new attribute is required then it is
+        more sound to create a new nc file from scratch that includes this
+        attribute.
+
+        Args:
+            attr (:obj:`str`): Name of attribute to update. If the attribute
+                is in a group instead of the root then the full path of
+                the attribute must be included with / seperators. If attr
+                does not exist within the dataset then do not create but
+                return.
+            update (:obj:`str` or :obj:`list`): Update for attribute.
+                If None (default) then just return. If string then append
+                to existing attr string with comma seperator. If list of
+                strings then append comma-delineated string generated from
+                list.
+        """
+
+        if update in [None,'']:
+            # No updates to be made
+            return
+
+        # Extract existing attribute from ds
+        grp_, attr_ = os.path.split(attr)
+
+        try:
+            attr_old = self.ds.getncattr(attr)
+        except AttributeError as err:
+            try:
+                attr_old = self.ds[grp_].getncattr(attr_)
+            except AttributeError as err:
+                # Attribute as given does not exist so do nothing
+                print('Attribute {} does not exist.'.format(attr))
+                return
+            else:
+                # Delete existing group attribute
+                self.ds[grp_].delncattr(attr_)
+        else:
+            # Delete existing root attribute
+            self.ds.delncattr(attr)
+
+
+        if hasattr(update,'__iter__') and type(update) not in [str]:
+            # If is a list of strings then join
+            update = ', '.join(update[:])
+
+        # Append update to existing attribute string and rewrite into ds
+        if grp_ == '':
+            self.ds.setncattr(attr,'{}, {}'.format(attr_old,update))
+        else:
+            self.ds[grp_].setncattr(attr_,'{}, {}'.format(attr_old,update))
 
 
     def change_val(self,var,old_val,new_val):

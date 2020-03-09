@@ -15,7 +15,7 @@ var_map = {'bin_cal/ADC_thres':
            'bin_cal/x-section':
                 lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundaries'],
                                         d['data']['Upper Cross Section Boundaries'])),
-           'bin_cal/x-section_err': 
+           'bin_cal/x-section_err':
                 lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundary Errors'].base,
                                         d['data']['Upper Cross Section Boundary Errors'].base)),
            'bin_cal/x-section_width':
@@ -400,7 +400,6 @@ def read_cal_file(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
         print()
         d = None
 
-
     # Return arrays of only bins required
     if reject_bins is not None:
 
@@ -444,7 +443,7 @@ class PCASP(Generic):
         Args:
             ds (:obj:`netCDF4.dataset`): Dataset from ingested netCDF file.
         """
-        
+
         Generic.__init__(self,ds)
 
 
@@ -461,7 +460,7 @@ class PCASP(Generic):
             is more useful?
 
         Examples:
-            
+
             .. warning::
 
                 These usage examples are now out of date.
@@ -541,7 +540,7 @@ class PCASP(Generic):
 
         Args:
             cal_file (:obj:`str` or :obj:`pathlib`): Filename of calibration
-                PCASP calibration csv file to be read. Is recognised as 
+                PCASP calibration csv file to be read. Is recognised as
                 ending in 'cs' or 'd' so user needs to provide some quality
                 assurance on the input files.
             vars_d(:obj:`dict`): Dictionary of any additional variables
@@ -550,7 +549,7 @@ class PCASP(Generic):
                 eg `time`.
         """
 
-        if (cal_file == None) and (os.path.isfile(cal_file) == False):
+        if (cal_file == None) or (os.path.isfile(cal_file) == False):
             # Nothing to do
             return
 
@@ -588,7 +587,7 @@ class PCASP(Generic):
             else:
                 pass
         #        print('Add {} to self.ds'.format(k))
-        
+
         try:
             msg = self.append_dict(vars_d)
         except Exception as err:

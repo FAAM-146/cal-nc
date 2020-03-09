@@ -255,8 +255,6 @@ def call(infile,args):
                                     updates=updates)
 
 
-    pdb.set_trace()
-
     # Delete any temporary files
     for file in tmpfile:
         os.remove(file)

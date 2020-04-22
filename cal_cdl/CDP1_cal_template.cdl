@@ -5,7 +5,20 @@ netcdf CDP1_cal_template {
 //
 // Instrument: CDP-1
 //
-// Some of these fields may be modified/overwritten by cal_ncgen.py.
+// Structure of the cal-nc file is as follows;
+// Global attributes
+//  Group: flight_cal
+//      Contains a time series of pre-flight calibrations
+//  Group: master_cal
+//      Contains the master calibration based on flight_cal variables.
+//      Diameters that are included as based on the default particle, liquid
+//      water.
+//    Group: Secondary material sub-group
+//      This sub-group of master_cal/ contains diameter-related variables for
+//      another material. Dimensions are inherited from master_cal.
+//    Group: Another material sub-group
+//      Any number of material sub-groups can be included for different
+//      particle types/materials.
 //
 // author = G. Nott
 // email = graeme.nott@faam.ac.uk
@@ -272,6 +285,10 @@ group: master_cal {
     group: mineral_dust {
         // Group containing calibration of size bins of the CDP for campaign
 
+        // MOVE THIS TO SEPARATE CDL FILE IN DATA DIR
+        // HMM, CAN THIS BE DONE WITH PARENT COORDS?
+
+
         :title = "Size bin diameter calibrations of CDP for mineral dust";
         :comment = "The real part of the refractive index was taken as 1.53 which is a common value and is in the OPAC database. It is quite a bit smaller than the 1.547 that was reported by Weinzierl et al. [2011] but has been shown to have a relatively weak effect on the instrument response. The values of the imaginary part were based on references in  Ryder et al. [2019] along with the frequency distribution of k(550nm) presented in fig 9 of Ryder et al. [2013]. So the minimum value was extended from 0.0015i to 0.001i. Calculating the bin boundaries with these multiple Mie curves was done with Gaussian centre-weighted averaging with 0.001i and 0.0024i being +/-2 sigma extreme values.";
         :references = "Weinzierl et al., Tellus 63B, 589-618, 2011., Ryder et al., ACP 19, 5353-15376, 2019, Ryder et al., ACP 13, 303-325, 2013.";
@@ -279,7 +296,7 @@ group: master_cal {
         // Define group variables
         variables:
             float dia_centre(time,bin);
-                dia_centre:long_name = "Centre diameter of each bin for given atmospheric particle material - liquid water";
+                dia_centre:long_name = "Centre diameter of each bin for given atmospheric particle material - mineral dust";
                 dia_centre:comment = "Weighted average of all diameter region centres covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group).";
                 dia_centre:refractive_index = "1.53 + (0.001i--0.0024i)";
                 dia_centre:shape = "spherical";
@@ -294,7 +311,7 @@ group: master_cal {
                 dia_centre_err:_FillValue = NaN;
 
             float dia_width(time,bin);
-                dia_width:long_name = "Width in terms of diameter of each bin number for given atmospheric particle material - liquid water";
+                dia_width:long_name = "Width in terms of diameter of each bin number for given atmospheric particle material - mineral dust";
                 dia_width:comment = "Sum of all diameter regions covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al.";
                 dia_width:refractive_index = "1.53 + (0.001i--0.0024i)";
                 dia_width:shape = "spherical";

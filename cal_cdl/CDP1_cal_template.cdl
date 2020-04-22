@@ -11,11 +11,12 @@ netcdf CDP1_cal_template {
 //      Contains a time series of pre-flight calibrations
 //  Group: master_cal
 //      Contains the master calibration based on flight_cal variables.
-//      Diameters that are included as based on the default particle, liquid
+//      Diameters that are included are based on the default particle, liquid
 //      water.
 //    Group: Secondary material sub-group
 //      This sub-group of master_cal/ contains diameter-related variables for
-//      another material. Dimensions are inherited from master_cal.
+//      another material. Dimensions are inherited from master_cal. Material
+//      information is included in group and variable attributes.
 //    Group: Another material sub-group
 //      Any number of material sub-groups can be included for different
 //      particle types/materials.
@@ -27,7 +28,7 @@ netcdf CDP1_cal_template {
 // global attributes:
 
     // Universal global file attributes. Do not modify.
-    :Conventions = "CF-1.6";
+    :Conventions = "CF-1.7";
     :_Format = "netCDF-4";
     :institution = "FAAM. Facility for Airborne Atmospheric Measurements";
     :address = "Building 146, Cranfield University, Cranfield MK43 0AL UK";
@@ -52,7 +53,6 @@ group: flight_cal {
     :comment = "Group containing calibration of size bins of the CDP. Photodetector voltage pulse-heights are calibrated to the calculated scattering cross-section of known glass bead monodisperse distributions.";
     :references = "P.D. Rosenberg, A.R. Dean, P.I. Williams, J.R. Dorsey, A. Minikin, M.A. Pickering and A. Petzold, Particle sizing calibration with refractive index correction for light scattering optical particle counters and impacts upon PCASP and CDP data collected during the Fennec campaign, Atmos. Meas. Tech., 5, 1147-1163, doi:10.5194/amt-5-1147-2012, 2012.";
 
-
     // Define dimensions for group.
     dimensions:
         time = UNLIMITED ;
@@ -73,26 +73,26 @@ group: flight_cal {
 
         int bin(bin);
             bin:long_name = "bin number";
-            bin:comment = "The CDP has 30 bins however the first has a somewhat undefined lower boundary and should therefore usually be discarded.";
+            bin:comment = "The CDP has 30 bins however the first has a somewhat undefined lower boundary, it is nominally 2um.";
 
     // Define group variables
         string applies_to(time);
-            applies_to:long_name = "Each calibration applies to these measurements";
-            applies_to:comment = "String of applicable flight numbers or other unique identifier for each calibration time/date";
+            applies_to:long_name = "Calibration applies to this data";
+            applies_to:comment = "String of applicable flight numbers or other unique identifier for each calibration time/date.";
 
         string descr(time);
             descr:long_name = "Description of calibration";
-            descr:comment = "Any descriptive string used as an addition identifier of this calibration";
+            descr:comment = "Any descriptive string used as an addition identifier of this calibration.";
 
         string traceability(time);
-            traceability:long_name = "Traceability trail for each calibration";
+            traceability:long_name = "Traceability of calibration";
             traceability:comment = "Unique lot numbers for each calibration glass bead. Glass beads are from the ThermoScientific 9000 series.";
 
         string calibration_file(time);
-            calibration_file:long_name = "File from which this calibration data has been read";
+            calibration_file:long_name = "File from which this calibration data has been read.";
 
         string source_file(time);
-            source_file:long_name = "Source file that was used in calibration processing";
+            source_file:long_name = "Source file that was used in calibration processing.";
 
         int cal_flag(time);
             cal_flag:long_name = "Flag denoting quality of calibration";
@@ -108,7 +108,7 @@ group: flight_cal {
             ADC_thres:_FillValue = NaN;
 
         float x-section(time,bin,bin_bounds);
-            x-section:long_name = "Scattering cross-section boundaries for each bin";
+            x-section:long_name = "Lower and upper scattering cross-section boundaries for each bin";
             x-section:comment = "Lower boundary of first bin is undefined.";
             x-section:units = "um**2";
             x-section:ancillary_variables = "x-section_err";
@@ -120,18 +120,18 @@ group: flight_cal {
             x-section_err:_FillValue = NaN;
 
         float x-section_width(time,bin);
-            x-section_width:long_name = "Width of each bin in terms of scattering cross section";
+            x-section_width:long_name = "Width of each bin in terms of scattering cross-section";
             x-section:units = "um**2";
             x-section:ancillary_variables = "x-section_width_err";
             x-section:_FillValue = NaN;
 
         float x-section_width_err(time,bin);
-            x-section_width_err:long_name = "Uncertainty of scattering cross section boundaries for each bin";
+            x-section_width_err:long_name = "Uncertainty of scattering cross-section width for each bin";
             x-section_width_err:comment = "Uncertainties are derived from the uncertainty in the calculated scattering cross-section and the width of the modal bin for each calibration particle. These are discussed in sections 2.1 and 2.23 in Rosenberg et al. (full citation given in references attribute of this group).";
             x-section_width_err:_FillValue = NaN;
 
         float dia_centre(time,bin);
-            dia_centre:long_name = "Centre diameter of each bin for given atmospheric particle material - liquid water";
+            dia_centre:long_name = "Centre diameter of each bin for given particle material - liquid water";
             dia_centre:comment = "Weighted average of all diameter region centres covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group).";
             dia_centre:refractive_index = "1.33+0i";
             dia_centre:shape = "spherical";
@@ -146,7 +146,7 @@ group: flight_cal {
             dia_centre_err:_FillValue = NaN;
 
         float dia_width(time,bin);
-            dia_width:long_name = "Width in terms of diameter of each bin number for given atmospheric particle material - liquid water";
+            dia_width:long_name = "Width in terms of diameter of each bin for given particle material - liquid water";
             dia_width:comment = "Sum of all diameter regions covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group).";
             dia_width:refractive_index = "1.33+0i";
             dia_width:shape = "spherical";
@@ -204,20 +204,20 @@ group: master_cal {
             time:timezone = "UTC";
             time:units = "seconds since 1970-01-01 00:00:00";
             time:strftime_format = "seconds since %Y-%m-%d %H:%M:%S%Z";
-            time:comment = "This is a time used to represent the period over which this master calibraton is valid. If for a campaign will generally be the mid-point date although may also be the start or end. Only a single time is given for the master calibration.";
+            time:comment = "This is a time used to represent the period over which this master calibraton is valid. If for a campaign will generally be the mid-point date although may also be the start or end. Only a single time is given for the master calibration, it is used to maintain consistency with flight_cal.";
 
         int bin(bin);
             bin:long_name = "bin number";
-            bin:comment = "The CDP has 30 bins however the first has a somewhat undefined lower boundary and should therefore usually be discarded.";
+            bin:comment = "The CDP has 30 bins however the first has a somewhat undefined lower boundary, it is nominally 2um.";
 
     // Define group variables
         string applies_to(time);
-            applies_to:long_name = "Each calibration applies to these measurements";
-            applies_to:comment = "String of applicable flight numbers or other unique identifier for each calibration time/date";
+            applies_to:long_name = "Calibration applies to this data";
+            applies_to:comment = "String of applicable flight numbers, campaign name, or other unique identifier for calibration.";
 
         string descr(time);
             descr:long_name = "Description of calibration";
-            descr:comment = "Any descriptive string used as an addition identifier of this calibration";
+            descr:comment = "Any descriptive string used as an addition identifier of this calibration.";
 
         int ADC_thres(time,bin,bin_bounds);
             ADC_thres:long_name = "Lower and upper ADC thresholds for each bin";
@@ -226,7 +226,7 @@ group: master_cal {
             ADC_thres:_FillValue = NaN;
 
         float x-section(time,bin,bin_bounds);
-            x-section:long_name = "Scattering cross-section boundaries for each bin";
+            x-section:long_name = "Lower and upper scattering cross-section boundaries for each bin";
             x-section:comment = "Lower boundary of first bin is undefined.";
             x-section:units = "um**2";
             x-section:ancillary_variables = "x-section_err";
@@ -238,18 +238,18 @@ group: master_cal {
             x-section_err:_FillValue = NaN;
 
         float x-section_width(time,bin);
-            x-section_width:long_name = "Width of each bin in terms of scattering cross section";
+            x-section_width:long_name = "Width of each bin in terms of scattering cross-section";
             x-section:units = "um**2";
             x-section:ancillary_variables = "x-section_width_err";
             x-section:_FillValue = NaN;
 
         float x-section_width_err(time,bin);
-            x-section_width_err:long_name = "Uncertainty of scattering cross section boundaries for each bin";
+            x-section_width_err:long_name = "Uncertainty of scattering cross-section width for each bin";
             x-section_width_err:comment = "Uncertainties are derived from the uncertainty in the calculated scattering cross-section and the width of the modal bin for each calibration particle. These are discussed in sections 2.1 and 2.23 in Rosenberg et al. (full citation given in references attribute of this group).";
             x-section_width_err:_FillValue = NaN;
 
         float dia_centre(time,bin);
-            dia_centre:long_name = "Centre diameter of each bin for given atmospheric particle material - liquid water";
+            dia_centre:long_name = "Centre diameter of each bin for given particle material - liquid water";
             dia_centre:comment = "Weighted average of all diameter region centres covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group).";
             dia_centre:refractive_index = "1.33+0i";
             dia_centre:shape = "spherical";
@@ -264,7 +264,7 @@ group: master_cal {
             dia_centre_err:_FillValue = NaN;
 
         float dia_width(time,bin);
-            dia_width:long_name = "Width in terms of diameter of each bin number for given atmospheric particle material - liquid water";
+            dia_width:long_name = "Width in terms of diameter of each bin for given particle material - liquid water";
             dia_width:comment = "Sum of all diameter regions covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group).";
             dia_width:refractive_index = "1.33+0i";
             dia_width:shape = "spherical";
@@ -296,7 +296,7 @@ group: master_cal {
         // Define group variables
         variables:
             float dia_centre(time,bin);
-                dia_centre:long_name = "Centre diameter of each bin for given atmospheric particle material - mineral dust";
+                dia_centre:long_name = "Centre diameter of each bin for given particle material - mineral dust";
                 dia_centre:comment = "Weighted average of all diameter region centres covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group).";
                 dia_centre:refractive_index = "1.53 + (0.001i--0.0024i)";
                 dia_centre:shape = "spherical";
@@ -311,7 +311,7 @@ group: master_cal {
                 dia_centre_err:_FillValue = NaN;
 
             float dia_width(time,bin);
-                dia_width:long_name = "Width in terms of diameter of each bin number for given atmospheric particle material - mineral dust";
+                dia_width:long_name = "Width in terms of diameter of each bin for given particle material - mineral dust";
                 dia_width:comment = "Sum of all diameter regions covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al.";
                 dia_width:refractive_index = "1.53 + (0.001i--0.0024i)";
                 dia_width:shape = "spherical";

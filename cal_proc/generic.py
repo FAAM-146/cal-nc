@@ -411,7 +411,52 @@ class Generic():
         return 0
 
 
-    def _add_var(self,var,vals):
+    def _parent_dim(self, var, unlim=True):
+        """ Returns paths/dimensions of given variable even if in parent group.
+
+        var is full path to the variable name
+        """
+        # Names of found dimensions that match those of var
+        fnd_dims = []
+        fnd_unlim = []
+
+        _path, _ = os.path.split(var)
+
+        while len(fnd_dims) < len(self.ds[var].dimensions):
+            # Walk up through groups attempting to find required dimensions
+            try:
+                _dims = [d for d in self.ds[_path].dimensions
+                         if d in self.ds[var].dimensions]
+            except (KeyError, IndexError) as err:
+                # Step up to parent group
+                break
+                _dims = [d for d in self.ds.dimensions
+                         if d in self.ds[var].dimensions]
+            finally:
+                _unlim = [self.ds[_path].dimensions[d].isunlimited()
+                          for d in _dims]
+
+            fnd_dims.extend([os.path.join(_path,d) for d in _dims])
+            fnd_unlim.extend(_unlim)
+            _path = os.path.split(_path)[0]
+
+        if len(fnd_dims) < len(self.ds[var].dimensions):
+            fnd_dims.extend([d for d in self.ds.dimensions
+                             if d in self.ds[var].dimensions])
+            fnd_unlim.extend([d.isunlimited() for d in _dims])
+
+        if unlim == True:
+            return np.array(fnd_dims)[fnd_unlim].tolist()
+        elif unlim.lower() in ['index','idx']:
+            # Return an index list of unlimited/fixed dimensions
+            return fnd_unlim
+        elif unlim.lower() in ['all', 'a']:
+            return fnd_dims, fnd_unlim
+        else:
+            return fnd_dims
+
+
+    def _add_var(self, var, vals):
         """Adds extra values to end of an already extended variable.
 
         If a coordinate is increased in size then all of the variables that
@@ -440,51 +485,67 @@ class Generic():
             # This assures (?) that 0 axis is the unlimited one...
             vals = np.expand_dims(vals[::],axis=0)
 
+        if vals.ndim != self.ds[var].ndim:
+            pdb.set_trace()
+
         assert vals.ndim == self.ds[var].ndim, \
                'Mismatch in number of dimensions'
 
         # Annoyingly have to split path and variable name
         vpath,vname = os.path.split(var)
 
-        # Find unlimited dimension for this var
-        for i,d_ in enumerate(self.ds[var].dimensions):
-            try:
-                unlim_dim = self.ds[vpath].dimensions[d_].isunlimited()
-            except IndexError as err:
-                # Assume this is because you're in the root
-                unlim_dim = self.ds.dimensions[d_].isunlimited()
-
-            if unlim_dim:
-                break
-
-        try:
-            _ = unlim_dim
-        except NameError as err:
+        # Find unlimited dimension/s for this var
+        #print(var)
+        dims, unlim = self._parent_dim(var, 'all')
+        if unlim is []:
             print(err)
             print('Variable {} does not have unlimited dimension'.format(var))
             return
 
         # Create slice to write to the correct dimension
         # That is the last elements of the unlimited dimension
+        unlim_idx = [i for i,v in enumerate(unlim) if v == True]
 
-        # .. TODO::
-        #   Need to check that this works for adding more than one new value
+        if len(unlim_idx) > 1:
+            # There is more than one unlimited dimension. This is allows in nc4
+            # Currently there is no code to automatically determine which
+            # dimension val should be added to. Therefore ask user for clarity,
+            # this is a bit rubbish so maybe _add_var() should have an
+            # additional arg for the dimension to extend??
+            print('\nMore than one UNLIMITED dimension found for variable: ' +
+                  '\n  {}'.format(var))
+            req_unlim_idx = None
+            while req_unlim_idx is None:
+                for _i,_d in enumerate(np.array(dims)[unlim_idx]):
+                    print('  {}: {}'.format(_i, _d))
+                req_unlim_idx = input('Enter number of dimension to use [0]: ')
+                if req_unlim_idx == '':
+                    req_unlim_idx = 0
+                elif int(req_unlim_idx) in range(_i):
+                    req_unlim_idx = int(req_unlim_idx)
+                else:
+                    req_unlim_idx = None
+            unlim_idx = unlim_idx[req_unlim_idx]
+            print('Adding {} to dimension: {}\n'.format(var,dims[unlim_idx]))
+        else:
+            unlim_idx = unlim_idx[0]
+
         if self.ds[var].ndim == 1:
+            # 'empty' slots filled from first position towards array end,
+            # thus the -1*len(vals)
             idx = slice(-1*len(vals),None)
         else:
             idx = [slice(None)] * self.ds[var].ndim
-
-            # Don't use slice obj as I can't work out what is going on!
-            idx[0] = -1#slice(-1,None)
-            idx[1] = range(len(vals[0]))#slice(None,len(vals[0]))
-
+            idx[unlim_idx] = -1
+            #idx[1] = range(len(vals[0]))
 
         if (self.ds[var].dtype in [str]) and \
            ((self.ds[var][idx] == '').all()):
             # Strings are vlen arrays which have more limited access
             # Need to write each individual string seperately (?)
             for i,val in enumerate(vals[::-1]):
-                self.ds[var][-1*(i+1)] = val
+                # Use string format to convert (also converts None)
+                self.ds[var][-1*(i+1)] = '{}'.format(val)
 
         elif any((self.ds[var][idx].mask.all(),
                   np.isfinite(self.ds[var][idx].base).all())):
@@ -592,11 +653,13 @@ class Generic():
         """
 
         # Find coordinate variable
-        coord_d = {}
+        coord_d  = {}
         var_keys = list(var_d.keys())
         for k_ in var_keys:
             try:
                 if self.ds[k_].name == self.ds[k_].dimensions[0]:
+                    # Coordinates can only have one dimension, thus the [0]
+                    # Coordinates cannot use a parent group dimension
                     coord_d[k_] = var_d.pop(k_)
             except IndexError as err:
                 # Variable does not exist in dataset so remove from var_d

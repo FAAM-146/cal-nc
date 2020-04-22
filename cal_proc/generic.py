@@ -485,9 +485,6 @@ class Generic():
             # This assures (?) that 0 axis is the unlimited one...
             vals = np.expand_dims(vals[::],axis=0)
 
-        if vals.ndim != self.ds[var].ndim:
-            pdb.set_trace()
-
         assert vals.ndim == self.ds[var].ndim, \
                'Mismatch in number of dimensions'
 

@@ -6,6 +6,7 @@ from . import generic
 from . import temperature
 from . import wcm2000
 from . import pcasp
+from . import cdp
 
 
 # Project information
@@ -23,7 +24,7 @@ __all__ = ['generic',
            # Primary instruments
            'temperature', 'wcm2000',
            # Core cloud physics
-           'pcasp']
+           'pcasp', 'cdp']
 
 # ----------------------------------------------------------------------
 def proc_map(instr):
@@ -54,6 +55,8 @@ def proc_map(instr):
     # Core cloud physics
     proc_map[pcasp.PCASP] = ['PCASP','PCASP-1','PCASP-2','PCASP-X',
                              'PCASP1','PCASP2','PCASPX']
+    proc_map[cdp.CDP] = ['CDP','CDP-1','CDP-2','CDP1','CDP2']
+
 
     # Search proc_map dictionary for exact match to instr string.
     # Will only return the first instance.

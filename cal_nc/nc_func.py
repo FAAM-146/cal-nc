@@ -101,7 +101,7 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
     # Create a instrument processor from the master nc file. This file remains
     # open until explicitly closed.
     master_ds = netCDF4.Dataset(tmp_nc, mode='r+', format='NETCDF4',
-                                diskless=True,persist=True)
+                                diskless=True, persist=True)
 
     # If instrument name has not explicitly been given then obtain intrument
     # from master dataset
@@ -112,9 +112,9 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             print('No instrument name given in master file.')
             return 1, 'Use --update instr instrument argument.'
 
+
     # Obtain appropriate instrument processing class
     instr_class = cal_proc.proc_map(instr)
-
 
     try:
         # Initialise the nc object
@@ -184,8 +184,8 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
                 except KeyError as err:
                     grp = ''
                 else:
-                    # If not given then assume is root group
-                    if grp == None:
+                    # If not given or given explicitly then is root group
+                    if grp in [None,'/']:
                         grp = ''
 
                 # 'Correct' variable names to include group path
@@ -208,6 +208,7 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             var_dicts = [{k_:(v_[i] if len(v_)>=i else v_[-1]) for (k_,v_) in updates.items()}]
             p_files = [anc]
 
+        pdb.set_trace()
         for p_,v_ in zip(p_files,var_dicts):
             # The zip obj will be as short as the shortest input, ie empty if var_dicts==[]
             if p_ == None:

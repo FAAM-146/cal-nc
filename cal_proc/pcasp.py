@@ -9,30 +9,32 @@ import pdb
 
 
 # Map cal file variable names to nc variables
-var_map = {'bin_cal/ADC_thres':
+# Note that as these variables are used in different groups, group path
+# must be prepended to the key when called.
+var_map = {'ADC_thres':
                 lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
                                         d['data']['Upper Thresholds'])),
-           'bin_cal/x-section':
+           'x-section':
                 lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundaries'],
                                         d['data']['Upper Cross Section Boundaries'])),
-           'bin_cal/x-section_err':
+           'x-section_err':
                 lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundary Errors'].base,
                                         d['data']['Upper Cross Section Boundary Errors'].base)),
-           'bin_cal/x-section_width':
+           'x-section_width':
                 lambda d: d['data']['Width of Cross Section Boundaries'],
-           'bin_cal/x-section_width_err':
+           'x-section_width_err':
                 lambda d: d['data']['Width of Cross Section Boundary Errors'],
-           'bin_cal/dia_centre':
+           'dia_centre':
                 lambda d: d['data']['Channel Centre'],
-           'bin_cal/dia_centre_err':
+           'dia_centre_err':
                 lambda d: d['data']['Channel Centre Errors'],
-           'bin_cal/dia_width':
+           'dia_width':
                 lambda d: d['data']['Channel Widths'],
-           'bin_cal/dia_width_err':
+           'dia_width_err':
                 lambda d: d['data']['Channel Width Errors'],
-           'bin_cal/calibration_file':
+           'calibration_file':
                 lambda d: d['metadata']['cal file'],
-           'bin_cal/source_file':
+           'source_file':
                 lambda d: d['metadata']['input file']
            }
 
@@ -142,32 +144,47 @@ class PCASP(Generic):
                 pass
 
 
-    def update_bincal_from_file(self,cal_file,vars_d):
+    def update_bincal_from_file(self, cal_file, vars_d):
         """Appends bin calibration data in calibration file to that in nc file.
 
         Args:
             cal_file (:obj:`str` or :obj:`pathlib`): Filename of calibration
-                PCASP calibration csv file to be read. Is recognised as
-                ending in 'cs' or 'd' so user needs to provide some quality
-                assurance on the input files.
+                PCASP calibration csv file to be read. The type of calibration
+                file, a scattering cross-section or diameters file, is
+                automatically determined. Diameter files are recognised as
+                starting with the string 'input file' as well as possibly
+                having 'dia' in the filename or ending with 'd.csv'. The
+                scattering cross-section files are recognised as containing
+                'scs' in the filename or having it end with 'cs.csv'.
             vars_d(:obj:`dict`): Dictionary of any additional variables
-                associated with those contained within the datafile. At the very
-                least this should contain any associated coordinate variables,
-                eg `time`.
+                associated with those contained within the datafile. At the
+                very least this should contain any associated coordinate
+                variables, eg `time`.
         """
         from . import reader
 
+        caldata = None
         if (cal_file == None) or (os.path.isfile(cal_file) == False):
             # Nothing to do
             return
+        elif os.path.splitext(cal_file)[1].lower() == '.csv':
+            with open(cal_file,'r') as f:
+                if f.read(10).lower() == 'input file':
+                    dia_type = True
+                else:
+                    dia_type = False
 
-        caldata = None
-        if all((os.path.splitext(cal_file)[0].endswith('cs'),
-               os.path.splitext(cal_file)[1].lower() == '.csv')):
-            caldata = reader.opc_calfile(cal_file,f_type='pcasp_cs')
-        elif all((os.path.splitext(cal_file)[0].endswith('d'),
-                 os.path.splitext(cal_file)[1].lower() == '.csv')):
-            caldata = reader.opc_calfile(cal_file,f_type='pcasp_d')
+            scs_type = any(['scs' in os.path.splitext(cal_file)[0].lower(),
+                    os.path.splitext(cal_file)[0].lower().endswith('cs')])
+
+            dia_type = any([dia_type,
+                    'dia' in os.path.splitext(cal_file)[0].lower(),
+                    os.path.splitext(cal_file)[0].lower().endswith('d')])
+
+        if scs_type and not dia_type:
+            caldata = reader.opc_calfile(cal_file, f_type='pcasp_cs')
+        elif dia_type:
+            caldata = reader.opc_calfile(cal_file, f_type='pcasp_d')
 
         if caldata == None:
             # Error in the cal_file
@@ -180,21 +197,30 @@ class PCASP(Generic):
         #print('Variables passed to update_bincal_from_file() in vars_d:')
         #for k in vars_d.keys(): print(k)
         #print()
+
+        # Determine group path.
+        grps = set(['' if os.path.dirname(k_) in ['', None, '/']
+                    else os.path.dirname(k_) for k_ in vars_d.keys()])
+
+        if len(grps) > 1:
+            # All keys in vars_d must have the same path
+            pdb.set_trace()
+        grp = grps.pop()
+
         for k,v in ((k_,v_) for k_,v_ in var_map.items() if k_ not in vars_d):
             try:
-                vars_d[k] = v(caldata)
+                vars_d[os.path.join(grp,k)] = v(caldata)
             except KeyError as err:
                 # Variable in var_map does not exist in file therefore skip
-                #pdb.set_trace()
-        #        print('{} not found in {}'.format(k,os.path.basename(cal_file)))
-                pass
+                # print('{} not found in {}'.format(k,os.path.basename(cal_file)))
+                continue
             except Exception as err:
                 print('  Failed. ',err)
                 pdb.set_trace()
                 pass
             else:
                 pass
-        #        print('Add {} to self.ds'.format(k))
+                # print('Add {} to self.ds'.format(k))
 
         try:
             msg = self.append_dict(vars_d)

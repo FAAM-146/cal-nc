@@ -31,9 +31,9 @@ default_special_str = ['_group',
 
 def read_config(cfg_file, de_str=True):
     """Read in configuration file and return entries in dictionary.
-    
+
     ConfigParser options used are;
-        
+
         * allow_no_value=True
 
     Args:
@@ -48,7 +48,7 @@ def read_config(cfg_file, de_str=True):
     """
 
     # Manual configuration converters
-    def list_converter(s):
+    def _list_converter(s):
         """
         Convert comma-delineated string to list of numbers or strings as
         appropriate. 'none' strings are converted to None
@@ -65,6 +65,18 @@ def read_config(cfg_file, de_str=True):
                 break
         return l
 
+    def _convert_time(s):
+        """ Converts a datetime string into a datetime object
+
+        """
+        from dateutil import parser
+
+        try:
+            return parser.parse(s, dayfirst=True)
+        except ValueError as err:
+            raise err
+
+
     def _ConfigSectionMap(section,rtn_str=False):
         # Read each option within the given section
         # If rtn_str is False then attempt to inteprete/convert string
@@ -79,6 +91,10 @@ def read_config(cfg_file, de_str=True):
         cfg_d = {}
         options = cfg.options(section)
         for option in options:
+            if option.lower() in ['time']:
+                # Make sure time entries stay as strings
+                cfg_d[option] = cfg.get(section, option)
+                continue
             for getter_ in getter:
                 try:
                     cfg_d[option] = getter_(section, option)
@@ -100,7 +116,7 @@ def read_config(cfg_file, de_str=True):
                 else:
                     break
 
-            # Attempt to 'none' strings to None
+            # Attempt to convert 'none' strings to None
             if cfg_d[option] in ['none', 'None', 'NONE']:
                 cfg_d[option] = None
 
@@ -118,8 +134,8 @@ def read_config(cfg_file, de_str=True):
 
 
     cfg = configparser.ConfigParser(allow_no_value=True,
-                                    converters={'list': list_converter})
-
+                                    converters={'list': _list_converter,
+                                                'datetime': _convert_time})
     cfg.read(cfg_file)
     cfg_dict = {}
     for l in cfg.sections():
@@ -154,7 +170,7 @@ def extract_specials(cfg_dict,specials = [],overwrite=False):
             special items removed. If no specials found then ``specials_dict``
             will be {}.
     """
-    
+
     #pdb.set_trace()
     if type(specials) in [str]:
         specials = [specials]

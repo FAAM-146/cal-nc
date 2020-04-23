@@ -48,13 +48,7 @@ def append_time(otime,ntime,concat_axis=0):
         A netCDF4 variable with the same units and calendar as `otime`.
     """
 
-    import datetime
-
-    time_fmts = ['%Y%m%dT%H:%M:%S.%f','%Y-%m-%dT%H:%M:%S.%f',
-                 '%Y%m%dT%H:%M:%S',   '%Y-%m-%dT%H:%M:%S',
-                 '%Y%m%dT%H:%M',      '%Y-%m-%dT%H:%M',
-                 '%Y%m%dT%H',         '%Y-%m-%dT%H',
-                 '%Y%m%d',            '%Y-%m-%d']
+    from dateutil import parser
 
     # Convert original times into datetime objects
     try:
@@ -88,36 +82,11 @@ def append_time(otime,ntime,concat_axis=0):
         if (type(ntime[0]) == str) or (ntime.dtype.kind in ['U','S']):
             # Attempt to convert the times into a list of datetime object
             # Assume that all formats are the same!
-            for t_fmt in time_fmts:
-                try:
-                    _ = datetime.datetime.strptime(ntime[0],t_fmt)
-                except ValueError:
-                    pass
-                else:
-                    break
-
-                # Reverse date part of t_fmt
-                try:
-                    indx = t_fmt.index('T')
-                except ValueError:
-                    t_fmt = t_fmt[::-1]
-                else:
-                    t_fmt = t_fmt[:indx][::-1]+t_fmt[indx:]
-
-                try:
-                    _ = datetime.datetime.strptime(ntime[0],t_fmt)
-                except ValueError:
-                    continue
-                else:
-                    break
-
-            #print('t_fmt = ',t_fmt)
-            ndatetime = [datetime.datetime.strptime(n_,t_fmt) for n_ in ntime]
+            ndatetime = [parser.parse(n_, dayfirst=True) for n_ in ntime]
 
         else:
             # Assume are numbers in same format as those in otime
             ndatetime = netCDF4.num2date(ntime,otime.units,ocalendar)
-
 
     adatetime = np.ma.concatenate((odatetime,ndatetime),axis=concat_axis)
 

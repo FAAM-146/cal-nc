@@ -153,9 +153,13 @@ class CDP(Generic):
 
         Args:
             cal_file (:obj:`str` or :obj:`pathlib`): Filename of calibration
-                cdp calibration csv file to be read. Is recognised as
-                ending in 'cs' or 'd' so user needs to provide some quality
-                assurance on the input files.
+                cdp calibration csv file to be read. The type of calibration
+                file, a scattering cross-section or diameters file, is
+                automatically determined. Diameter files are recognised as
+                starting with the string 'input file' as well as possibly
+                having 'dia' in the filename or ending with 'd.csv'. The
+                scattering cross-section files are recognised as containing
+                'scs' or 'master_calibration' in the filename.
             vars_d(:obj:`dict`): Dictionary of any additional variables
                 associated with those contained within the datafile. At the very
                 least this should contain any associated coordinate variables,
@@ -198,7 +202,7 @@ class CDP(Generic):
         #for k in vars_d.keys(): print(k)
         #print()
 
-        # Determine group path. A
+        # Determine group path.
         grps = set(['' if os.path.dirname(k_) in ['', None, '/']
                     else os.path.dirname(k_) for k_ in vars_d.keys()])
 
@@ -212,8 +216,7 @@ class CDP(Generic):
                 vars_d[os.path.join(grp,k)] = v(caldata)
             except KeyError as err:
                 # Variable in var_map does not exist in file therefore skip
-                #pdb.set_trace()
-        #        print('{} not found in {}'.format(k,os.path.basename(cal_file)))
+                # print('{} not found in {}'.format(k,os.path.basename(cal_file)))
                 continue
             except Exception as err:
                 print('  Failed. ',err)
@@ -221,7 +224,7 @@ class CDP(Generic):
                 pass
             else:
                 pass
-        #        print('Add {} to self.ds'.format(k))
+                # print('Add {} to self.ds'.format(k))
 
         try:
             msg = self.append_dict(vars_d)

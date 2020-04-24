@@ -15,7 +15,7 @@ This command does the following;
 * The second input file, ``testing/PCASP1_cal_test-2.cdl`` contains additional data in existing variables and groups and this shall be appended to the *master* nc file. Groups and variables that do not already exist within the *master* shall be added to it.
 * The ``--update`` argument ``parsefile`` indicates that the configuration file ``testing/PCASP1_testcals.cfg`` should be parsed using a PCASP1-specific  parser and the data added/appended to the *master* nc.
 * An additional string in the root attribute ``comment`` shall be added to the *master* nc as long as it does not conflict with an existing attribute.
-* With the ``-o`` arguement, the output is saved to the netCDF file ``testing/PCASP1_test.nc``.
+* With the ``-o`` argument, the output is saved to the netCDF file ``testing/PCASP1_test.nc``.
 
 
 Have a go...

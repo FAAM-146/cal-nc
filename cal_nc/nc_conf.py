@@ -151,7 +151,7 @@ def read_config(cfg_file, de_str=True):
     return cfg_dict
 
 
-def extract_specials(cfg_dict,specials = [],overwrite=False):
+def extract_specials(cfg_dict, specials = [], overwrite=False):
     """Extracts special configuration keys from dictionary and returns them.
 
     Args:

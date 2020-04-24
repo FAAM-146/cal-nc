@@ -15,7 +15,7 @@ import pdb
 import cal_proc
 from cal_proc import *
 from .nc_conf import *
-from .utils import *
+from . import utils
 
 __all__ = ['read_nc','process_nc','run_ncgen']
 
@@ -159,7 +159,6 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             # Read in any configuration files.
             # Currently this code assumes that all information is included
             # within the config file.
-
             cfg_dict = read_config(anc)
 
             # Separate file to parse and associated variables
@@ -177,7 +176,7 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
                     p_files.append(None)
                 else:
                     # Attempt to find correct path
-                    p_files.append(filepath(p_file,os.path.dirname(anc)))
+                    p_files.append(utils.filepath(p_file,os.path.dirname(anc)))
 
                 try:
                     grp = s.pop('_group')
@@ -189,7 +188,8 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
                         grp = ''
 
                 # 'Correct' variable names to include group path
-                var_dicts.append({os.path.join(grp,k_):v_ for (k_,v_) in v_dicts[i].items()})
+                var_dicts.append({os.path.join(grp,k_):v_
+                                 for (k_,v_) in v_dicts[i].items()})
 
         else:
             # If ancillary files are not config's then need to be parsed
@@ -205,11 +205,11 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
             # have been given in updates.
             # Note that if too many attributes have been given (compared to
             # the number of anc files) then these shall be lost!
-            var_dicts = [{k_:(v_[i] if len(v_)>=i else v_[-1]) for (k_,v_) in updates.items()}]
+            var_dicts = [{k_:(v_[i] if len(v_)>=i else v_[-1])
+                         for (k_,v_) in updates.items()}]
             p_files = [anc]
 
-        pdb.set_trace()
-        for p_,v_ in zip(p_files,var_dicts):
+        for p_,v_ in zip(p_files, var_dicts):
             # The zip obj will be as short as the shortest input, ie empty if var_dicts==[]
             if p_ == None:
                 master.append_dict(v_)

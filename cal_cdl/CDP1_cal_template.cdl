@@ -52,6 +52,7 @@ group: flight_cal {
     :title = "Size bin calibrations of CDP";
     :comment = "Group containing calibration of size bins of the CDP. Photodetector voltage pulse-heights are calibrated to the calculated scattering cross-section of known glass bead monodisperse distributions.";
     :references = "P.D. Rosenberg, A.R. Dean, P.I. Williams, J.R. Dorsey, A. Minikin, M.A. Pickering and A. Petzold, Particle sizing calibration with refractive index correction for light scattering optical particle counters and impacts upon PCASP and CDP data collected during the Fennec campaign, Atmos. Meas. Tech., 5, 1147-1163, doi:10.5194/amt-5-1147-2012, 2012.";
+    :applied = False;
 
     // Define dimensions for group.
     dimensions:
@@ -185,7 +186,7 @@ group: master_cal {
     :title = "Master size bin calibrations of CDP";
     :comment = "Group containing master calibration of size bins of the CDP. The master is based on the average of individual related pre-flight calibrations.";
     :references = "P.D. Rosenberg, A.R. Dean, P.I. Williams, J.R. Dorsey, A. Minikin, M.A. Pickering and A. Petzold, Particle sizing calibration with refractive index correction for light scattering optical particle counters and impacts upon PCASP and CDP data collected during the Fennec campaign, Atmos. Meas. Tech., 5, 1147-1163, doi:10.5194/amt-5-1147-2012, 2012.";
-
+    :applied = False;
 
     // Define dimensions for group.
     dimensions:

@@ -531,7 +531,6 @@ class Generic():
                 print('Variable: {}'.format(var))
                 pdb.set_trace()
                 print(err)
-                pdb.set_trace()
 
         else:
             print('Insufficient empty space in {}!'.format(var))
@@ -653,8 +652,6 @@ class Generic():
                 print('Variable: {}'.format(k_))
                 pdb.set_trace()
                 print(err)
-                pdb.set_trace()
-
 
 
     def append_dataset(self,ds,
@@ -687,7 +684,6 @@ class Generic():
                 appended to.
 
         """
-
 
         def append_group(mgrp,ngrp):
             """Updates master ds group with values from new ds group.

@@ -246,14 +246,12 @@ def call(infile,args):
             updates[k_] = u_
 
 
-
     ### Process ########################################################
     proc_rtn, proc_err = process_nc(master_infile,
                                     nc_infile + tmpfile,
                                     out_nc = outfile,
                                     instr=args['instr'],
                                     updates=updates)
-
 
     # Delete any temporary files
     for file in tmpfile:

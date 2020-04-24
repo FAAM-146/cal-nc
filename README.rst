@@ -53,6 +53,8 @@ It is important that calibration information is easily linked to those datasets 
 
 In each calibration group there is a variable called ``APPLIES_TO`` which has an entry for each calibration time in the series that points to the applicable measurement data to which this calibration data has been or should be applied to. How this pointer is crafted at this stage is left to the individual as it may change instrument-to-instrument. It may be a data filename or it may be a string of applicable flight numbers for example. How a data file points to a particular calibration may also depend on the instrument and its particular calibration process.
 
+In each calibration group there is also an attribute called ``applied``. This is a boolean value that indicates if the calibration has already been applied to the data referred to in ``APPLIED_TO``. If ``applied == False`` then the user should apply the calibration provided in the calibration netCDF to the data that they are using.
+
 Traceability
 ^^^^^^^^^^^^
 Traceability of calibrations, calibration materials, and procedures is vital for user confidence in the data. The calibration netCDF has to hold this information within the file. This may include certificates provided by manufacturers or third party calibration facilities, descriptions of procedures or links to these that detail the methods used, and/or references to papers or textbooks that serve as the basis of the procedures [#fnote-graphics_inclusion]_.
@@ -119,7 +121,7 @@ This nc file is then read in with the netCDF4 module. The instrument nickname is
 It is possible to add/update individual attributes and variables as script arguments using the ``--update`` option.
 
     .. warning::
-    
+
         The testing for this option has been limited. Need to complete this.
 
 
@@ -136,7 +138,7 @@ Installation
         This application uses ``ncgen`` which is part of the `netCDF <https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html>`_ package. It must be in the OS path so that it can be found by the script. It will usually be installed as part of the ``netcdf4-python`` package.
 
 * In a terminal clone the ``cal-nc`` repository (the instructions below assume you are installing into a user/git directory but it can be anywhere you like)
-   
+
 .. code-block:: console
 
     user@pc:~\git$ git clone git@github.com:FAAM-146/cal-nc.git

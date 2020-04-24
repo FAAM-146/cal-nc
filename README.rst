@@ -114,7 +114,7 @@ A helper script, ``cal_ncgen.py`` has been written to assist in creating and mod
 * If cdl, a new nc file will be created using the cdl as a template
 * If nc then new data is appended into this nc file
 
-If the input is cdl then ncgen is run to create an nc file [#fnote-direct_ncgen_call]_. The first netCDF file argument is assumed to the *master* to which any additional information is added. If there is no netCDF files given then the frist cdl file is used to create the *master* nc.
+If the input is cdl then ncgen is run to create an nc file [#fnote-direct_ncgen_call]_. The first netCDF file argument is assumed to the *master* to which any additional information is added. If there is no netCDF files given then the first cdl file is used to create the *master* nc.
 
 This nc file is then read in with the netCDF4 module. The instrument nickname is extracted from the resulting datasets global ``instr`` attribute and this is used to instantiate the appropriate class for that instrument. The simplest class is ``Generic`` which has some universal methods. All other classes inherit from Generic and may include other methods to parse from ancillary files and and write this data into the nc file. This parsing will be highly specific to an instrument, thus the individual classes.
 

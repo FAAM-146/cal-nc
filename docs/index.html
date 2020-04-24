@@ -61,7 +61,8 @@
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#testing-calibration-netcdf">Testing Calibration netCDF</a></li>
 <li><a class="reference internal" href="#example-creation-of-cal-nc-file">Example Creation of <cite>cal-nc</cite> File</a><ul>
-<li><a class="reference internal" href="#resultant-cal-nc">Resultant <cite>cal-nc</cite></a></li>
+<li><a class="reference internal" href="#initial-creation">Initial creation</a></li>
+<li><a class="reference internal" href="#appending-to-existing-cal-nc-file">Appending to existing <cite>cal-nc</cite> file</a></li>
 </ul>
 </li>
 </ul>
@@ -122,7 +123,7 @@
 <td><p>Jan 2018</p></td>
 </tr>
 <tr class="row-even"><td><p>Modified</p></td>
-<td><p>2019-12-02</p></td>
+<td><p>2020-04-24</p></td>
 </tr>
 </tbody>
 </table>
@@ -182,6 +183,7 @@
 <h3>Data and calibration referencing<a class="headerlink" href="#data-and-calibration-referencing" title="Permalink to this headline">¶</a></h3>
 <p>It is important that calibration information is easily linked to those datasets to which it applies and that the end user of the dataset understands whether the calibrations have already been applied or not. These are possibly quite difficult to satisfy depending on the instrument.</p>
 <p>In each calibration group there is a variable called <code class="docutils literal notranslate"><span class="pre">APPLIES_TO</span></code> which has an entry for each calibration time in the series that points to the applicable measurement data to which this calibration data has been or should be applied to. How this pointer is crafted at this stage is left to the individual as it may change instrument-to-instrument. It may be a data filename or it may be a string of applicable flight numbers for example. How a data file points to a particular calibration may also depend on the instrument and its particular calibration process.</p>
+<p>In each calibration group there is also an attribute called <code class="docutils literal notranslate"><span class="pre">applied</span></code>. This is a boolean value that indicates if the calibration has already been applied to the data referred to in <code class="docutils literal notranslate"><span class="pre">APPLIED_TO</span></code>. If <code class="docutils literal notranslate"><span class="pre">applied</span> <span class="pre">==</span> <span class="pre">False</span></code> then the user should apply the calibration provided in the calibration netCDF to the data that they are using.</p>
 </div>
 <div class="section" id="traceability">
 <h3>Traceability<a class="headerlink" href="#traceability" title="Permalink to this headline">¶</a></h3>
@@ -235,7 +237,7 @@
 <li><p>If cdl, a new nc file will be created using the cdl as a template</p></li>
 <li><p>If nc then new data is appended into this nc file</p></li>
 </ul>
-<p>If the input is cdl then ncgen is run to create an nc file <a class="footnote-reference brackets" href="#fnote-direct-ncgen-call" id="id4">4</a>. The first netCDF file argument is assumed to the <em>master</em> to which any additional information is added. If there is no netCDF files given then the frist cdl file is used to create the <em>master</em> nc.</p>
+<p>If the input is cdl then ncgen is run to create an nc file <a class="footnote-reference brackets" href="#fnote-direct-ncgen-call" id="id4">4</a>. The first netCDF file argument is assumed to the <em>master</em> to which any additional information is added. If there is no netCDF files given then the first cdl file is used to create the <em>master</em> nc.</p>
 <p>This nc file is then read in with the netCDF4 module. The instrument nickname is extracted from the resulting datasets global <code class="docutils literal notranslate"><span class="pre">instr</span></code> attribute and this is used to instantiate the appropriate class for that instrument. The simplest class is <code class="docutils literal notranslate"><span class="pre">Generic</span></code> which has some universal methods. All other classes inherit from Generic and may include other methods to parse from ancillary files and and write this data into the nc file. This parsing will be highly specific to an instrument, thus the individual classes.</p>
 <p>It is possible to add/update individual attributes and variables as script arguments using the <code class="docutils literal notranslate"><span class="pre">--update</span></code> option.</p>
 <blockquote>
@@ -317,7 +319,7 @@
 <li><p>The second input file, <code class="docutils literal notranslate"><span class="pre">testing/PCASP1_cal_test-2.cdl</span></code> contains additional data in existing variables and groups and this shall be appended to the <em>master</em> nc file. Groups and variables that do not already exist within the <em>master</em> shall be added to it.</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">--update</span></code> argument <code class="docutils literal notranslate"><span class="pre">parsefile</span></code> indicates that the configuration file <code class="docutils literal notranslate"><span class="pre">testing/PCASP1_testcals.cfg</span></code> should be parsed using a PCASP1-specific  parser and the data added/appended to the <em>master</em> nc.</p></li>
 <li><p>An additional string in the root attribute <code class="docutils literal notranslate"><span class="pre">comment</span></code> shall be added to the <em>master</em> nc as long as it does not conflict with an existing attribute.</p></li>
-<li><p>With the <code class="docutils literal notranslate"><span class="pre">-o</span></code> arguement, the output is saved to the netCDF file <code class="docutils literal notranslate"><span class="pre">testing/PCASP1_test.nc</span></code>.</p></li>
+<li><p>With the <code class="docutils literal notranslate"><span class="pre">-o</span></code> argument, the output is saved to the netCDF file <code class="docutils literal notranslate"><span class="pre">testing/PCASP1_test.nc</span></code>.</p></li>
 </ul>
 <p>Have a go…</p>
 <blockquote>
@@ -329,29 +331,30 @@
 </div>
 <div class="section" id="example-creation-of-cal-nc-file">
 <h1>Example Creation of <cite>cal-nc</cite> File<a class="headerlink" href="#example-creation-of-cal-nc-file" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="initial-creation">
+<h2>Initial creation<a class="headerlink" href="#initial-creation" title="Permalink to this headline">¶</a></h2>
 <p>The following command was used to create a <cite>cal-nc</cite> file for PCASP-2 using pre-ACRUISE and post-ARNA1 bin size calibrations and the sample flow calibrations from 8 May 2018.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(cal-nc) user@pc:~/git/cal-nc$ python cal_ncgen.py PCASP2_cal_template.cdl&#39;</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(cal-nc) user@pc:~/git/cal-nc$ python cal_ncgen.py PCASP2_cal_template.cdl</span>
 <span class="go">        -u parsefile &#39;/home/graeme/tmp/P2_cal/20191107_P2_cal.cfg&#39;</span>
 <span class="go">        -u parsefile &#39;/home/graeme/tmp/P2_cal/20180508PCASP2_flowcal.cfg&#39;</span>
 <span class="go">        --user=&quot;Graeme Nott &lt;graeme.nott@faam.ac.uk&gt;&quot;</span>
 <span class="go">        --hist=&quot;&lt;now&gt; Initial creation&quot;</span>
-<span class="go">        -o PCASP_faam_20191107_v001_r000_cal.nc</span>
+<span class="go">        -o PCASP-2_faam_20191107_v001_r000_cal.nc</span>
 </pre></div>
 </div>
-<div class="section" id="resultant-cal-nc">
-<h2>Resultant <cite>cal-nc</cite><a class="headerlink" href="#resultant-cal-nc" title="Permalink to this headline">¶</a></h2>
 <p>This results in the cal-nc file;</p>
 <blockquote>
-<div><p><a class="reference external" href="https://github.com/FAAM-146/cal-nc/blob/master/testing/PCASP_faam_20191107_v001_r000_cal.nc">PCASP_faam_20191107_v001_r000_cal.nc</a></p>
+<div><p><a class="reference external" href="https://github.com/FAAM-146/cal-nc/blob/master/testing/PCASP-2_faam_20191107_v001_r000_cal.nc">PCASP-2_faam_20191107_v001_r000_cal.nc</a></p>
 </div></blockquote>
 <p>Reading this netCDF file with</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ncdump PCASP_faam_20191107_v001_r000_cal.nc &gt; PCASP_faam_20191107_v001_r000_cal.cdl</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ncdump PCASP-2_faam_20191107_v001_r000_cal.nc &gt; PCASP-2_faam_20191107_v001_r000_cal.cdl</span>
 </pre></div>
 </div>
 <p>results in the <cite>cdl</cite> file;</p>
 <blockquote>
 <div><p><a class="reference external" href="https://github.com/FAAM-146/cal-nc/blob/master/testing/PCASP_faam_20191107_v001_r000_cal.cdl">PCASP_faam_20191107_v001_r000_cal.cdl</a></p>
 </div></blockquote>
+<p>the contents of which are;</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netcdf</span> <span class="n">PCASP_faam_20191107_v001_r000_cal</span> <span class="p">{</span>
 
 <span class="o">//</span> <span class="k">global</span> <span class="n">attributes</span><span class="p">:</span>
@@ -800,6 +803,24 @@
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="appending-to-existing-cal-nc-file">
+<h2>Appending to existing <cite>cal-nc</cite> file<a class="headerlink" href="#appending-to-existing-cal-nc-file" title="Permalink to this headline">¶</a></h2>
+<p>Note that it is up to the user to ensure that data appended to an existing file
+is sensible. This is especially true as it is possible for example to append diameter data for different particle refractive indices without any form of indication in the variable attributes.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">(cal-nc) user@pc:~/git/cal-nc$ python cal_ncgen.py &#39;testing/PCASP-2_faam_20191107_v001_r000_cal.nc&#39;</span>
+<span class="go">    -u bin_cal/time 20200128</span>
+<span class="go">    -u bin_cal/applies_to C213</span>
+<span class="go">    -u bin_cal/traceability &quot;269nm (#166237). 303nm (#196947). 345nm (#199283). 401nm (#211099). 453nm (#166631). 510nm (#218477). 600nm (#213249). 702nm (#211842). 803nm (#209453). 903nm (#218704). 994nm (#200992). 1.101um (#212683). 1.361um (#199629). 1.592um (#204268). 1.745um (#205235). 2.020um (#181058). 2.10 um (#213339). 2.504um (#190272). 3.007um (#185943).&quot;</span>
+<span class="go">    -u bin_cal/cal_flag 0</span>
+<span class="go">    -u bin_cal/cal_flag 1</span>
+<span class="go">    -u parsefile testing/20200128_P2_cal_results_PSLd.csv</span>
+<span class="go">    --user=&quot;Graeme Nott &lt;graeme.nott@faam.ac.uk&gt;&quot;</span>
+<span class="go">    --hist=&quot;&lt;now&gt; Cal for FAAM test flight&quot;</span>
+<span class="go">    -o &#39;testing/PCASP-2_faam_20191107_v001_r001_cal.nc&#39;</span>
+</pre></div>
+</div>
+<p>This command will append the size calibration data from <code class="docutils literal notranslate"><span class="pre">testing/20200128_P2_cal_results_PSLd.csv</span></code> to that in <code class="docutils literal notranslate"><span class="pre">testing/PCASP-2_faam_20191107_v001_r000_cal.nc</span></code> and save the result as new revision of the same file <code class="docutils literal notranslate"><span class="pre">testing/PCASP-2_faam_20191107_v001_r001_cal.nc</span></code>. Variables that are not included in the .csv file are included using the <code class="docutils literal notranslate"><span class="pre">--update</span></code> or <code class="docutils literal notranslate"><span class="pre">-u</span></code> option. Variable names given in this way must include the path to the variable in the netCDF, in this case the information in the calibration csv file should go in the <code class="docutils literal notranslate"><span class="pre">bin_cal</span></code> group. Note that multiple <code class="docutils literal notranslate"><span class="pre">--update</span></code>’s of a single variable are acceptable as shown for the <code class="docutils literal notranslate"><span class="pre">bin_cal/cal_flag</span></code> variable. However as only as single calibration source csv has been given the second one is ignored.</p>
 </div>
 </div>
 

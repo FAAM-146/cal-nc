@@ -82,9 +82,9 @@
 
 <div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">,</span> <span class="n">de_str</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Read in configuration file and return entries in dictionary.</span>
-<span class="sd">    </span>
+
 <span class="sd">    ConfigParser options used are;</span>
-<span class="sd">        </span>
+
 <span class="sd">        * allow_no_value=True</span>
 
 <span class="sd">    Args:</span>
@@ -99,7 +99,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Manual configuration converters</span>
-    <span class="k">def</span> <span class="nf">list_converter</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_list_converter</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert comma-delineated string to list of numbers or strings as</span>
 <span class="sd">        appropriate. &#39;none&#39; strings are converted to None</span>
@@ -116,6 +116,18 @@
                 <span class="k">break</span>
         <span class="k">return</span> <span class="n">l</span>
 
+    <span class="k">def</span> <span class="nf">_convert_time</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Converts a datetime string into a datetime object</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">dateutil</span> <span class="k">import</span> <span class="n">parser</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">dayfirst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">err</span>
+
+
     <span class="k">def</span> <span class="nf">_ConfigSectionMap</span><span class="p">(</span><span class="n">section</span><span class="p">,</span><span class="n">rtn_str</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1"># Read each option within the given section</span>
         <span class="c1"># If rtn_str is False then attempt to inteprete/convert string</span>
@@ -130,6 +142,10 @@
         <span class="n">cfg_d</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">options</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]:</span>
+                <span class="c1"># Make sure time entries stay as strings</span>
+                <span class="n">cfg_d</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                <span class="k">continue</span>
             <span class="k">for</span> <span class="n">getter_</span> <span class="ow">in</span> <span class="n">getter</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">cfg_d</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">getter_</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
@@ -151,7 +167,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">break</span>
 
-            <span class="c1"># Attempt to &#39;none&#39; strings to None</span>
+            <span class="c1"># Attempt to convert &#39;none&#39; strings to None</span>
             <span class="k">if</span> <span class="n">cfg_d</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;NONE&#39;</span><span class="p">]:</span>
                 <span class="n">cfg_d</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -169,8 +185,8 @@
 
 
     <span class="n">cfg</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">(</span><span class="n">allow_no_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                    <span class="n">converters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;list&#39;</span><span class="p">:</span> <span class="n">list_converter</span><span class="p">})</span>
-
+                                    <span class="n">converters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;list&#39;</span><span class="p">:</span> <span class="n">_list_converter</span><span class="p">,</span>
+                                                <span class="s1">&#39;datetime&#39;</span><span class="p">:</span> <span class="n">_convert_time</span><span class="p">})</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
     <span class="n">cfg_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">sections</span><span class="p">():</span>
@@ -186,7 +202,7 @@
     <span class="k">return</span> <span class="n">cfg_dict</span></div>
 
 
-<div class="viewcode-block" id="extract_specials"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.extract_specials">[docs]</a><span class="k">def</span> <span class="nf">extract_specials</span><span class="p">(</span><span class="n">cfg_dict</span><span class="p">,</span><span class="n">specials</span> <span class="o">=</span> <span class="p">[],</span><span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="extract_specials"><a class="viewcode-back" href="../../_source/cal_nc.html#cal_nc.nc_conf.extract_specials">[docs]</a><span class="k">def</span> <span class="nf">extract_specials</span><span class="p">(</span><span class="n">cfg_dict</span><span class="p">,</span> <span class="n">specials</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Extracts special configuration keys from dictionary and returns them.</span>
 
 <span class="sd">    Args:</span>
@@ -205,7 +221,7 @@
 <span class="sd">            special items removed. If no specials found then ``specials_dict``</span>
 <span class="sd">            will be {}.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1">#pdb.set_trace()</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">specials</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="n">specials</span> <span class="o">=</span> <span class="p">[</span><span class="n">specials</span><span class="p">]</span>

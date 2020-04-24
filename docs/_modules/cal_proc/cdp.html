@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>cal_proc.pcasp &#8212; Creation/updates of nc files for FAAM calibration data 0.3 documentation</title>
+    <title>cal_proc.cdp &#8212; Creation/updates of nc files for FAAM calibration data 0.3 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -48,9 +48,9 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1>Source code for cal_proc.pcasp</h1><div class="highlight"><pre>
+  <h1>Source code for cal_proc.cdp</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">File containing all PCASP instrument processor classes.</span>
+<span class="sd">File containing all CDP instrument processor classes.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.generic</span> <span class="k">import</span> <span class="n">Generic</span>
@@ -90,10 +90,13 @@
            <span class="p">}</span>
 
 
-<div class="viewcode-block" id="PCASP"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.pcasp.PCASP">[docs]</a><span class="k">class</span> <span class="nc">PCASP</span><span class="p">(</span><span class="n">Generic</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Parses and processes calibration data files for instrument: PCASP.</span>
 
-<span class="sd">        **PCASP:** Passive Cavity Aerosol Spectrometer Probe</span>
+
+
+<div class="viewcode-block" id="CDP"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.cdp.CDP">[docs]</a><span class="k">class</span> <span class="nc">CDP</span><span class="p">(</span><span class="n">Generic</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parses and processes calibration data files for instrument: CDP.</span>
+
+<span class="sd">        **CDP:** Cloud Droplet Probe</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -108,8 +111,8 @@
         <span class="n">Generic</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="PCASP.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.pcasp.PCASP.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">largs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Make any change to the pcasp object.</span>
+<div class="viewcode-block" id="CDP.update"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.cdp.CDP.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">largs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make any change to the object.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            largs (:obj:`list`): List of lists of arbitrary arguments to apply</span>
@@ -184,8 +187,8 @@
 
             <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">larg</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span> <span class="ow">and</span> \
                  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">larg</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
-                <span class="c1"># PCASP calibration file/s</span>
-                <span class="n">update_bincal</span><span class="p">(</span><span class="n">larg</span><span class="p">)</span>
+                <span class="c1"># CDP calibration file/s</span>
+                <span class="n">update_bincal_from_file</span><span class="p">(</span><span class="n">larg</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">larg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">:</span>
                 <span class="c1"># Attribute/variable contained within nc object</span>
@@ -195,22 +198,23 @@
                 <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="PCASP.update_bincal_from_file"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.pcasp.PCASP.update_bincal_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">update_bincal_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cal_file</span><span class="p">,</span> <span class="n">vars_d</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CDP.update_bincal_from_file"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.cdp.CDP.update_bincal_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">update_bincal_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cal_file</span><span class="p">,</span> <span class="n">vars_d</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Appends bin calibration data in calibration file to that in nc file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            cal_file (:obj:`str` or :obj:`pathlib`): Filename of calibration</span>
-<span class="sd">                PCASP calibration csv file to be read. The type of calibration</span>
+<span class="sd">                cdp calibration csv file to be read. The type of calibration</span>
 <span class="sd">                file, a scattering cross-section or diameters file, is</span>
 <span class="sd">                automatically determined. Diameter files are recognised as</span>
 <span class="sd">                starting with the string &#39;input file&#39; as well as possibly</span>
 <span class="sd">                having &#39;dia&#39; in the filename or ending with &#39;d.csv&#39;. The</span>
 <span class="sd">                scattering cross-section files are recognised as containing</span>
-<span class="sd">                &#39;scs&#39; in the filename or having it end with &#39;cs.csv&#39;.</span>
+<span class="sd">                &#39;scs&#39; or &#39;master_calibration&#39; in the filename.</span>
 <span class="sd">            vars_d(:obj:`dict`): Dictionary of any additional variables</span>
-<span class="sd">                associated with those contained within the datafile. At the</span>
-<span class="sd">                very least this should contain any associated coordinate</span>
-<span class="sd">                variables, eg `time`.</span>
+<span class="sd">                associated with those contained within the datafile. At the very</span>
+<span class="sd">                least this should contain any associated coordinate variables,</span>
+<span class="sd">                eg `time`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">reader</span>
 
@@ -226,16 +230,16 @@
                     <span class="n">dia_type</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="n">scs_type</span> <span class="o">=</span> <span class="nb">any</span><span class="p">([</span><span class="s1">&#39;scs&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;cs&#39;</span><span class="p">)])</span>
+                <span class="s1">&#39;master_calibration&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()])</span>
 
             <span class="n">dia_type</span> <span class="o">=</span> <span class="nb">any</span><span class="p">([</span><span class="n">dia_type</span><span class="p">,</span>
-                    <span class="s1">&#39;dia&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)])</span>
+                <span class="s1">&#39;dia&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">cal_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)])</span>
 
         <span class="k">if</span> <span class="n">scs_type</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dia_type</span><span class="p">:</span>
-            <span class="n">caldata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">opc_calfile</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span> <span class="n">f_type</span><span class="o">=</span><span class="s1">&#39;pcasp_cs&#39;</span><span class="p">)</span>
+            <span class="n">caldata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">opc_calfile</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span> <span class="n">f_type</span><span class="o">=</span><span class="s1">&#39;cdp_cs&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">dia_type</span><span class="p">:</span>
-            <span class="n">caldata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">opc_calfile</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span> <span class="n">f_type</span><span class="o">=</span><span class="s1">&#39;pcasp_d&#39;</span><span class="p">)</span>
+            <span class="n">caldata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">opc_calfile</span><span class="p">(</span><span class="n">cal_file</span><span class="p">,</span> <span class="n">f_type</span><span class="o">=</span><span class="s1">&#39;cdp_d&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">caldata</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Error in the cal_file</span>

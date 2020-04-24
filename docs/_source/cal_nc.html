@@ -42,9 +42,9 @@
   <ul>
 <li><a class="reference internal" href="#">cal_nc package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cal_nc.ds_func">cal_nc.ds_func module</a></li>
 <li><a class="reference internal" href="#module-cal_nc.nc_conf">cal_nc.nc_conf module</a></li>
 <li><a class="reference internal" href="#module-cal_nc.nc_func">cal_nc.nc_func module</a></li>
+<li><a class="reference internal" href="#module-cal_nc.utils">cal_nc.utils module</a></li>
 <li><a class="reference internal" href="#module-cal_nc">Module contents</a></li>
 </ul>
 </li>
@@ -85,54 +85,6 @@
 <h1>cal_nc package<a class="headerlink" href="#cal-nc-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-cal_nc.ds_func">
-<span id="cal-nc-ds-func-module"></span><h2>cal_nc.ds_func module<a class="headerlink" href="#module-cal_nc.ds_func" title="Permalink to this headline">¶</a></h2>
-<p>Functions for reading, writing, and manipulating netCDF datasets.</p>
-<dl class="function">
-<dt id="cal_nc.ds_func.combine_datasets">
-<code class="sig-prename descclassname">cal_nc.ds_func.</code><code class="sig-name descname">combine_datasets</code><span class="sig-paren">(</span><em class="sig-param">ds1</em>, <em class="sig-param">ds2</em>, <em class="sig-param">ds3=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/ds_func.html#combine_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.ds_func.combine_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combine attributes, dimensions, and variables from ds1 and ds2</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="cal_nc.ds_func.create_common_nc">
-<code class="sig-prename descclassname">cal_nc.ds_func.</code><code class="sig-name descname">create_common_nc</code><span class="sig-paren">(</span><em class="sig-param">nc1, nc2, fnc3, force_append=['username', 'history'], exclude=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/ds_func.html#create_common_nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.ds_func.create_common_nc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new netCDF with all of the items of the two input datasets</p>
-<p>netCDF inputs, nc1 and nc2, are used to create a new netCDF, nc3,
-that contains all of the attributes, groups, and variables of nc1 and
-nc2.</p>
-<p>Attributes shall be that of nc1 if it is the same in both nc1 and
-nc2 unless that attribute name is included in force_append. In this
-case it shall be treated as if the attributes are different. When the
-attribute value in nc1 and nc2 are different, the resultant attribute
-in nc3 shall be a comma-delineated combination of the individuals,
-that from nc1 preceeds that from nc2.</p>
-<p>Variables from nc2 are appended to the same variable in nc1. The
-variables are sorted by the unlimited dimension.</p>
-<p>Variables in only one of the input datasets shall be included unaltered
-in the resultant dataset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nc1</strong> (<em>File string</em><em> or </em><em>PosixPath</em><em> or </em><em>netCDF4.dataset Must be
-same type as nc2.</em>) – netCDF file or dataset.</p></li>
-<li><p><strong>nc2</strong> (<em>File string</em><em> or </em><em>PosixPath</em><em> or </em><em>netCDF4.dataset. Must be
-same type as nc1.</em>) – netCDF file or dataset.</p></li>
-<li><p><strong>fnc3</strong> (<em>File string</em><em> or </em><em>PosixPath for created nc file</em>) – Name of created netCDF file.</p></li>
-<li><p><strong>force_append</strong> (<em>List of attribute case-sensitive strings.</em>) – Any attribute strings that should always be
-appended, even if they are identical. Default is [‘username’].</p></li>
-<li><p><strong>exclude</strong> (<em>List of case-sensitive strings.</em>) – List of attribute or variable names (but not variable
-attributes) that are not to be included in nc3.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns nc3</dt>
-<dd class="field-even"><p>netCDF file or dataset with combined attributes, groups,
-and variables of nc1 and nc2.</p>
-</dd>
-</dl>
-</dd></dl>
-
 </div>
 <div class="section" id="module-cal_nc.nc_conf">
 <span id="cal-nc-nc-conf-module"></span><h2>cal_nc.nc_conf module<a class="headerlink" href="#module-cal_nc.nc_conf" title="Permalink to this headline">¶</a></h2>
@@ -281,6 +233,33 @@ created, default is 3 for netCDF-4. Options are;</p>
 the entire <cite>cal-nc</cite> structure.</p>
 </p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cal_nc.utils">
+<span id="cal-nc-utils-module"></span><h2>cal_nc.utils module<a class="headerlink" href="#module-cal_nc.utils" title="Permalink to this headline">¶</a></h2>
+<p>General utility functions. Primarily for file manipulation etc</p>
+<dl class="function">
+<dt id="cal_nc.utils.filepath">
+<code class="sig-prename descclassname">cal_nc.utils.</code><code class="sig-name descname">filepath</code><span class="sig-paren">(</span><em class="sig-param">f, paths=['.']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_nc/utils.html#filepath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_nc.utils.filepath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds path where file, f, exists from selection of paths.</p>
+<p>Single filename is given and the complete path for this file is found
+from a list of possible locations. If does not exist then return f.
+Note that if the file exists in two locations then the paths list carries
+with it the order of priority, only a single file is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Complete or part filename.</p></li>
+<li><p><strong>paths</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – List of path strings to search. Default is</p></li>
+<li><p><strong>default_file_dir.</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If valid file is found the complete path/filename is returned. If no
+valid path is found then <cite>f</cite> is returned.</p>
 </dd>
 </dl>
 </dd></dl>

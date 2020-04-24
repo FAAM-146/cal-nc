@@ -66,7 +66,7 @@
 <span class="kn">import</span> <span class="nn">cal_proc</span>
 <span class="kn">from</span> <span class="nn">cal_proc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">.nc_conf</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;read_nc&#39;</span><span class="p">,</span><span class="s1">&#39;process_nc&#39;</span><span class="p">,</span><span class="s1">&#39;run_ncgen&#39;</span><span class="p">]</span>
 
@@ -91,7 +91,7 @@
 <span class="sd">        aux (:obj:`list`): List of any additional netCDF filenames that are to</span>
 <span class="sd">            be added/concatenated with master nc file. Auxillary nc files are</span>
 <span class="sd">            opened as read only. Default is [], ie no auxillary files.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple of dataset from master netCDF and list of any auxillary Datasets.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -137,9 +137,8 @@
 <span class="sd">            from `master_nc`.</span>
 <span class="sd">        updates (:obj:`dict`, optional): All other updates to be applied to the final</span>
 <span class="sd">            dataset. Default is {}.</span>
-<span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Create a temporary copy of the master</span>
     <span class="c1"># Note that all &#39;master&#39; operations are done on this temporary copy</span>
@@ -153,7 +152,7 @@
     <span class="c1"># Create a instrument processor from the master nc file. This file remains</span>
     <span class="c1"># open until explicitly closed.</span>
     <span class="n">master_ds</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">tmp_nc</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r+&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">,</span>
-                                <span class="n">diskless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">persist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                <span class="n">diskless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">persist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># If instrument name has not explicitly been given then obtain intrument</span>
     <span class="c1"># from master dataset</span>
@@ -164,9 +163,9 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No instrument name given in master file.&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Use --update instr instrument argument.&#39;</span>
 
+
     <span class="c1"># Obtain appropriate instrument processing class</span>
     <span class="n">instr_class</span> <span class="o">=</span> <span class="n">cal_proc</span><span class="o">.</span><span class="n">proc_map</span><span class="p">(</span><span class="n">instr</span><span class="p">)</span>
-
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Initialise the nc object</span>
@@ -181,7 +180,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">master</span><span class="p">)</span>
 
             <span class="c1"># TODO(gn): Change this to a Raise</span>
-            
+
             <span class="k">return</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="c1"># eg if args[&#39;update_arg&#39;] is None</span>
@@ -205,9 +204,12 @@
             <span class="n">master</span><span class="o">.</span><span class="n">append_dataset</span><span class="p">(</span><span class="n">aux_ds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="c1"># Read in any ancillary files</span>
-    <span class="k">for</span> <span class="n">anc</span> <span class="ow">in</span> <span class="n">anc_files</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">anc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">anc_files</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">anc</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;.cfg&#39;</span><span class="p">,</span><span class="s1">&#39;.config&#39;</span><span class="p">]:</span>
+            <span class="c1"># Read in any configuration files.</span>
+            <span class="c1"># Currently this code assumes that all information is included</span>
+            <span class="c1"># within the config file.</span>
             <span class="n">cfg_dict</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">(</span><span class="n">anc</span><span class="p">)</span>
 
             <span class="c1"># Separate file to parse and associated variables</span>
@@ -225,38 +227,75 @@
                     <span class="n">p_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Attempt to find correct path</span>
-                    <span class="n">p_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">(</span><span class="n">p_file</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">anc</span><span class="p">)))</span>
+                    <span class="n">p_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">filepath</span><span class="p">(</span><span class="n">p_file</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">anc</span><span class="p">)))</span>
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">grp</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_group&#39;</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">grp</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># If not given then assume is root group</span>
-                    <span class="k">if</span> <span class="n">grp</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># If not given or given explicitly then is root group</span>
+                    <span class="k">if</span> <span class="n">grp</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">]:</span>
                         <span class="n">grp</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
                 <span class="c1"># &#39;Correct&#39; variable names to include group path</span>
-                <span class="n">var_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span><span class="n">k_</span><span class="p">):</span><span class="n">v_</span> <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">v_dicts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+                <span class="n">var_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span><span class="n">k_</span><span class="p">):</span><span class="n">v_</span>
+                                 <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">v_dicts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">var_dicts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># If ancillary files are not config&#39;s then need to be parsed</span>
+            <span class="c1"># directly.</span>
+            <span class="c1"># Any attributes that are included in updates are associated with</span>
+            <span class="c1"># the ancillary file. Thus if there are more than one anc file</span>
+            <span class="c1"># then there should be the same number of identicaly update</span>
+            <span class="c1"># parameters (unless they are to be broadcast to all updates.</span>
+
+            <span class="c1"># Create a dictionary of variables/attributes associated with</span>
+            <span class="c1"># the ancillary file, anc.</span>
+            <span class="c1"># This comprehension pseudo broadcasts the last value if not enough</span>
+            <span class="c1"># have been given in updates.</span>
+            <span class="c1"># Note that if too many attributes have been given (compared to</span>
+            <span class="c1"># the number of anc files) then these shall be lost!</span>
+            <span class="n">var_dicts</span> <span class="o">=</span> <span class="p">[{</span><span class="n">k_</span><span class="p">:(</span><span class="n">v_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v_</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">i</span> <span class="k">else</span> <span class="n">v_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                         <span class="k">for</span> <span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">()}]</span>
             <span class="n">p_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">anc</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">p_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">p_files</span><span class="p">,</span><span class="n">var_dicts</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p_</span><span class="p">,</span><span class="n">v_</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">p_files</span><span class="p">,</span> <span class="n">var_dicts</span><span class="p">):</span>
+            <span class="c1"># The zip obj will be as short as the shortest input, ie empty if var_dicts==[]</span>
             <span class="k">if</span> <span class="n">p_</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">master</span><span class="o">.</span><span class="n">append_dict</span><span class="p">(</span><span class="n">v_</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">master</span><span class="o">.</span><span class="n">update_bincal_from_file</span><span class="p">(</span><span class="n">p_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span>
 
-    <span class="c1"># Add any updates</span>
-    <span class="c1">### TODO: This needs sorting! Make more general</span>
-    <span class="k">for</span> <span class="n">k_</span><span class="p">,</span><span class="n">update</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">k_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;username&#39;</span><span class="p">:</span>
-            <span class="n">master</span><span class="o">.</span><span class="n">update_user</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
+    <span class="c1"># Append any updates that are attributes rather than variables.</span>
+    <span class="c1"># Attributes are skipped in cal_proc.generic.append_dict()</span>
 
-        <span class="k">elif</span> <span class="n">k_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;history&#39;</span><span class="p">:</span>
-            <span class="n">master</span><span class="o">.</span><span class="n">update_hist</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
+    <span class="c1"># Every update must include a username and a history that are appended</span>
+    <span class="c1"># to the root attributes &#39;username&#39; and &#39;history&#39;. If these are not</span>
+    <span class="c1"># given then creation is dealt with in cal_proc.generic()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">update_by</span> <span class="o">=</span> <span class="n">updates</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">update_by</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">update_user</span><span class="p">(</span><span class="n">update_by</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">update_when</span> <span class="o">=</span> <span class="n">updates</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;history&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">update_when</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">update_hist</span><span class="p">(</span><span class="n">update_when</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span><span class="n">update</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">grp_</span><span class="p">,</span> <span class="n">attr_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">grp_</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">master</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">():</span>
+            <span class="c1"># Update not a root attribute so skip</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">attr_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">master</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">grp_</span><span class="p">]</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">():</span>
+            <span class="c1"># Update not a group attribute so skip</span>
+            <span class="k">continue</span>
+
+        <span class="n">master</span><span class="o">.</span><span class="n">update_attr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span><span class="n">update</span><span class="p">)</span>
 
     <span class="c1"># Add any version information that is missing from nc</span>
     <span class="n">master</span><span class="o">.</span><span class="n">update_ver</span><span class="p">()</span>

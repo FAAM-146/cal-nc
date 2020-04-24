@@ -38,8 +38,10 @@
   <ul>
 <li><a class="reference internal" href="#">cal_proc package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-cal_proc.cdp">cal_proc.cdp module</a></li>
 <li><a class="reference internal" href="#module-cal_proc.generic">cal_proc.generic module</a></li>
 <li><a class="reference internal" href="#module-cal_proc.pcasp">cal_proc.pcasp module</a></li>
+<li><a class="reference internal" href="#module-cal_proc.reader">cal_proc.reader module</a></li>
 <li><a class="reference internal" href="#module-cal_proc.temperature">cal_proc.temperature module</a></li>
 <li><a class="reference internal" href="#module-cal_proc.wcm2000">cal_proc.wcm2000 module</a></li>
 <li><a class="reference internal" href="#module-cal_proc">Module contents</a></li>
@@ -79,6 +81,101 @@
 <h1>cal_proc package<a class="headerlink" href="#cal-proc-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-cal_proc.cdp">
+<span id="cal-proc-cdp-module"></span><h2>cal_proc.cdp module<a class="headerlink" href="#module-cal_proc.cdp" title="Permalink to this headline">¶</a></h2>
+<p>File containing all CDP instrument processor classes.</p>
+<dl class="class">
+<dt id="cal_proc.cdp.CDP">
+<em class="property">class </em><code class="sig-prename descclassname">cal_proc.cdp.</code><code class="sig-name descname">CDP</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/cdp.html#CDP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.cdp.CDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cal_proc.generic.Generic" title="cal_proc.generic.Generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">cal_proc.generic.Generic</span></code></a></p>
+<p>Parses and processes calibration data files for instrument: CDP.</p>
+<p><strong>CDP:</strong> Cloud Droplet Probe</p>
+<dl class="method">
+<dt id="cal_proc.cdp.CDP.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">largs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/cdp.html#CDP.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.cdp.CDP.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make any change to the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>largs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – List of lists of arbitrary arguments to apply
+to nc</p>
+</dd>
+</dl>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>This is actually not used and looks hella complicated. Change so
+is more useful?</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>These usage examples are now out of date.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">largs</span></code> list is from</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python cal_ncgen.py --update option
+</pre></div>
+</div>
+<p>and may be one of the following types;</p>
+<ul>
+<li><p>A list [of lists] of cdl files of data to be written into the nc
+object. This option is chosen based on extension <code class="docutils literal notranslate"><span class="pre">.cdl</span></code>. If more
+than one cdl file is offered then it must be given as a single
+entry. eg;</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python cal_ncgen.py -u PCASP_20170725.cdl PCASP_20171114.cdl
+</pre></div>
+</div>
+</li>
+<li><p>A list [of lists] of PCASP diameter calibration files output from
+<code class="docutils literal notranslate"><span class="pre">cstodconverter</span></code>. This option is chosen based on filename ending
+with <code class="docutils literal notranslate"><span class="pre">d.csv</span></code>. If more than one calibration file is offered then
+it must be given as a single entry. eg;</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python cal_ncgen.py -u 20170725_P1_cal_results_PSLd.csv 20171114_P1_cal_results_PSLd.csv
+</pre></div>
+</div>
+</li>
+<li><p>A list nc attribute/value or variable/value pairs. For attributes
+that are strings, the value is concatenated to the existing string
+with a delimiting comma (non-char attributes will probably throw
+an error). Variables will be appended to the end of the existing
+variable numpy array. Note that variable attributes cannot be
+appended to. The attribute/variable names must be given exactly as
+in the existing nc file. Any containing group/s is given with
+forward slashes, eg</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python cal_ncgen.py -u bin_cal/time <span class="m">2769</span> <span class="m">2874</span> -u bin_cal/applies_to C027-C055 C057-C071 <span class="m">2818</span>.5, <span class="m">2864</span>.5
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Note that any spaces in filenames must be enclosed in quotes. All
+files are assumed to the same type as the first filename in the list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cal_proc.cdp.CDP.update_bincal_from_file">
+<code class="sig-name descname">update_bincal_from_file</code><span class="sig-paren">(</span><em class="sig-param">cal_file</em>, <em class="sig-param">vars_d</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/cdp.html#CDP.update_bincal_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.cdp.CDP.update_bincal_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends bin calibration data in calibration file to that in nc file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cal_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Filename of calibration
+cdp calibration csv file to be read. The type of calibration
+file, a scattering cross-section or diameters file, is
+automatically determined. Diameter files are recognised as
+starting with the string ‘input file’ as well as possibly
+having ‘dia’ in the filename or ending with ‘d.csv’. The
+scattering cross-section files are recognised as containing
+‘scs’ or ‘master_calibration’ in the filename.</p></li>
+<li><p><strong>vars_d</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of any additional variables
+associated with those contained within the datafile. At the very
+least this should contain any associated coordinate variables,
+eg <cite>time</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-cal_proc.generic">
 <span id="cal-proc-generic-module"></span><h2>cal_proc.generic module<a class="headerlink" href="#module-cal_proc.generic" title="Permalink to this headline">¶</a></h2>
@@ -167,13 +264,41 @@ string.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="cal_proc.generic.Generic.update_attr">
+<code class="sig-name descname">update_attr</code><span class="sig-paren">(</span><em class="sig-param">attr</em>, <em class="sig-param">update=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.update_attr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.update_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates an attribute by appending update.</p>
+<p>Root and group attributes are generally strings and should not be
+changed. However they may be appended to, it is common to create a
+comma-delineated string. If attr does not exist then it is not
+created by this method. If a new attribute is required then it is
+more sound to create a new nc file from scratch that includes this
+attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of attribute to update. If the attribute
+is in a group instead of the root then the full path of
+the attribute must be included with / seperators. If attr
+does not exist within the dataset then do not create but
+return.</p></li>
+<li><p><strong>update</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – Update for attribute.
+If None (default) then just return. If string then append
+to existing attr string with comma seperator. If list of
+strings then append comma-delineated string generated from
+list.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="cal_proc.generic.Generic.change_val">
 <code class="sig-name descname">change_val</code><span class="sig-paren">(</span><em class="sig-param">var</em>, <em class="sig-param">old_val</em>, <em class="sig-param">new_val</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.change_val"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.change_val" title="Permalink to this definition">¶</a></dt>
 <dd><p>Changes a single variable/attribute value.</p>
 <p>The variable or attribute name must be given along with the old
 value, <code class="docutils literal notranslate"><span class="pre">old_val</span></code>, that is to be change to <code class="docutils literal notranslate"><span class="pre">new_val</span></code>. If <code class="docutils literal notranslate"><span class="pre">old_val</span></code>
 is not found then nothing is done.</p>
-<div class="admonition-todo admonition" id="id1">
+<div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
 <p>Not implemented</p>
 </div>
@@ -183,7 +308,7 @@ is not found then nothing is done.</p>
 <dt id="cal_proc.generic.Generic.append_var">
 <code class="sig-name descname">append_var</code><span class="sig-paren">(</span><em class="sig-param">var</em>, <em class="sig-param">coord_vals</em>, <em class="sig-param">var_vals</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/generic.html#Generic.append_var"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.generic.Generic.append_var" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to append to an existing netCDF4 variable and associated coord</p>
-<div class="admonition-todo admonition" id="id2">
+<div class="admonition-todo admonition" id="id3">
 <p class="admonition-title">Todo</p>
 <p>Redundant/not currently used.</p>
 </div>
@@ -227,7 +352,7 @@ sub-dictionary of values and attributes</p>
 </dl>
 </dd>
 </dl>
-<div class="admonition-todo admonition" id="id3">
+<div class="admonition-todo admonition" id="id4">
 <p class="admonition-title">Todo</p>
 <p>Currently does not accept netCDF4 variable values.
 Currently only accepts iterable of data.</p>
@@ -292,46 +417,6 @@ appended to.</p></li>
 <div class="section" id="module-cal_proc.pcasp">
 <span id="cal-proc-pcasp-module"></span><h2>cal_proc.pcasp module<a class="headerlink" href="#module-cal_proc.pcasp" title="Permalink to this headline">¶</a></h2>
 <p>File containing all PCASP instrument processor classes.</p>
-<dl class="function">
-<dt id="cal_proc.pcasp.read_cal_file">
-<code class="sig-prename descclassname">cal_proc.pcasp.</code><code class="sig-name descname">read_cal_file</code><span class="sig-paren">(</span><em class="sig-param">cal_file</em>, <em class="sig-param">f_type='pcasp_d'</em>, <em class="sig-param">reject_bins=None</em>, <em class="sig-param">invalid=-9999</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/pcasp.html#read_cal_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.pcasp.read_cal_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses calibration files outputted from various calibration programs.</p>
-<p>Currently reads in csv files from Phil’s calibration programs along with
-Angela’s calibration program.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This has been ripped straight from <code class="docutils literal notranslate"><span class="pre">datafile_utils.py</span></code>. Probably
-can do this better.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cal_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Filename of calibration file to</p></li>
-<li><p><strong>read.</strong> (<em>be</em>) – </p></li>
-<li><p><strong>f_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – <p>Type of calibration file to read. One of;</p>
-<dl class="simple">
-<dt>’pcasp_d’</dt><dd><p>output of CDtoDConverter.exe</p>
-</dd>
-<dt>’pcasp_cs’</dt><dd><p>output of pcaspcal.exe</p>
-</dd>
-<dt>’cdp_d’</dt><dd><p>output of CDtoDConverter.exe</p>
-</dd>
-<dt>’cdp_cs’</dt><dd><p>output from ADs calibration program</p>
-</dd>
-</dl>
-</p></li>
-<li><p><strong>reject_bins</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – List of integer bin numbers that are not
-returned. Default is None.</p></li>
-<li><p><strong>invalid</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Value of invalid values as used by
-input file. Default is -9999.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of metadata and data masked arrays.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="class">
 <dt id="cal_proc.pcasp.PCASP">
 <em class="property">class </em><code class="sig-prename descclassname">cal_proc.pcasp.</code><code class="sig-name descname">PCASP</code><span class="sig-paren">(</span><em class="sig-param">ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/pcasp.html#PCASP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.pcasp.PCASP" title="Permalink to this definition">¶</a></dt>
@@ -348,7 +433,7 @@ input file. Default is -9999.</p></li>
 to nc</p>
 </dd>
 </dl>
-<div class="admonition-todo admonition" id="id4">
+<div class="admonition-todo admonition" id="id5">
 <p class="admonition-title">Todo</p>
 <p>This is actually not used and looks hella complicated. Change so
 is more useful?</p>
@@ -405,13 +490,17 @@ files are assumed to the same type as the first filename in the list.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cal_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Filename of calibration
-PCASP calibration csv file to be read. Is recognised as
-ending in ‘cs’ or ‘d’ so user needs to provide some quality
-assurance on the input files.</p></li>
+PCASP calibration csv file to be read. The type of calibration
+file, a scattering cross-section or diameters file, is
+automatically determined. Diameter files are recognised as
+starting with the string ‘input file’ as well as possibly
+having ‘dia’ in the filename or ending with ‘d.csv’. The
+scattering cross-section files are recognised as containing
+‘scs’ in the filename or having it end with ‘cs.csv’.</p></li>
 <li><p><strong>vars_d</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of any additional variables
-associated with those contained within the datafile. At the very
-least this should contain any associated coordinate variables,
-eg <cite>time</cite>.</p></li>
+associated with those contained within the datafile. At the
+very least this should contain any associated coordinate
+variables, eg <cite>time</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -420,11 +509,55 @@ eg <cite>time</cite>.</p></li>
 </dd></dl>
 
 </div>
+<div class="section" id="module-cal_proc.reader">
+<span id="cal-proc-reader-module"></span><h2>cal_proc.reader module<a class="headerlink" href="#module-cal_proc.reader" title="Permalink to this headline">¶</a></h2>
+<p>File reader/parser utilities.</p>
+<dl class="function">
+<dt id="cal_proc.reader.opc_calfile">
+<code class="sig-prename descclassname">cal_proc.reader.</code><code class="sig-name descname">opc_calfile</code><span class="sig-paren">(</span><em class="sig-param">cal_file</em>, <em class="sig-param">f_type='pcasp_d'</em>, <em class="sig-param">reject_bins=None</em>, <em class="sig-param">invalid=-9999</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cal_proc/reader.html#opc_calfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cal_proc.reader.opc_calfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses calibration files outputted from various calibration programs.</p>
+<p>Currently reads in csv files from Phil’s calibration programs along with
+Angela’s calibration program.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This has been ripped straight from <code class="docutils literal notranslate"><span class="pre">datafile_utils.py</span></code>. Probably
+can do this better.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cal_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code>) – Filename of calibration file to</p></li>
+<li><p><strong>read.</strong> (<em>be</em>) – </p></li>
+<li><p><strong>f_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – <p>Type of calibration file to read. One of;</p>
+<dl class="simple">
+<dt>’pcasp_d’</dt><dd><p>output of CDtoDConverter.exe</p>
+</dd>
+<dt>’pcasp_cs’</dt><dd><p>output of pcaspcal.exe</p>
+</dd>
+<dt>’cdp_d’</dt><dd><p>output of CDtoDConverter.exe</p>
+</dd>
+<dt>’cdp_cs’</dt><dd><p>output from ADs calibration program</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>reject_bins</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – List of integer bin numbers that are not
+returned. Default is None.</p></li>
+<li><p><strong>invalid</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Value of invalid values as used by
+input file. Default is -9999.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of metadata and data masked arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="module-cal_proc.temperature">
 <span id="cal-proc-temperature-module"></span><h2>cal_proc.temperature module<a class="headerlink" href="#module-cal_proc.temperature" title="Permalink to this headline">¶</a></h2>
 <p>File containing all primary instrument temperature instrument processor
 classes.</p>
-<div class="admonition-todo admonition" id="id5">
+<div class="admonition-todo admonition" id="id6">
 <p class="admonition-title">Todo</p>
 <p>This needs significant work</p>
 </div>

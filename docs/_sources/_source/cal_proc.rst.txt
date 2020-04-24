@@ -4,6 +4,14 @@ cal\_proc package
 Submodules
 ----------
 
+cal\_proc.cdp module
+--------------------
+
+.. automodule:: cal_proc.cdp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cal\_proc.generic module
 ------------------------
 
@@ -16,6 +24,14 @@ cal\_proc.pcasp module
 ----------------------
 
 .. automodule:: cal_proc.pcasp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cal\_proc.reader module
+-----------------------
+
+.. automodule:: cal_proc.reader
    :members:
    :undoc-members:
    :show-inheritance:

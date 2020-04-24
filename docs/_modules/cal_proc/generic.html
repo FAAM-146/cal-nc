@@ -99,13 +99,7 @@
 <span class="sd">        A netCDF4 variable with the same units and calendar as `otime`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">import</span> <span class="nn">datetime</span>
-
-    <span class="n">time_fmts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>   <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H:%M&#39;</span><span class="p">,</span>      <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H&#39;</span><span class="p">,</span>         <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>            <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">]</span>
+    <span class="kn">from</span> <span class="nn">dateutil</span> <span class="k">import</span> <span class="n">parser</span>
 
     <span class="c1"># Convert original times into datetime objects</span>
     <span class="k">try</span><span class="p">:</span>
@@ -139,36 +133,11 @@
         <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ntime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ntime</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">,</span><span class="s1">&#39;S&#39;</span><span class="p">]):</span>
             <span class="c1"># Attempt to convert the times into a list of datetime object</span>
             <span class="c1"># Assume that all formats are the same!</span>
-            <span class="k">for</span> <span class="n">t_fmt</span> <span class="ow">in</span> <span class="n">time_fmts</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">ntime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">t_fmt</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="k">pass</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">break</span>
-
-                <span class="c1"># Reverse date part of t_fmt</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">indx</span> <span class="o">=</span> <span class="n">t_fmt</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="n">t_fmt</span> <span class="o">=</span> <span class="n">t_fmt</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">t_fmt</span> <span class="o">=</span> <span class="n">t_fmt</span><span class="p">[:</span><span class="n">indx</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">t_fmt</span><span class="p">[</span><span class="n">indx</span><span class="p">:]</span>
-
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">_</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">ntime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">t_fmt</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">break</span>
-
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;t_fmt = &#39;</span><span class="p">,</span><span class="n">t_fmt</span><span class="p">)</span>
-            <span class="n">ndatetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">n_</span><span class="p">,</span><span class="n">t_fmt</span><span class="p">)</span> <span class="k">for</span> <span class="n">n_</span> <span class="ow">in</span> <span class="n">ntime</span><span class="p">]</span>
+            <span class="n">ndatetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">n_</span><span class="p">,</span> <span class="n">dayfirst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">n_</span> <span class="ow">in</span> <span class="n">ntime</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Assume are numbers in same format as those in otime</span>
             <span class="n">ndatetime</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span><span class="n">ntime</span><span class="p">,</span><span class="n">otime</span><span class="o">.</span><span class="n">units</span><span class="p">,</span><span class="n">ocalendar</span><span class="p">)</span>
-
 
     <span class="n">adatetime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">odatetime</span><span class="p">,</span><span class="n">ndatetime</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="n">concat_axis</span><span class="p">)</span>
 
@@ -241,6 +210,7 @@
 
         <span class="kn">from</span> <span class="nn">cal_proc</span> <span class="k">import</span> <span class="n">__version__</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">software_version</span> <span class="o">=</span> <span class="n">__version__</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">software_version</span> <span class="o">=</span> <span class="n">__version__</span></div>
 
 
@@ -340,6 +310,64 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_</span><span class="p">,</span><span class="n">update</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="Generic.update_attr"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.update_attr">[docs]</a>    <span class="k">def</span> <span class="nf">update_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates an attribute by appending update.</span>
+
+<span class="sd">        Root and group attributes are generally strings and should not be</span>
+<span class="sd">        changed. However they may be appended to, it is common to create a</span>
+<span class="sd">        comma-delineated string. If attr does not exist then it is not</span>
+<span class="sd">        created by this method. If a new attribute is required then it is</span>
+<span class="sd">        more sound to create a new nc file from scratch that includes this</span>
+<span class="sd">        attribute.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            attr (:obj:`str`): Name of attribute to update. If the attribute</span>
+<span class="sd">                is in a group instead of the root then the full path of</span>
+<span class="sd">                the attribute must be included with / seperators. If attr</span>
+<span class="sd">                does not exist within the dataset then do not create but</span>
+<span class="sd">                return.</span>
+<span class="sd">            update (:obj:`str` or :obj:`list`): Update for attribute.</span>
+<span class="sd">                If None (default) then just return. If string then append</span>
+<span class="sd">                to existing attr string with comma seperator. If list of</span>
+<span class="sd">                strings then append comma-delineated string generated from</span>
+<span class="sd">                list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">update</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>
+            <span class="c1"># No updates to be made</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Extract existing attribute from ds</span>
+        <span class="n">grp_</span><span class="p">,</span> <span class="n">attr_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attr_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">attr_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">grp_</span><span class="p">]</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">attr_</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="c1"># Attribute as given does not exist so do nothing</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Attribute </span><span class="si">{}</span><span class="s1"> does not exist.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr</span><span class="p">))</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Delete existing group attribute</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">grp_</span><span class="p">]</span><span class="o">.</span><span class="n">delncattr</span><span class="p">(</span><span class="n">attr_</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Delete existing root attribute</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">delncattr</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span><span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">update</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+            <span class="c1"># If is a list of strings then join</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">update</span><span class="p">[:])</span>
+
+        <span class="c1"># Append update to existing attribute string and rewrite into ds</span>
+        <span class="k">if</span> <span class="n">grp_</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">setncattr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr_old</span><span class="p">,</span><span class="n">update</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">grp_</span><span class="p">]</span><span class="o">.</span><span class="n">setncattr</span><span class="p">(</span><span class="n">attr_</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr_old</span><span class="p">,</span><span class="n">update</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="Generic.change_val"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.change_val">[docs]</a>    <span class="k">def</span> <span class="nf">change_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">old_val</span><span class="p">,</span><span class="n">new_val</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Changes a single variable/attribute value.</span>
 
@@ -403,7 +431,52 @@
         <span class="k">return</span> <span class="mi">0</span>
 
 
-    <span class="k">def</span> <span class="nf">_add_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">vals</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parent_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">unlim</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns paths/dimensions of given variable even if in parent group.</span>
+
+<span class="sd">        var is full path to the variable name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Names of found dimensions that match those of var</span>
+        <span class="n">fnd_dims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fnd_unlim</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">_path</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">fnd_dims</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+            <span class="c1"># Walk up through groups attempting to find required dimensions</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">_dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">_path</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span>
+                         <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">]</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="c1"># Step up to parent group</span>
+                <span class="k">break</span>
+                <span class="n">_dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span>
+                         <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">]</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">_unlim</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">_path</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
+                          <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_dims</span><span class="p">]</span>
+
+            <span class="n">fnd_dims</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_path</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_dims</span><span class="p">])</span>
+            <span class="n">fnd_unlim</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_unlim</span><span class="p">)</span>
+            <span class="n">_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fnd_dims</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+            <span class="n">fnd_dims</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span>
+                             <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">])</span>
+            <span class="n">fnd_unlim</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_dims</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">unlim</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fnd_dims</span><span class="p">)[</span><span class="n">fnd_unlim</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">unlim</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">,</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
+            <span class="c1"># Return an index list of unlimited/fixed dimensions</span>
+            <span class="k">return</span> <span class="n">fnd_unlim</span>
+        <span class="k">elif</span> <span class="n">unlim</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">fnd_dims</span><span class="p">,</span> <span class="n">fnd_unlim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fnd_dims</span>
+
+
+    <span class="k">def</span> <span class="nf">_add_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Adds extra values to end of an already extended variable.</span>
 
 <span class="sd">        If a coordinate is increased in size then all of the variables that</span>
@@ -438,45 +511,67 @@
         <span class="c1"># Annoyingly have to split path and variable name</span>
         <span class="n">vpath</span><span class="p">,</span><span class="n">vname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 
-        <span class="c1"># Find unlimited dimension for this var</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">d_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">unlim_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">vpath</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">d_</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="c1"># Assume this is because you&#39;re in the root</span>
-                <span class="n">unlim_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">d_</span><span class="p">]</span><span class="o">.</span><span class="n">isunlimited</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="n">unlim_dim</span><span class="p">:</span>
-                <span class="k">break</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">_</span> <span class="o">=</span> <span class="n">unlim_dim</span>
-        <span class="k">except</span> <span class="ne">NameError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="c1"># Find unlimited dimension/s for this var</span>
+        <span class="c1">#print(var)</span>
+        <span class="n">dims</span><span class="p">,</span> <span class="n">unlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_dim</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unlim</span> <span class="ow">is</span> <span class="p">[]:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Variable </span><span class="si">{}</span><span class="s1"> does not have unlimited dimension&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
             <span class="k">return</span>
 
         <span class="c1"># Create slice to write to the correct dimension</span>
         <span class="c1"># That is the last elements of the unlimited dimension</span>
+        <span class="n">unlim_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unlim</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span>
 
-        <span class="c1"># .. TODO::</span>
-        <span class="c1">#   Need to check that this works for adding more than one new value</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unlim_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># There is more than one unlimited dimension. This is allows in nc4</span>
+            <span class="c1"># Currently there is no code to automatically determine which</span>
+            <span class="c1"># dimension val should be added to. Therefore ask user for clarity,</span>
+            <span class="c1"># this is a bit rubbish so maybe _add_var() should have an</span>
+            <span class="c1"># additional arg for the dimension to extend??</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">More than one UNLIMITED dimension found for variable: &#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
+            <span class="n">req_unlim_idx</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">while</span> <span class="n">req_unlim_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">_i</span><span class="p">,</span><span class="n">_d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="p">)[</span><span class="n">unlim_idx</span><span class="p">]):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_i</span><span class="p">,</span> <span class="n">_d</span><span class="p">))</span>
+                <span class="n">req_unlim_idx</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Enter number of dimension to use [0]: &#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">req_unlim_idx</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">req_unlim_idx</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="n">req_unlim_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_i</span><span class="p">):</span>
+                    <span class="n">req_unlim_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req_unlim_idx</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">req_unlim_idx</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">unlim_idx</span> <span class="o">=</span> <span class="n">unlim_idx</span><span class="p">[</span><span class="n">req_unlim_idx</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Adding </span><span class="si">{}</span><span class="s1"> to dimension: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">,</span><span class="n">dims</span><span class="p">[</span><span class="n">unlim_idx</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">unlim_idx</span> <span class="o">=</span> <span class="n">unlim_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># &#39;empty&#39; slots filled from first position towards array end,</span>
+            <span class="c1"># thus the -1*len(vals)</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
-
-            <span class="c1"># Don&#39;t use slice obj as I can&#39;t work out what is going on!</span>
-            <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="c1">#slice(-1,None)</span>
-            <span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="c1">#slice(None,len(vals[0]))</span>
-
+            <span class="c1"># This is not as easy as one might think!</span>
+            <span class="k">assert</span> <span class="n">unlim_idx</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="c1"># The lines below assume that the unlimited dimension that is</span>
+            <span class="c1"># being extended is the 0th. The other indexers are set to write</span>
+            <span class="c1"># only to as many elements in each dimension as required (those</span>
+            <span class="c1"># outside this range remain masked). This is to cope with ragged</span>
+            <span class="c1"># arrays.</span>
+            <span class="c1"># However, it is likely/possible that this shall not always be the</span>
+            <span class="c1"># case. I have not been able to test this case yet, thus the assert</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+            <span class="n">idx</span><span class="p">[</span><span class="n">unlim_idx</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="c1">#idx[1] = range(len(vals[0]))</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> \
            <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
             <span class="c1"># Strings are vlen arrays which have more limited access</span>
             <span class="c1"># Need to write each individual string seperately (?)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vals</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="c1"># Use string format to convert (also converts None)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span>
                   <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())):</span>
@@ -485,8 +580,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Variable: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
                 <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Insufficient empty space in </span><span class="si">{}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
@@ -584,11 +679,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Find coordinate variable</span>
-        <span class="n">coord_d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">coord_d</span>  <span class="o">=</span> <span class="p">{}</span>
         <span class="n">var_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var_d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">k_</span> <span class="ow">in</span> <span class="n">var_keys</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="c1"># Coordinates can only have one dimension, thus the [0]</span>
+                    <span class="c1"># Coordinates cannot use a parent group dimension</span>
                     <span class="n">coord_d</span><span class="p">[</span><span class="n">k_</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k_</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="c1"># Variable does not exist in dataset so remove from var_d</span>
@@ -604,9 +701,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_add_var</span><span class="p">(</span><span class="n">k_</span><span class="p">,</span><span class="n">v_</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Variable: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k_</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-                <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span></div>
-
+                <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Generic.append_dataset"><a class="viewcode-back" href="../../_source/cal_proc.html#cal_proc.generic.Generic.append_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">append_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ds</span><span class="p">,</span>
@@ -639,7 +735,6 @@
 <span class="sd">                appended to.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
 
         <span class="k">def</span> <span class="nf">append_group</span><span class="p">(</span><span class="n">mgrp</span><span class="p">,</span><span class="n">ngrp</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;Updates master ds group with values from new ds group.</span>

@@ -501,7 +501,16 @@ class Generic():
             # thus the -1*len(vals)
             idx = slice(-1*len(vals),None)
         else:
-            idx = [slice(None)] * self.ds[var].ndim
+            # This is not as easy as one might think!
+            assert unlim_idx == 0
+            # The lines below assume that the unlimited dimension that is
+            # being extended is the 0th. The other indexers are set to write
+            # only to as many elements in each dimension as required (those
+            # outside this range remain masked). This is to cope with ragged
+            # arrays.
+            # However, it is likely/possible that this shall not always be the
+            # case. I have not been able to test this case yet, thus the assert
+            idx = [slice(0,i) for i in vals.shape]
             idx[unlim_idx] = -1
             #idx[1] = range(len(vals[0]))
 
@@ -520,6 +529,7 @@ class Generic():
                 self.ds[var][idx] = vals[0]
             except Exception as err:
                 print('Variable: {}'.format(var))
+                pdb.set_trace()
                 print(err)
                 pdb.set_trace()
 
@@ -641,6 +651,7 @@ class Generic():
                 self._add_var(k_,v_)
             except Exception as err:
                 print('Variable: {}'.format(k_))
+                pdb.set_trace()
                 print(err)
                 pdb.set_trace()
 

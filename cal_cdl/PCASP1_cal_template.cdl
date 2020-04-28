@@ -128,36 +128,6 @@ group: bin_cal {
             x-section_width_err:comment = "Uncertainties are derived from the uncertainty in the calculated scattering cross-section and the width of the modal bin for each calibration particle. These are discussed in sections 2.1 and 2.23 in Rosenberg et al. (full citation given in references attribute of this group)." ;
             x-section_width_err:_FillValue = NaN ;
 
-        float dia_centre(time,bin) ;
-            dia_centre:long_name = "Centre diameter of each bin for particle material - PSL" ;
-            dia_centre:comment = "Sum of all diameter regions covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group)." ;
-            dia_centre:refractive_index = "1.59+0i" ;
-            dia_centre:shape = "spherical" ;
-            dia_centre:units = "um" ;
-            dia_centre:ancillary_variables = "dia_centre_err dia_width" ;
-            dia_centre:_FillValue = NaN ;
-
-        float dia_centre_err(time,bin) ;
-            dia_centre_err:long_name = "Uncertainty of bin centre diameter" ;
-            dia_centre_err:comment = "Uncertainties are discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group)." ;
-            dia_centre_err:units = "um" ;
-            dia_centre_err:_FillValue = NaN ;
-
-        float dia_width(time,bin) ;
-            dia_width:long_name = "Width in terms of diameter of each bin for given particle material - PSL" ;
-            dia_width:comment = "Sum of all diameter regions covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group)." ;
-            dia_width:refractive_index = "1.59+0i" ;
-            dia_width:shape = "spherical" ;
-            dia_width:units = "um" ;
-            dia_width:ancillary_variables = "dia_width_err" ;
-            dia_width:_FillValue = NaN ;
-
-        float dia_width_err(time,bin) ;
-            dia_width_err:long_name = "Uncertainty of bin diameter width" ;
-            dia_width_err:comment = "Uncertainties are discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group)." ;
-            dia_width_err:units = "um" ;
-            dia_width_err:_FillValue = NaN ;
-
 
     data:
         // Data is comma-delineated with no additional deliniation between

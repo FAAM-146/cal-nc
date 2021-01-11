@@ -359,7 +359,7 @@ def opc_calfile(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
             line = f.readline()
 
         # Create array of bin numbers *** Starting at 1 ***
-        d['data']['bin'] = np.arange(len(d['data']['Lower Thresholds']))+1
+        d['data']['bin'] = np.arange(len(d['data']['Lower Thresholds'])) + 1
 
         # Close file
         f.close()
@@ -378,7 +378,7 @@ def opc_calfile(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
     if reject_bins is not None:
 
         try:
-            del_bins = np.asarray(reject_bins,dtype=int)
+            del_bins = np.asarray(reject_bins, dtype=int)
         except:
             # Something happened
             pdb.set_trace()

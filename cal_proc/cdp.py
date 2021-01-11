@@ -161,9 +161,9 @@ class CDP(Generic):
                 scattering cross-section files are recognised as containing
                 'scs' or 'master_calibration' in the filename.
             vars_d(:obj:`dict`): Dictionary of any additional variables
-                associated with those contained within the datafile. At the very
-                least this should contain any associated coordinate variables,
-                eg `time`.
+                associated with those contained within the datafile. At the
+                very least this should contain any associated coordinate
+                variables, eg `time`.
         """
         from . import reader
 

@@ -168,8 +168,10 @@ def call(infile,args):
         return None
 
     # Split input files into nc and cdl lists
-    nc_infile = [f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.nc']
-    cdl_infile =[f_ for f_ in abs_infile if os.path.splitext(f_)[-1].lower() == '.cdl']
+    nc_infile = [f_ for f_ in abs_infile
+                 if os.path.splitext(f_)[-1].lower() == '.nc']
+    cdl_infile =[f_ for f_ in abs_infile
+                 if os.path.splitext(f_)[-1].lower() == '.cdl']
 
     # Find 'master' input file on which to build
     # Note that this shall always be the first netCDF file if one is provided.
@@ -192,8 +194,9 @@ def call(infile,args):
     tmpfile = []
     for i, f_ in enumerate(cdl_infile):
         #tmpfile.append(tempfile.TemporaryFile(dir=os.path.dirname(f_)))
-        tmpfile.append('{}_tmp.nc'.format(os.path.join(default_tmp_dir,os.path.splitext(f_)[0]),
-                                                 i+1))
+        tmpfile.append('{}_tmp.nc'.format(os.path.join(default_tmp_dir,
+                                                       os.path.splitext(f_)[0]),
+                       i+1))
         # Run cal_nc.nc_func.ncgen to produce netCDF-4 format file
         run_ncgen(f_,tmpfile[-1])
 
@@ -286,15 +289,16 @@ if __name__=='__main__':
     # Mandatory argument
     parser.add_argument('files',
                         nargs='+',
-                        help=('Input cdl or nc file/s. If one or more cdl files '
-                        'then a new calibration netCDF file shall be created '
-                        'using the (concatenated if possible) cdl as a template. '
-                        'If an existing nc file is given then new calibration '
-                        'data shall be appended to the variables in that file. '
-                        'This data is provided in additional cdf/nc files or '
-                        'as --update argumenmts. The first nc file, and if none '
-                        'the first cdl file, is treated as the master and used '
-                        'for output filename generation, root attributes, etc.'))
+                        help=('Input cdl or nc file/s. If one or more cdl '
+                        'files then a new calibration netCDF file shall be '
+                        'created using the (concatenated if possible) cdl as '
+                        'a template. If an existing nc file is given then '
+                        'new calibration data shall be appended to the '
+                        'variables in that file. This data is provided in '
+                        'additional cdf/nc files or as --update argumenmts. '
+                        'The first nc file, and if none the first cdl file, '
+                        'is treated as the master and used for output '
+                        'filename generation, root attributes, etc.'))
 
     # Optional arguments
     parser.add_argument('-u', '--update', action='append',

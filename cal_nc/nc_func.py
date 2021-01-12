@@ -136,7 +136,7 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
         pass
 
 
-    # Extract any ancillary files from updates with key 'parsefile'
+    # Extract any ancillary files from updates with key '_parsefile'
     try:
         anc_files.extend(updates.pop('_parsefile'))
     except KeyError:

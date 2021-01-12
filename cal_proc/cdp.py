@@ -127,7 +127,6 @@ class CDP(Generic):
 
         # Loop over outer list and determine action based on first element
         for larg in largs:
-
             if os.path.splitext(larg[0])[1] == 'cdl':
                 # Auxillary cdl file/s
                 #######
@@ -168,6 +167,7 @@ class CDP(Generic):
         from . import reader
 
         caldata = None
+        print(f"Processing {cal_file}")
         if (cal_file == None) or (os.path.isfile(cal_file) == False):
             # Nothing to do
             return
@@ -192,6 +192,7 @@ class CDP(Generic):
 
         if caldata == None:
             # Error in the cal_file
+            print(f'caldata does not exist: {cal_file}')
             return
 
         # Add var_map data to vars. However do not overwrite any items in var
@@ -209,7 +210,12 @@ class CDP(Generic):
         if len(grps) > 1:
             # All keys in vars_d must have the same path
             pdb.set_trace()
-        grp = grps.pop()
+        try:
+            grp = grps.pop()
+        except Exception as err:
+            print(err)
+            print("Error often due to no 'conventional' vars in cfg group.")
+            pdb.set_trace()
 
         for k,v in ((k_,v_) for k_,v_ in var_map.items() if k_ not in vars_d):
             try:

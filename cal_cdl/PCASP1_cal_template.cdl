@@ -8,8 +8,7 @@ netcdf PCASP1_cal_template {
 // Structure of the cal-nc file is as follows ;
 // Global attributes
 //  Group: bin_cal
-//      Contains calibration information for size bins. Diameters that are
-//      included are based on the default particle type, PSL.
+//      Contains scattering cross-section calibration info for size bins.
 //    Group: Secondary material sub-group
 //      This sub-group of bin_cal/ contains diameter-related variables for
 //      another material. Dimensions are inherited from bin_cal. Material
@@ -20,7 +19,7 @@ netcdf PCASP1_cal_template {
 //
 // author = G. Nott
 // email = graeme.nott@faam.ac.uk
-// creation = Jan 2018
+// creation = Jan 2021
 
 // global attributes:
 
@@ -61,8 +60,8 @@ group: bin_cal {
     variables:
         float time(time) ;
             // The units of time may be one of days ('d'), hours ('hr', 'h'),
-            // minutes ('min'), or seconds ('sec', 's') and the most appropriate
-            // unit for the frequency of calibration should be used.
+            // minutes ('min'), or seconds ('sec', 's'). The most appropriate
+            // unit given the frequency of calibration should be used.
             time:standard_name = "time" ;
             time:long_name = "time of calibration" ;
             time:timezone = "UTC" ;
@@ -102,7 +101,7 @@ group: bin_cal {
         int ADC_thres(time,bin,bin_bounds) ;
             ADC_thres:long_name = "Lower and upper ADC thresholds for each bin" ;
             ADC_thres:comment = "Coverage of each bin in terms of the digitized peak photovoltage. This variable has been included primarily for error checking as the same values should be in the standard data files." ;
-            ADC_thres:valid_range = 0, 1288 ;
+            ADC_thres:valid_range = 0, 12288 ;
             ADC_thres:_FillValue = NaN ;
 
         float x-section(time,bin,bin_bounds) ;
@@ -156,6 +155,13 @@ group: bin_cal {
 
         // Define group variables
         variables:
+
+            string calibration_file(time) ;
+                calibration_file:long_name = "File from which this calibration data has been read" ;
+
+            string source_file(time) ;
+                source_file:long_name = "Source file used in calibration processing" ;
+
             float dia_centre(time,bin) ;
                 dia_centre:long_name = "Centre diameter of each bin for given particle material - mineral dust" ;
                 dia_centre:comment = "Weighted average of all diameter region centres covered by the scattering cross-sections of each bin. This is discussed in sections 4.1 and 4.2 in Rosenberg et al. (full citation given in references attribute of this group)." ;

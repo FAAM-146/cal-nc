@@ -13,7 +13,7 @@ from . import cdp
 __title__ = 'FAAM Calibration netCDF'
 __description__ = 'Creation/updates of nc files for FAAM calibration data'
 __institution__ = 'FAAM - Facility for Airborne Atmospheric Measurements'
-__version__ = '0.3'
+__version__ = '0.4'
 __author__ = 'Graeme Nott'
 __author_email__ = 'graeme.nott@faam.ac.uk'
 __copyright__ = '2019, FAAM'

@@ -35,7 +35,7 @@ var_map = {'ADC_thres':
            'calibration_file':
                 lambda d: d['metadata']['cal file'],
            'source_file':
-                lambda d: d['metadata']['input file']
+                lambda d: d['metadata']['Input file']
            }
 
 
@@ -205,7 +205,12 @@ class PCASP(Generic):
         if len(grps) > 1:
             # All keys in vars_d must have the same path
             pdb.set_trace()
-        grp = grps.pop()
+       try:
+            grp = grps.pop()
+        except Exception as err:
+            print(err)
+            print("Error often due to no 'conventional' vars in cfg group.")
+            pdb.set_trace()
 
         for k,v in ((k_,v_) for k_,v_ in var_map.items() if k_ not in vars_d):
             try:

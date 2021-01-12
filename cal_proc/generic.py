@@ -649,9 +649,9 @@ class Generic():
             try:
                 self._add_var(k_,v_)
             except Exception as err:
-                print('Variable: {}'.format(k_))
-                pdb.set_trace()
                 print(err)
+                print('Variable: {}'.format(k_))
+                pdb.post_mortem()
 
 
     def append_dataset(self,ds,

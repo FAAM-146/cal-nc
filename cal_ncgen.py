@@ -113,7 +113,6 @@ default_cdl_dir = ['.','cal_cdl']
 # Directory where temporary files are stored
 default_tmp_dir = './tmp'
 
-
 import warnings
 warnings.filterwarnings('error')
 
@@ -302,7 +301,7 @@ if __name__=='__main__':
 
     # Optional arguments
     parser.add_argument('-u', '--update', action='append',
-                        nargs = '*',
+                        nargs ='*',
                         dest='update_arg', default=[],
                         help=('Space-delineated list of data parameters '
                         'as required by the specific instrument class. '
@@ -343,6 +342,32 @@ if __name__=='__main__':
                         'given string is appended to the global username '
                         'attribute instead (should be space-seperated '
                         'user and <email>).'))
+
+    parser.add_argument('--ceda', action='append',
+                        nargs='+',
+                        dest='ceda_flts', default=None,
+                        help=('Generate CEDA-standard filenames from a single '
+                        'existing cal-nc file. The option values are a '
+                        'space-delineated list of flight number and flight '
+                        "date that match the CEDA structure. '--ceda' can be"
+                        'given multiple times if creating multiple flight '
+                        'files.'))
+    parser.add_argument('--ceda_ver', action='store',
+                        dest='ceda_ver', default=None,
+                        help=('Version of software used to generate the '
+                        'cal-nc file. If not given then is read from the '
+                        'cal-nc file.'))
+    parser.add_argument('--ceda_rev', action='store',
+                        dest='ceda_rev', default=0,
+                        help=('Revision of cal-nc file to be produced. If '
+                        'not specified then is assumed to be 0. The revision '
+                        'should be incremented by 1 from revision already '
+                        'on CEDA.'))
+    parser.add_argument('--ceda_instr', action='store',
+                        dest='ceda_instr', default=None,
+                        help=('Instrument name for the cal-nc file to be '
+                        'produced. If not given then is read from the cal-nc '
+                        'file.'))
     parser.add_argument('-v', '--version', action='version',
                         version=version,
                         help='Display program version number.')
@@ -352,20 +377,33 @@ if __name__=='__main__':
     args_dict = vars(parser.parse_args())
     opts_dict = {k:v for k,v in args_dict.items() if k not in ['files']}
 
-    for i,l in enumerate(opts_dict['update_arg']):
-        # Replace special option arguments strings with those recognised
-        opts_dict['update_arg'][i][0] = \
-                    opts_dict['update_arg'][i][0].replace('parsefile',
-                                                          '_parsefile')
+    pdb.set_trace()
 
-    print()
+    if args_dict['ceda_flts'] != None:
+        if len(args_dict['files']) > 1:
+            raise ValueError('Only a single cal-nc file can be converted.')
 
-    # Welcome splash
-    print('\n-----------------------------------------------------')
-    print('\tCalibration netCDF generation script')
-    print('-----------------------------------------------------\n')
+        create_ceda_files(args_dict['files'][0],
+                          args_dict['ceda_flts'],
+                          args_dict['ceda_rev'],
+                          args_dict['ceda_ver'],
+                          args_dict['ceda_instr'])
 
-    call(args_dict['files'],opts_dict)
+    else:
+        for i,l in enumerate(opts_dict['update_arg']):
+            # Replace special option arguments strings with those recognised
+            opts_dict['update_arg'][i][0] = \
+                        opts_dict['update_arg'][i][0].replace('parsefile',
+                                                              '_parsefile')
+
+        print()
+
+        # Welcome splash
+        print('\n-----------------------------------------------------')
+        print('\tCalibration netCDF generation script')
+        print('-----------------------------------------------------\n')
+
+        call(args_dict['files'],opts_dict)
 
     print('\nDone.\n')
     # EOF

@@ -318,10 +318,11 @@ def create_ceda_files(ncfile, flights, revision=0, version=None, instr=None):
     directories to which it applies so the same calnc file will have multiple
     copies with different filenames.
 
-    The filenames are generated based on the contents of ``ncfile``,
-    specifically the ``applies_to`` attribute. Note that the date of the
-    flight may not be given inside ``ncfile`` so this has to be determined
-    either from the dictionary arg given or from CEDA...
+    ..TODO::
+        The filenames are generated based on the contents of ``ncfile``,
+        specifically the ``applies_to`` attribute. Note that the date of the
+        flight may not be given inside ``ncfile`` so this has to be determined
+        either from the dictionary arg given or from CEDA...
 
     Args:
         ncfile (:obj: `str` or `pathlib`): Filename of calibration nc file.
@@ -332,7 +333,9 @@ def create_ceda_files(ncfile, flights, revision=0, version=None, instr=None):
             by one from previous file revision.
         version (:obj: `float`): Version of software used to produce
             ``ncfile``. If ``None`` [default] then is extracted from
-            'software_version' attribute of ``ncfile``.
+            'software_version' attribute of ``ncfile``. This extracted version
+            is multiplied by 10 so that if ``'software_version' == 1.1``
+            then version = 011.
         instr (:obj: `str`): Name of instrument. If ``None`` [default] then
             is extracted from 'instr' attribute of ``ncfile``.
     """
@@ -376,7 +379,7 @@ def create_ceda_files(ncfile, flights, revision=0, version=None, instr=None):
             _ = datetime.datetime.strftime(fltdate,'%Y%m%d')
         except TypeError as err:
             try:
-                _d = parse(str(fltdate), dayfirst=True)
+                _d = parse(str(fltdate))
             except TypeError as err:
                 print(err)
                 print('Unable to parse flight date')

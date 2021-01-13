@@ -308,8 +308,7 @@ def run_ncgen(fin,fout,nc_fmt=3):
     return
 
 
-def create_ceda_files(ncfile, flts, fltdates, revision=0,
-                      version=None, instr=None):
+def create_ceda_files(ncfile, flights, revision=0, version=None, instr=None):
     """ Copies single cal-nc file into a series of files for upload to CEDA
 
     The CEDA filesnames include the flight number and date of the flight.
@@ -326,9 +325,9 @@ def create_ceda_files(ncfile, flts, fltdates, revision=0,
 
     Args:
         ncfile (:obj: `str` or `pathlib`): Filename of calibration nc file.
-        flts (:obj: `list`): List of flight numbers.
-        fltdates (:obj: `list`): List of dates of flights. Must be same length
-            as ``flts``.
+        flights (:obj: `list`): List of 2-element list. Each list has a flight
+            number string and the associated flight date. The date may be
+            a string or a datetime object
         revision (:obj: `int`): Revision number of file. Should be incremented
             by one from previous file revision.
         version (:obj: `float`): Version of software used to produce
@@ -349,10 +348,12 @@ def create_ceda_files(ncfile, flts, fltdates, revision=0,
             f"_r{rev:d}_{flt.lower()}_{instr.lower()}_cal.nc"
         return f
 
+    # Create separate flight number and date lists
     try:
-        assert len(flts) == len(fltdates)
-    except AssertionError:
-        print('Number of flights and flight dates must match')
+        (flts, fltdates) = list(zip(*flights))
+    except ValueError as err:
+        print(err)
+        print('Incorrect flight number and date list')
         return
 
     # Check that flight number strings are correct
@@ -372,13 +373,19 @@ def create_ceda_files(ncfile, flts, fltdates, revision=0,
     dates = []
     for fltdate in fltdates:
         try:
-            _d = parse(str(fltdate), dayfirst=True)
+            _ = datetime.datetime.strftime(fltdate,'%Y%m%d')
         except TypeError as err:
-            print(err)
-            print('Unable to parse flight date')
-            print(fltdate)
-            return
-        dates.append(datetime.datetime.strftime(_d,'%Y%m%d'))
+            try:
+                _d = parse(str(fltdate), dayfirst=True)
+            except TypeError as err:
+                print(err)
+                print('Unable to parse flight date')
+                print(fltdate)
+                return
+        else:
+            _d = fltdate
+        finally:
+            dates.append(datetime.datetime.strftime(_d,'%Y%m%d'))
 
     ds = read_nc(ncfile)[0]
 
@@ -413,4 +420,4 @@ def create_ceda_files(ncfile, flts, fltdates, revision=0,
         path = os.path.dirname(ncfile)
 
         fname = CEDA_fmt(date, version, revision, flt, instr)
-        shutil.copy(ncfile, os.path.join(path, fname))
+        shutil.copy2(ncfile, os.path.join(path, fname))

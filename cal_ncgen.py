@@ -377,8 +377,6 @@ if __name__=='__main__':
     args_dict = vars(parser.parse_args())
     opts_dict = {k:v for k,v in args_dict.items() if k not in ['files']}
 
-    pdb.set_trace()
-
     if args_dict['ceda_flts'] != None:
         if len(args_dict['files']) > 1:
             raise ValueError('Only a single cal-nc file can be converted.')

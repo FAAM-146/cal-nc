@@ -17,7 +17,10 @@ from cal_proc import *
 from .nc_conf import *
 from . import utils
 
-__all__ = ['read_nc','process_nc','run_ncgen']
+__all__ = ['read_nc',
+           'process_nc',
+           'run_ncgen',
+           'create_ceda_files']
 
 
 # Directory where temporary files are stored by default
@@ -73,19 +76,20 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
 
     Args:
         master_nc (:obj:`str`): Filename string of 'master' netCDF file.
-        aux_nc (:obj:`list`, optional): List of any additional filename/s of netCDF
-            files that are to be added/concatenated with master nc file. Default
-            is [], ie no auxillary files.
-        anc_files (:obj:`list`, optional): List of any ancillary files that are not
-            netCDF and so need to be parsed before being injested into the
+        aux_nc (:obj:`list`, optional): List of any additional filename/s of
+            netCDF files that are to be added/concatenated with master nc file.
+            Default is [], ie no auxillary files.
+        anc_files (:obj:`list`, optional): List of any ancillary files that are
+            not netCDF and so need to be parsed before being injested into the
             dataset. Default is [], ie no ancillary files.
-        out_nc (:obj:`str`, optional): Filename string of netCDF to be written. If None
-            (default) or the same as `master_nc`, `master_nc` is overwritten.
-        instr (:obj:`str`, optional): Identifying string of instrument which determines
-            processor class. If `None` (default) then instrument is identified
-            from `master_nc`.
-        updates (:obj:`dict`, optional): All other updates to be applied to the final
-            dataset. Default is {}.
+        out_nc (:obj:`str`, optional): Filename string of netCDF to be written.
+            If None (default) or the same as `master_nc`, `master_nc` is
+            overwritten.
+        instr (:obj:`str`, optional): Identifying string of instrument which
+            determines processor class. If `None` (default) then instrument is
+            identified from `master_nc`.
+        updates (:obj:`dict`, optional): All other updates to be applied to
+            the final dataset. Default is {}.
 
     """
 
@@ -302,3 +306,111 @@ def run_ncgen(fin,fout,nc_fmt=3):
         pdb.set_trace()
 
     return
+
+
+def create_ceda_files(ncfile, flts, fltdates, revision=0,
+                      version=None, instr=None):
+    """ Copies single cal-nc file into a series of files for upload to CEDA
+
+    The CEDA filesnames include the flight number and date of the flight.
+    Thus for placement into the correct directory of the archive by the
+    automatic system the filename must have the correct structure. The
+    idea is that the same calnc file will be placed in all CEDA flight
+    directories to which it applies so the same calnc file will have multiple
+    copies with different filenames.
+
+    The filenames are generated based on the contents of ``ncfile``,
+    specifically the ``applies_to`` attribute. Note that the date of the
+    flight may not be given inside ``ncfile`` so this has to be determined
+    either from the dictionary arg given or from CEDA...
+
+    Args:
+        ncfile (:obj: `str` or `pathlib`): Filename of calibration nc file.
+        flts (:obj: `list`): List of flight numbers.
+        fltdates (:obj: `list`): List of dates of flights. Must be same length
+            as ``flts``.
+        revision (:obj: `int`): Revision number of file. Should be incremented
+            by one from previous file revision.
+        version (:obj: `float`): Version of software used to produce
+            ``ncfile``. If ``None`` [default] then is extracted from
+            'software_version' attribute of ``ncfile``.
+        instr (:obj: `str`): Name of instrument. If ``None`` [default] then
+            is extracted from 'instr' attribute of ``ncfile``.
+    """
+
+    from dateutil.parser import parse
+    import re
+
+    FLIGHTNUM_PREFIXES = ['B', 'C']
+
+    # CEDA filename format
+    def CEDA_fmt(date, ver, rev, flt, instr):
+        f = f"core-cloud-phy_faam_{date}_v{ver:03d}" + \
+            f"_r{rev:d}_{flt.lower()}_{instr.lower()}_cal.nc"
+        return f
+
+    try:
+        assert len(flts) == len(fltdates)
+    except AssertionError:
+        print('Number of flights and flight dates must match')
+        return
+
+    # Check that flight number strings are correct
+    fltnums = []
+    fltnum_letters = '['+''.join(FLIGHTNUM_PREFIXES)+']'
+    for flt in flts:
+        try:
+            fltnums.append(re.search(fltnum_letters+'\d{3}',
+                                     str(flt), re.I).group().lower())
+        except AttributeError as err:
+            print(err)
+            print('Unable to parse flight number')
+            print(flt)
+            return
+
+    # Check that date strings can be identified and format into %Y%m%d
+    dates = []
+    for fltdate in fltdates:
+        try:
+            _d = parse(str(fltdate), dayfirst=True)
+        except TypeError as err:
+            print(err)
+            print('Unable to parse flight date')
+            print(fltdate)
+            return
+        dates.append(datetime.datetime.strftime(_d,'%Y%m%d'))
+
+    ds = read_nc(ncfile)[0]
+
+    if version == None:
+        try:
+            _ver = float(ds.getncattr('software_version'))*10.
+        except AttributeError as err:
+            print("\nNo 'software_version' found in nc file")
+            print(os.path.basename(ncfile))
+            return
+        except ValueError as err:
+            print('Software version must be a number')
+            print(err)
+            return
+
+        version = round(_ver)
+
+        if version != _ver:
+            print('Integer only versions are allowed in filename. '
+                  f"Filename version used is {version}")
+
+    if instr == None:
+        try:
+            instr = ds.getncattr('instr')
+        except AttributeError as err:
+            print("\nNo 'instr' found in nc file")
+            print(os.path.basename(ncfile))
+            return
+
+    for flt, date in zip(fltnums, dates):
+
+        path = os.path.dirname(ncfile)
+
+        fname = CEDA_fmt(date, version, revision, flt, instr)
+        shutil.copy(ncfile, os.path.join(path, fname))

@@ -205,7 +205,7 @@ class PCASP(Generic):
         if len(grps) > 1:
             # All keys in vars_d must have the same path
             pdb.set_trace()
-       try:
+        try:
             grp = grps.pop()
         except Exception as err:
             print(err)

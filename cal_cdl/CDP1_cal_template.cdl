@@ -33,6 +33,7 @@ netcdf CDP1_cal_template {
     :_Format = "netCDF-4" ;
     :institution = "FAAM. Facility for Airborne Atmospheric Measurements" ;
     :address = "Building 146, Cranfield University, Cranfield MK43 0AL UK" ;
+    :software_repository = "https://github.com/FAAM-146/cal-nc" ;
 
     // Instrument global file attributes.
     :title = "FAAM calibration data for the CDP-1" ;

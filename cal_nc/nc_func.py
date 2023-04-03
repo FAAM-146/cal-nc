@@ -97,21 +97,22 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
     # Note that all 'master' operations are done on this temporary copy
     tmp_nc = '{}_tmp.nc'.format(os.path.splitext(master_nc)[0])
     try:
-        shutil.copy2(master_nc,tmp_nc)
+        shutil.copy(master_nc,tmp_nc)
     except Exception as err:
         # This always seems to give an error but does work
+        pdb.set_trace()
         pass
 
     # Create a instrument processor from the master nc file. This file remains
     # open until explicitly closed.
-    master_ds = netCDF4.Dataset(tmp_nc, mode='r+', format='NETCDF4',
-                                diskless=True, persist=True)
+    master_ds = netCDF4.Dataset(tmp_nc, mode='r+', format='NETCDF4')
+                                #diskless=True, persist=True)
 
     # If instrument name has not explicitly been given then obtain intrument
     # from master dataset
     if instr is None:
         try:
-            instr = master_ds.getncattr('instr')
+            instr = master_ds.getncattr('instrument')
         except AttributeError:
             print('No instrument name given in master file.')
             return 1, 'Use --update instr instrument argument.'
@@ -250,20 +251,19 @@ def process_nc(master_nc, aux_nc=[], anc_files=[],
 
         master.update_attr(attr,update)
 
-    # Add any version information that is missing from nc
-    master.update_ver()
-
     # Close nc datasets
     for ds_ in [master_ds] + aux_ds:
         if ds_.isopen():
             ds_.close()
 
-    if out_nc == None:
-        # Write back over existing master nc file
-        shutil.move(tmp_nc, master_nc)
-    else:
-        shutil.move(tmp_nc, out_nc)
-
+    try:
+        if out_nc == None:
+            # Write back over existing master nc file
+            shutil.move(tmp_nc, master_nc)
+        else:
+            shutil.move(tmp_nc, out_nc)
+    except:
+        pdb.post_mortem()
     return 0, ''
 
 
@@ -340,14 +340,14 @@ def create_ceda_files(ncfile, flights, revision=0, version=None, instr=None):
             is extracted from 'instr' attribute of ``ncfile``.
     """
 
-    from dateutil.parser import parse
+    from dateutil.parser import isoparse
     import re
 
     FLIGHTNUM_PREFIXES = ['B', 'C']
 
     # CEDA filename format
     def CEDA_fmt(date, ver, rev, flt, instr):
-        f = f"core-cloud-phy_faam_{date}_v{ver:03d}" + \
+        f = f"core-cloud-phy_faam_{date}_v{round(ver):03d}" + \
             f"_r{rev:d}_{flt.lower()}_{instr.lower()}_cal.nc"
         return f
 
@@ -379,7 +379,7 @@ def create_ceda_files(ncfile, flights, revision=0, version=None, instr=None):
             _ = datetime.datetime.strftime(fltdate,'%Y%m%d')
         except TypeError as err:
             try:
-                _d = parse(str(fltdate))
+                _d = isoparse(str(fltdate))
             except TypeError as err:
                 print(err)
                 print('Unable to parse flight date')

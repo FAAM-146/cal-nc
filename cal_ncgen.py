@@ -330,10 +330,11 @@ if __name__=='__main__':
                         'attribute of the resultant cal-nc file. Instead the '
                         'given string is appended to the global history '
                         'attribute instead. These should be a space-delineated '
-                        'series of dates and comments, spaces in each entry '
-                        'must be enclosed in quotes or escaped. There should '
-                        'be one history entry for each --update, if not then '
-                        'the same history shall be attached to all updates.'))
+                        'series of comments, spaces in each entry must be '
+                        'enclosed in quotes or escaped. Timestamp is added '
+                        'automatically. There should be one history entry for '
+                        'each --update, if not then the same history shall '
+                        'be attached to all updates.'))
     parser.add_argument('--user', action='store',
                         dest='user', nargs='*',
                         default=None,
@@ -354,11 +355,13 @@ if __name__=='__main__':
                         'files.'))
     parser.add_argument('--ceda_ver', action='store',
                         dest='ceda_ver', default=None,
+                        type=float,
                         help=('Version of software used to generate the '
                         'cal-nc file. If not given then is read from the '
                         'cal-nc file.'))
     parser.add_argument('--ceda_rev', action='store',
                         dest='ceda_rev', default=0,
+                        type=int,
                         help=('Revision of cal-nc file to be produced. If '
                         'not specified then is assumed to be 0. The revision '
                         'should be incremented by 1 from revision already '

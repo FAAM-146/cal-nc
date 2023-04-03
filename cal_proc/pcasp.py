@@ -42,6 +42,9 @@ var_map_cs = {
     'ADC_threshold':
         lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
                                 d['data']['Upper Thresholds'])),
+    'ADC_range':
+        lambda d: np.ma.dstack((d['data']['Straight line fits']['Min Voltage (A-D Counts)'],
+                                d['data']['Straight line fits']['Max Voltage (A-D Counts)'])),
     'scattering_cross_section':
         lambda d: np.ma.dstack((d['data']['Lower Boundaries'],
                                 d['data']['Upper Boundaries'])),
@@ -52,8 +55,19 @@ var_map_cs = {
         lambda d: d['data']['Channel Widths'],
     'scattering_cross_section_width_err':
         lambda d: d['data']['Channel Widths Errors'],
-    'Boundaries Independant/Dependant':
+    'dependant_scattering_cross_section_err':
         lambda d: d['data']['Boundaries Independant/Dependant (0/1)'],
+    'polynomial_fit_parameters': lambda d: np.ma.dstack(
+    # Fit parameters of increasing order. So for a linear fit is p0 + p1*x
+        (d['data']['Straight line fits']['Intercept (micron^2)'],
+         d['data']['Straight line fits']['Gradient (micron^2/A-D Counts)'])),
+    'polynomial_fit_variance': lambda d: np.ma.dstack(
+    # Variance in fit parameters in same order as parameters
+        (d['data']['Straight line fits']['Var(Intercept) (micron^4)'],
+         d['data']['Straight line fits']['Var(Gradient) (micron^4/A-D Counts^2)'])),
+    'polynomial_fit_covariance':
+    # Covariance between fit parameters
+        lambda d: d['data']['Straight line fits']['Covar(Gradient Intercept) (micron^4/A-D Counts)'],
     'calibration_file':
         lambda d: d['metadata']['cal file']
              }

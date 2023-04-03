@@ -1,8 +1,8 @@
 name: cal-nc
 channels:
+  - conda-forge
   - anaconda
   - defaults
-  - conda-forge
 dependencies:
   - configparser>=3.5
   - h5py>=2.8
@@ -18,7 +18,7 @@ dependencies:
   - pathlib2
   - pint>=0.9
   - pip
-  - python>=3.7
+  - python>=3.9
   - pytz
   - scipy>=1.1
   - seaborn>=0.9

@@ -51,7 +51,9 @@ var_map_cs = {
     'scattering_cross_section_width':
         lambda d: d['data']['Channel Widths'],
     'scattering_cross_section_width_err':
-        lambda d: d['data']['Boundaries Independant/Dependant'],
+        lambda d: d['data']['Channel Widths Errors'],
+    'Boundaries Independant/Dependant':
+        lambda d: d['data']['Boundaries Independant/Dependant (0/1)'],
     'calibration_file':
         lambda d: d['metadata']['cal file']
              }

@@ -143,6 +143,7 @@ group: bin_cal {
             scattering_cross_section_err:long_name = "Uncertainty of scattering cross-section boundaries for each bin" ;
             scattering_cross_section_err:comment = "Uncertainties are derived from the uncertainty in the calculated scattering cross-section and the width of the modal bin for each calibration particle. These are discussed in sections 2.1 and 2.23 in Rosenberg et al. [2012] (full citation given in references attribute of this group)." ;
             scattering_cross_section_err:units = "um**2" ;
+            scattering_cross_section_err:ancillary_variables = "dependant_scattering_cross_section_err" ;
 
         float scattering_cross_section_width(time,bin) ;
             scattering_cross_section_width:long_name = "Width of each bin in terms of scattering cross-section" ;
@@ -155,9 +156,9 @@ group: bin_cal {
             scattering_cross_section_width_err:comment = "Uncertainties are derived from the uncertainty in the calculated scattering cross-section and the width of the modal bin for each calibration particle. These are discussed in sections 2.1 and 2.23 in Rosenberg et al. [2012] (full citation given in references attribute of this group)." ;
             scattering_cross_section_width_err:units = "um**2" ;
 
-        short dependant_boundaries(time,bin) ;
-            dependant_boundaries:long_name = "Boolean indicator of lower and upper bound uncertainties being dependant" ;
-            dependant_boundaries:comment = "If True (1) then bin boundary uncertainties are correlated" ;
+        short dependant_scattering_cross_section_err(time,bin) ;
+            dependant_boundaries:long_name = "Boolean indicator of lower and upper scattering cross-section bin boundary uncertainties being independant/dependant" ;
+            dependant_boundaries:comment = "If True (1) then scattering cross-section bin boundary uncertainties are correlated" ;
             dependant_boundaries:valid_range = 0, 1 ;
 
         float polynomial_fit_parameters(time, num_gainstages,polyfit_order) ;

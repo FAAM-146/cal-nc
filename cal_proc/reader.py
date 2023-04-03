@@ -63,6 +63,14 @@ def opc_calfile(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
          'data'    : {}}
 
 
+    def readtxtline(f):
+        line = f.readline()
+        try:
+            return line.decode()
+        except AttributeError as err:
+            return line
+
+
     def read_row_with_heading(line=''):
         '''
         Read comma-delineated row that starts with a heading and return the
@@ -73,7 +81,7 @@ def opc_calfile(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
         # Split into heading and data
         row = line.strip().strip(',').split(',',1)
 
-        if row[0].strip() is '':
+        if row[0].strip() == '':
             return None, None
 
         if len(row) == 1:
@@ -104,13 +112,14 @@ def opc_calfile(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
         d['metadata']['cal file'] = os.path.abspath(cal_file)
 
         try:
-            f = open(cal_file, 'r')
+            f = open(cal_file, 'rt')
         except FileNotFoundError as err:
             print(err)
             return None
 
         # Read metadata at top of file
         line = f.readline()
+
         while line.strip() != '':
             # Read the metadata, is seperated from data table by blank line
             [k,v] = line.split(':',1)
@@ -167,7 +176,7 @@ def opc_calfile(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
         d['data']['Straight line fits'] = {}
 
         try:
-            f = open(cal_file, 'r')
+            f = open(cal_file, 'rt')
         except FileNotFoundError as err:
             print(err)
             return None
@@ -323,7 +332,7 @@ def opc_calfile(cal_file, f_type='pcasp_d', reject_bins=None, invalid=-9999):
 #        d['data']['raw data'] = {}
         d['data']['Straight line fits'] = {}
 
-        f = open(cal_file, 'rb')
+        f = open(cal_file, 'rt')
 
         # Read any empty/extra lines at top of file
         line = f.readline()

@@ -11,32 +11,50 @@ import pdb
 # Map cal file variable names to nc variables
 # Note that as these variables are used in different groups, group path
 # must be prepended to the key when called.
-var_map = {'ADC_thres':
-                lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
-                                        d['data']['Upper Thresholds'])),
-           'x-section':
-                lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundaries'],
-                                        d['data']['Upper Cross Section Boundaries'])),
-           'x-section_err':
-                lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundary Errors'].base,
-                                        d['data']['Upper Cross Section Boundary Errors'].base)),
-           'x-section_width':
-                lambda d: d['data']['Width of Cross Section Boundaries'],
-           'x-section_width_err':
-                lambda d: d['data']['Width of Cross Section Boundary Errors'],
-           'dia_centre':
-                lambda d: d['data']['Channel Centre'],
-           'dia_centre_err':
-                lambda d: d['data']['Channel Centre Errors'],
-           'dia_width':
-                lambda d: d['data']['Channel Widths'],
-           'dia_width_err':
-                lambda d: d['data']['Channel Width Errors'],
-           'calibration_file':
-                lambda d: d['metadata']['cal file'],
-           'source_file':
-                lambda d: d['metadata']['Input file']
-           }
+# Map for diameter calibration files:
+var_map_d = {
+    'scattering_cross_section':
+        lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundaries'],
+                                d['data']['Upper Cross Section Boundaries'])),
+    'scattering_cross_section_err':
+        lambda d: np.ma.dstack((d['data']['Lower Cross Section Boundary Errors'].base,
+                                d['data']['Upper Cross Section Boundary Errors'].base)),
+    'scattering_cross_section_width':
+        lambda d: d['data']['Width of Cross Section Boundaries'],
+    'scattering_cross_section_width_err':
+        lambda d: d['data']['Width of Cross Section Boundary Errors'],
+    'diameter_centre':
+        lambda d: d['data']['Channel Centre'],
+    'diameter_centre_err':
+        lambda d: d['data']['Channel Centre Errors'],
+    'diameter_width':
+        lambda d: d['data']['Channel Widths'],
+    'diameter_width_err':
+        lambda d: d['data']['Channel Width Errors'],
+    'calibration_file':
+        lambda d: d['metadata']['cal file'],
+    'source_file':
+        lambda d: d['metadata']['Input file']
+            }
+
+# Map for scattering cross-section calibration files:
+var_map_cs = {
+    'ADC_threshold':
+        lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
+                                d['data']['Upper Thresholds'])),
+    'scattering_cross_section':
+        lambda d: np.ma.dstack((d['data']['Lower Boundaries'],
+                                d['data']['Upper Boundaries'])),
+    'scattering_cross_section_err':
+        lambda d: np.ma.dstack((d['data']['Lower Boundary Errors'].base,
+                                d['data']['Upper Boundary Errors'].base)),
+    'scattering_cross_section_width':
+        lambda d: d['data']['Channel Widths'],
+    'scattering_cross_section_width_err':
+        lambda d: d['data']['Boundaries Independant/Dependant'],
+    'calibration_file':
+        lambda d: d['metadata']['cal file']
+             }
 
 
 class PCASP(Generic):
@@ -183,8 +201,10 @@ class PCASP(Generic):
 
         if scs_type and not dia_type:
             caldata = reader.opc_calfile(cal_file, f_type='pcasp_cs')
+            var_map = var_map_cs
         elif dia_type:
             caldata = reader.opc_calfile(cal_file, f_type='pcasp_d')
+            var_map = var_map_d
 
         if caldata == None:
             # Error in the cal_file
@@ -231,5 +251,5 @@ class PCASP(Generic):
             msg = self.append_dict(vars_d)
         except Exception as err:
             print('err: {}'.format(err))
-            pdb.set_trace()
+            pdb.post_mortem()
 

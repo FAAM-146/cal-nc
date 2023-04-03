@@ -132,6 +132,12 @@ group: bin_cal {
             ADC_threshold:valid_range = 0, 12288 ;
             ADC_threshold:coverage_content_type = "auxillaryInformation" ;
 
+        short ADC_range(time,num_gainstages,bin_bounds) ;
+            ADC_range:long_name = "Range of analogue-to-digital converter (ADC) values covered by each gain stage" ;
+            ADC_range:comment = "Minimum and maximum of ADC values for each gain stage which can be used with corresponding fitting parameters to calculate the scattering cross-section fits for each gain stage" ;
+            ADC_range:valid_range = 0, 12288 ;
+            ADC_range:coverage_content_type = "auxillaryInformation" ;
+
         float scattering_cross_section(time,bin,bin_bounds) ;
             scattering_cross_section:long_name = "Lower and upper scattering cross-section boundaries for each bin" ;
             scattering_cross_section:comment = "Lower boundary of first bin is undefined." ;
@@ -161,7 +167,7 @@ group: bin_cal {
             dependant_boundaries:comment = "If True (1) then scattering cross-section bin boundary uncertainties are correlated" ;
             dependant_boundaries:valid_range = 0, 1 ;
 
-        float polynomial_fit_parameters(time, num_gainstages,polyfit_order) ;
+        float polynomial_fit_parameters(time,num_gainstages,polyfit_order) ;
             polynomial_fit_parameters:long_name = "Polynomial fit parameters of increasing order (eg linear fit is p[0] + p[1]*x) for fitting scattering cross-section to ADC_threshold" ;
             polynomial_fit_parameters:comment = "The PCASP has three gain stages, there is a fit for each gain stage." ;
             polynomial_fit_parameters:ancillary_variables = "polynomial_fit_variance polynomial_fit_covariance" ;

@@ -55,7 +55,7 @@ var_map_cs = {
         lambda d: d['data']['Channel Widths'],
     'scattering_cross_section_width_err':
         lambda d: d['data']['Channel Widths Errors'],
-    'dependant_scattering_cross_section_err':
+    'dependent_scattering_cross_section_err':
         lambda d: d['data']['Boundaries Independant/Dependant (0/1)'],
     'polynomial_fit_parameters': lambda d: np.ma.dstack(
     # Fit parameters of increasing order. So for a linear fit is p0 + p1*x

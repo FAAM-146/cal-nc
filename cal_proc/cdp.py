@@ -43,7 +43,7 @@ var_map_cs = {
         lambda d: np.ma.dstack((d['data']['Lower Thresholds'],
                                 d['data']['Upper Thresholds'])),
     'ADC_range':
-        lambda d: np.ma.dstack((d['data']['Straight line fits']['Min voltage (A-D Counts)'],
+        lambda d: np.ma.dstack((d['data']['Straight line fits']['Min Voltage (A-D Counts)'],
                                 d['data']['Straight line fits']['Max Voltage (A-D Counts)'])),
     'scattering_cross_section':
         lambda d: np.ma.dstack((d['data']['Lower Boundaries'],
@@ -54,9 +54,9 @@ var_map_cs = {
     'scattering_cross_section_width':
         lambda d: d['data']['Channel Widths'],
     'scattering_cross_section_width_err':
-        lambda d: d['data']['Channel Widths Errors'],
-    'dependant_scattering_cross_section_err':
-        lambda d: d['data']['Boundaries Independant/Dependant (0/1)'],
+        lambda d: d['data']['Channel Width Errors'],
+    'dependent_scattering_cross_section_err':
+        lambda d: d['data']['Boundaries Independent/Dependent (0/1)'],
     'polynomial_fit_parameters': lambda d: np.ma.dstack(
     # Fit parameters of increasing order. So for a linear fit is p0 + p1*x
         (d['data']['Straight line fits']['Intercept (micron^2)'],

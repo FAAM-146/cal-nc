@@ -65,7 +65,7 @@ netcdf PCASP1_template_calnc {
 //  :uuid = ;
 
 //    :revision_date = "2022-02-10T14:00:00Z" ;
-    :revision_number = 1 ;
+    :revision_number = 0 ;
 //    :history = "2022-02-10T14:00:00Z cal_ncgen.py v1.0" ;
 
 // ------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ group: bin_cal {
         bin = 30 ;
         bin_bounds = 2 ;
         num_gainstages = 3 ;
-        polyfit_order = 2 ;
+        polyfit_coefficients = 2 ;
 
     // Define group coordinate variable
     variables:
@@ -149,7 +149,7 @@ group: bin_cal {
             scattering_cross_section_err:long_name = "Uncertainty of scattering cross-section boundaries for each bin" ;
             scattering_cross_section_err:comment = "Uncertainties are derived from the uncertainty in the calculated scattering cross-section and the width of the modal bin for each calibration particle. These are discussed in sections 2.1 and 2.23 in Rosenberg et al. [2012] (full citation given in references attribute of this group)." ;
             scattering_cross_section_err:units = "um**2" ;
-            scattering_cross_section_err:ancillary_variables = "dependant_scattering_cross_section_err" ;
+            scattering_cross_section_err:ancillary_variables = "dependent_scattering_cross_section_err" ;
 
         float scattering_cross_section_width(time,bin) ;
             scattering_cross_section_width:long_name = "Width of each bin in terms of scattering cross-section" ;
@@ -162,17 +162,17 @@ group: bin_cal {
             scattering_cross_section_width_err:comment = "Uncertainties are derived from the uncertainty in the calculated scattering cross-section and the width of the modal bin for each calibration particle. These are discussed in sections 2.1 and 2.23 in Rosenberg et al. [2012] (full citation given in references attribute of this group)." ;
             scattering_cross_section_width_err:units = "um**2" ;
 
-        short dependant_scattering_cross_section_err(time,bin) ;
-            dependant_boundaries:long_name = "Boolean indicator of lower and upper scattering cross-section bin boundary uncertainties being independant/dependant" ;
-            dependant_boundaries:comment = "If True (1) then scattering cross-section bin boundary uncertainties are correlated" ;
-            dependant_boundaries:valid_range = 0, 1 ;
+        short dependent_scattering_cross_section_err(time,bin) ;
+            dependent_scattering_cross_section_err:long_name = "Boolean indicator of lower and upper scattering cross-section bin boundary uncertainties being independent/dependent" ;
+            dependent_scattering_cross_section_err:comment = "If True (1) then scattering cross-section bin boundary uncertainties are correlated" ;
+            dependent_scattering_cross_section_err:valid_range = 0, 1 ;
 
-        float polynomial_fit_parameters(time, num_gainstages,polyfit_order) ;
-            polynomial_fit_parameters:long_name = "Polynomial fit parameters of increasing order (eg linear fit is p[0] + p[1]*x) for fitting scattering cross-section to ADC_threshold" ;
-            polynomial_fit_parameters:comment = "The PCASP has three gain stages, there is a fit for each gain stage." ;
+        float polynomial_fit_parameters(time, num_gainstages,polyfit_coefficients) ;
+            polynomial_fit_parameters:long_name = "Polynomial fit parameters of increasing degree (eg linear fit is p[0] + p[1]*x) for fitting scattering cross-section to ADC_threshold" ;
+            polynomial_fit_parameters:comment = "The PCASP has three gain stages. There is a fit for each gain stage with the range of x for each gain stage is given in ADC_range." ;
             polynomial_fit_parameters:ancillary_variables = "polynomial_fit_variance polynomial_fit_covariance" ;
 
-        float polynomial_fit_variance(time,num_gainstages,polyfit_order) ;
+        float polynomial_fit_variance(time,num_gainstages,polyfit_coefficients) ;
             polynomial_fit_variance:long_name = "Variance of each of the polynomial fit parameters" ;
 
         float polynomial_fit_covariance(time,num_gainstages) ;
